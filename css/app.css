@@ -1,0 +1,222 @@
+/* ==========================================================================
+   app.css
+   Тонкий слой поверх legacy css/adaptive.css.
+   Только новые компоненты с осмысленными именами (BEM-подобный стиль):
+     - swipe-pager (.deck, .deck__panel, .deck__nav, .deck__dot)
+     - language switcher (.lang-switch, .lang-switch__btn)
+     - модификаторы перехода для #result / .m_edbox / списков
+   Никакие имена классов из старого UI здесь не переопределяются —
+   старая верстка остаётся как есть, новые элементы используют свои имена.
+   ========================================================================== */
+
+/* Css-переменные единой темы (без затрагивания legacy цветов) */
+:root {
+  --app-bg-deep: #13212d;
+  --app-bg-panel: rgba(70, 91, 110, 0.92);
+  --app-fg: aliceblue;
+  --app-fg-muted: #b9c8d6;
+  --app-accent: #5fa9d9;
+  --app-accent-2: #2f4253;
+  --app-radius: 10px;
+  --app-shadow: 0 6px 22px rgba(0, 0, 0, 0.25);
+  --app-trans: 320ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* --------------------------------------------------------------------------
+   Swipe-pager (карточная палуба)
+   Используется как обёртка над #result, чтобы анимировать переходы
+   между «список аккаунтов», «шаринг» и «iptv».
+   -------------------------------------------------------------------------- */
+.deck {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.deck__track {
+  display: flex;
+  width: 100%;
+  transition: transform var(--app-trans);
+  will-change: transform;
+}
+
+.deck__track--dragging {
+  transition: none;
+}
+
+.deck__panel {
+  flex: 0 0 100%;
+  width: 100%;
+  min-height: 1px;
+  box-sizing: border-box;
+}
+
+.deck__panel[hidden] {
+  display: none;
+}
+
+/* Точечная навигация (индикатор страниц) */
+.deck__nav {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 6px 0 10px;
+}
+
+.deck__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--app-accent-2);
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  transition: transform 200ms ease, background-color 200ms ease;
+}
+
+.deck__dot--active {
+  background: var(--app-accent);
+  transform: scale(1.4);
+}
+
+.deck__dot[disabled] {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+/* Кнопка возврата на список */
+.deck__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 4px 0 6px 6px;
+  padding: 4px 10px;
+  background: var(--app-accent-2);
+  color: var(--app-fg);
+  border: 0;
+  border-radius: var(--app-radius);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 180ms ease;
+}
+
+.deck__back:hover,
+.deck__back:focus-visible {
+  background: var(--app-accent);
+  outline: none;
+}
+
+.deck__back::before {
+  content: "‹";
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* Подсказка свайпа (показывается один раз) */
+.deck__hint {
+  position: absolute;
+  inset: auto 0 8px 0;
+  margin: 0 auto;
+  width: max-content;
+  font-size: 11px;
+  color: var(--app-fg-muted);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 250ms ease;
+}
+
+.deck__hint--visible {
+  opacity: 0.85;
+}
+
+/* --------------------------------------------------------------------------
+   Языковый переключатель (EN/RU)
+   Отображается в боковом меню в виде сегментированного контрола.
+   -------------------------------------------------------------------------- */
+.lang-switch {
+  display: inline-flex;
+  margin: 8px 0;
+  padding: 2px;
+  background: var(--app-accent-2);
+  border-radius: 999px;
+  font-size: 12px;
+  user-select: none;
+}
+
+.lang-switch__btn {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--app-fg-muted);
+  padding: 4px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.lang-switch__btn:hover,
+.lang-switch__btn:focus-visible {
+  color: var(--app-fg);
+  outline: none;
+}
+
+.lang-switch__btn--active {
+  background: var(--app-accent);
+  color: var(--app-fg);
+}
+
+.lang-switch__wrap {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--app-accent-2);
+}
+
+/* --------------------------------------------------------------------------
+   Утилиты, исключающие повторение inline-стилей
+   -------------------------------------------------------------------------- */
+.u-hidden { display: none !important; }
+.u-flex-center { display: flex; justify-content: center; align-items: center; }
+
+/* Лёгкая полировка скроллбара внутри карточек pager-а */
+.deck__panel::-webkit-scrollbar { width: 6px; height: 6px; }
+.deck__panel::-webkit-scrollbar-thumb { background: var(--app-accent-2); border-radius: 6px; }
+.deck__panel::-webkit-scrollbar-thumb:hover { background: var(--app-accent); }
+
+/* Пусто-состояние палубы */
+.deck__panel--empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--app-fg-muted);
+  font-style: italic;
+}
+
+/* --------------------------------------------------------------------------
+   Stage / анимация перехода между страницами палубы.
+   На текущий контент #result применяются keyframes при смене страницы.
+   -------------------------------------------------------------------------- */
+.deck__stage {
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes deck-slide-forward {
+  from { transform: translateX(28%); opacity: 0.0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes deck-slide-backward {
+  from { transform: translateX(-28%); opacity: 0.0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+.deck--slide-forward  > #result { animation: deck-slide-forward  var(--app-trans) both; }
+.deck--slide-backward > #result { animation: deck-slide-backward var(--app-trans) both; }
+
+/* Скрываем «новости» при переходе в карточку аккаунта,
+   возвращаем их когда снова на списке. */
+.deck__stage[data-page="sharing"] #news,
+.deck__stage[data-page="iptv"]    #news { display: none; }
