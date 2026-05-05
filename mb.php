@@ -80,8 +80,10 @@ if($res->num_rows == 1)
     <?php if(isset($_SESSION['a']) && $_SESSION['a'] == 1) {echo '<script src="adaptive_admin.js?v=12'; echo "></script>";}?>
 <script src="humanmsg.js"></script>
 <script src="js/jquery-ui.min.js"></script>
-<script src="js/i18n.js?v=1"></script>
-<script src="js/pager.js?v=1" defer></script>
+<script src="js/i18n.js?v=2"></script>
+<script src="js/net.js?v=1"   defer></script>
+<script src="js/reauth.js?v=1" defer></script>
+<script src="js/pager.js?v=1"  defer></script>
 <link href="https://fonts.googleapis.com/css2?family=PT+Mono&amp;family=Source+Sans+3&amp;display=swap" rel="stylesheet">
 <link type="text/css" href="css/theme/jquery-ui.css" rel="stylesheet"/>
 <link type="text/css" href="css/pluso_wide_andro7.css?v=10" rel="stylesheet"/>
@@ -89,7 +91,7 @@ if($res->num_rows == 1)
 <link rel="stylesheet" type="text/css" href="css/switcher.css"/>
 <link rel="stylesheet" type="text/css" href="css/proxima.css"/>
 <link rel="stylesheet" type="text/css" href="confirm.css?v=1"/>
-<link rel="stylesheet" type="text/css" href="css/app.css?v=1"/>
+<link rel="stylesheet" type="text/css" href="css/app.css?v=2"/>
 <?php if($_SESSION['a']) echo '<script src="js/admin.js"></script>';?>
 </head>
 <body>

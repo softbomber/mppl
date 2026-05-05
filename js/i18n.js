@@ -69,7 +69,23 @@
       'cards.list': 'СПИСОК КАРТ',
       'lang.label': 'Язык / Language',
       'lang.ru': 'RU',
-      'lang.en': 'EN'
+      'lang.en': 'EN',
+
+      'net.offline_title': 'Нет соединения с сетью',
+      'net.offline_msg': 'Проверьте подключение. Мы автоматически продолжим, как только связь восстановится.',
+      'net.restored_title': 'Связь восстановлена',
+      'net.restored_msg': 'Соединение восстановлено',
+      'net.retry': 'Проверить ещё раз',
+
+      'auth.session_expired_title': 'Сессия истекла',
+      'auth.session_expired_msg': 'Войдите заново — мы вернёмся туда же.',
+      'auth.login_label': 'Логин',
+      'auth.password_label': 'Пароль',
+      'auth.submit': 'ВОЙТИ',
+      'auth.error_empty': 'Введите логин и пароль',
+      'auth.error_invalid': 'Неправильная пара логин/пароль',
+      'auth.error_network': 'Ошибка сети — попробуйте ещё раз',
+      'auth.error_generic': 'Не удалось войти, попробуйте ещё раз'
     },
     en: {
       'menu.create_account': 'CREATE ACCOUNT',
@@ -126,7 +142,23 @@
       'cards.list': 'CARD LIST',
       'lang.label': 'Language / Язык',
       'lang.ru': 'RU',
-      'lang.en': 'EN'
+      'lang.en': 'EN',
+
+      'net.offline_title': 'No network connection',
+      'net.offline_msg': 'Check your connection. We will continue automatically as soon as the network is back.',
+      'net.restored_title': 'Network restored',
+      'net.restored_msg': 'Connection restored',
+      'net.retry': 'Retry',
+
+      'auth.session_expired_title': 'Session expired',
+      'auth.session_expired_msg': 'Please log in again — we will keep you on this page.',
+      'auth.login_label': 'Login',
+      'auth.password_label': 'Password',
+      'auth.submit': 'SIGN IN',
+      'auth.error_empty': 'Enter login and password',
+      'auth.error_invalid': 'Wrong login/password',
+      'auth.error_network': 'Network error — please retry',
+      'auth.error_generic': 'Could not sign in, please retry'
     }
   };
 
