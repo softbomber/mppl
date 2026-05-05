@@ -1,0 +1,389 @@
+/* ==========================================================================
+   app.css
+   Тонкий слой поверх legacy css/adaptive.css.
+   Только новые компоненты с осмысленными именами (BEM-подобный стиль):
+     - swipe-pager (.deck, .deck__panel, .deck__nav, .deck__dot)
+     - language switcher (.lang-switch, .lang-switch__btn)
+     - модификаторы перехода для #result / .m_edbox / списков
+   Никакие имена классов из старого UI здесь не переопределяются —
+   старая верстка остаётся как есть, новые элементы используют свои имена.
+   ========================================================================== */
+
+/* Css-переменные единой темы (без затрагивания legacy цветов) */
+:root {
+  --app-bg-deep: #13212d;
+  --app-bg-panel: rgba(70, 91, 110, 0.92);
+  --app-fg: aliceblue;
+  --app-fg-muted: #b9c8d6;
+  --app-accent: #5fa9d9;
+  --app-accent-2: #2f4253;
+  --app-radius: 10px;
+  --app-shadow: 0 6px 22px rgba(0, 0, 0, 0.25);
+  --app-trans: 320ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* --------------------------------------------------------------------------
+   Swipe-pager (карточная палуба)
+   Используется как обёртка над #result, чтобы анимировать переходы
+   между «список аккаунтов», «шаринг» и «iptv».
+   -------------------------------------------------------------------------- */
+.deck {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.deck__track {
+  display: flex;
+  width: 100%;
+  transition: transform var(--app-trans);
+  will-change: transform;
+}
+
+.deck__track--dragging {
+  transition: none;
+}
+
+.deck__panel {
+  flex: 0 0 100%;
+  width: 100%;
+  min-height: 1px;
+  box-sizing: border-box;
+}
+
+.deck__panel[hidden] {
+  display: none;
+}
+
+/* Точечная навигация (индикатор страниц) */
+.deck__nav {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 6px 0 10px;
+}
+
+.deck__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--app-accent-2);
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  transition: transform 200ms ease, background-color 200ms ease;
+}
+
+.deck__dot--active {
+  background: var(--app-accent);
+  transform: scale(1.4);
+}
+
+.deck__dot[disabled] {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+/* Кнопка возврата на список */
+.deck__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 4px 0 6px 6px;
+  padding: 4px 10px;
+  background: var(--app-accent-2);
+  color: var(--app-fg);
+  border: 0;
+  border-radius: var(--app-radius);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 180ms ease;
+}
+
+.deck__back:hover,
+.deck__back:focus-visible {
+  background: var(--app-accent);
+  outline: none;
+}
+
+.deck__back::before {
+  content: "‹";
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* Подсказка свайпа (показывается один раз) */
+.deck__hint {
+  position: absolute;
+  inset: auto 0 8px 0;
+  margin: 0 auto;
+  width: max-content;
+  font-size: 11px;
+  color: var(--app-fg-muted);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 250ms ease;
+}
+
+.deck__hint--visible {
+  opacity: 0.85;
+}
+
+/* --------------------------------------------------------------------------
+   Языковый переключатель (EN/RU)
+   Отображается в боковом меню в виде сегментированного контрола.
+   -------------------------------------------------------------------------- */
+.lang-switch {
+  display: inline-flex;
+  margin: 8px 0;
+  padding: 2px;
+  background: var(--app-accent-2);
+  border-radius: 999px;
+  font-size: 12px;
+  user-select: none;
+}
+
+.lang-switch__btn {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--app-fg-muted);
+  padding: 4px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.lang-switch__btn:hover,
+.lang-switch__btn:focus-visible {
+  color: var(--app-fg);
+  outline: none;
+}
+
+.lang-switch__btn--active {
+  background: var(--app-accent);
+  color: var(--app-fg);
+}
+
+.lang-switch__wrap {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--app-accent-2);
+}
+
+/* --------------------------------------------------------------------------
+   Утилиты, исключающие повторение inline-стилей
+   -------------------------------------------------------------------------- */
+.u-hidden { display: none !important; }
+.u-flex-center { display: flex; justify-content: center; align-items: center; }
+
+/* Лёгкая полировка скроллбара внутри карточек pager-а */
+.deck__panel::-webkit-scrollbar { width: 6px; height: 6px; }
+.deck__panel::-webkit-scrollbar-thumb { background: var(--app-accent-2); border-radius: 6px; }
+.deck__panel::-webkit-scrollbar-thumb:hover { background: var(--app-accent); }
+
+/* Пусто-состояние палубы */
+.deck__panel--empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--app-fg-muted);
+  font-style: italic;
+}
+
+/* --------------------------------------------------------------------------
+   Stage / анимация перехода между страницами палубы.
+   На текущий контент #result применяются keyframes при смене страницы.
+   -------------------------------------------------------------------------- */
+.deck__stage {
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes deck-slide-forward {
+  from { transform: translateX(28%); opacity: 0.0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes deck-slide-backward {
+  from { transform: translateX(-28%); opacity: 0.0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+.deck--slide-forward  > #result { animation: deck-slide-forward  var(--app-trans) both; }
+.deck--slide-backward > #result { animation: deck-slide-backward var(--app-trans) both; }
+
+/* Скрываем «новости» при переходе в карточку аккаунта,
+   возвращаем их когда снова на списке. */
+.deck__stage[data-page="sharing"] #news,
+.deck__stage[data-page="iptv"]    #news { display: none; }
+
+
+/* ============================================================================
+   Net offline modal + restored toast (BEM: .net-modal, .net-toast)
+   ============================================================================ */
+.net-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 14, 20, 0.78);
+  backdrop-filter: blur(2px);
+}
+.net-modal.is-active { display: flex; }
+
+.net-modal__box {
+  min-width: 280px;
+  max-width: min(90vw, 420px);
+  padding: 22px 22px 18px;
+  background: var(--app-bg-panel);
+  color: var(--app-fg);
+  border: 1px solid var(--app-accent-2);
+  border-radius: var(--app-radius);
+  box-shadow: var(--app-shadow);
+  text-align: center;
+}
+.net-modal__title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.net-modal__msg {
+  font-size: 13px;
+  color: var(--app-fg-muted);
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+.net-modal__spinner {
+  width: 28px;
+  height: 28px;
+  margin: 0 auto 12px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--app-accent);
+  border-radius: 50%;
+  animation: net-spin 0.9s linear infinite;
+}
+@keyframes net-spin { to { transform: rotate(360deg); } }
+
+.net-modal__btn {
+  cursor: pointer;
+  border: 0;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: var(--app-accent);
+  color: #0c1a26;
+  font-weight: 600;
+  font-size: 13px;
+}
+.net-modal__btn:hover { filter: brightness(1.06); }
+
+.net-toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9998;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #1d4f31;
+  color: #d8f3df;
+  font-size: 13px;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--app-shadow);
+}
+.net-toast.is-active { display: inline-flex; }
+.net-toast__dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #50d27e;
+  box-shadow: 0 0 0 4px rgba(80, 210, 126, 0.25);
+}
+
+
+/* ============================================================================
+   Reauth modal (BEM: .auth-modal)
+   ============================================================================ */
+.auth-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 14, 20, 0.82);
+  backdrop-filter: blur(2px);
+}
+.auth-modal.is-active { display: flex; }
+
+.auth-modal__box {
+  width: min(92vw, 360px);
+  padding: 22px 22px 18px;
+  background: var(--app-bg-panel);
+  color: var(--app-fg);
+  border: 1px solid var(--app-accent-2);
+  border-radius: var(--app-radius);
+  box-shadow: var(--app-shadow);
+}
+.auth-modal__title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.auth-modal__msg {
+  font-size: 13px;
+  color: var(--app-fg-muted);
+  margin-bottom: 14px;
+}
+.auth-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.auth-modal__field label {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--app-fg-muted);
+}
+.auth-modal__field input {
+  font: inherit;
+  font-size: 14px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--app-accent-2);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--app-fg);
+  outline: none;
+}
+.auth-modal__field input:focus {
+  border-color: var(--app-accent);
+  box-shadow: 0 0 0 3px rgba(95, 169, 217, 0.18);
+}
+.auth-modal__error {
+  font-size: 12px;
+  color: #ff8a8a;
+  margin-bottom: 8px;
+}
+.auth-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+.auth-modal__submit {
+  cursor: pointer;
+  border: 0;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: var(--app-accent);
+  color: #0c1a26;
+  font-weight: 700;
+  font-size: 13px;
+}
+.auth-modal__submit:disabled { opacity: 0.6; cursor: progress; }
+.auth-modal.is-busy { pointer-events: none; }

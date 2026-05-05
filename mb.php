@@ -41,7 +41,6 @@ if (!empty($t_usr)) {
 
 $q="SELECT id,user,sum,a,pwd,DATE_FORMAT(dreg,'%d.%m.%y %H:%i') as dreg,eml,phone,fe,postpaid,defserver,currency FROM dealers WHERE ((user='$user' or eml='$demail') or (t_fname='$t_fname' or t_lname='$t_lname' 
 or t_usr='$t_usr')) and id=$dId";
-file_put_contents("query.log", $q, FILE_APPEND | LOCK_EX);
 $res=$link->query($q) or die("SQL Req. error: ".$link->error_list);
 if($res->num_rows == 1)
     {$row = $res->fetch_assoc();
@@ -81,6 +80,10 @@ if($res->num_rows == 1)
     <?php if(isset($_SESSION['a']) && $_SESSION['a'] == 1) {echo '<script src="adaptive_admin.js?v=12'; echo "></script>";}?>
 <script src="humanmsg.js"></script>
 <script src="js/jquery-ui.min.js"></script>
+<script src="js/i18n.js?v=2"></script>
+<script src="js/net.js?v=1"   defer></script>
+<script src="js/reauth.js?v=1" defer></script>
+<script src="js/pager.js?v=1"  defer></script>
 <link href="https://fonts.googleapis.com/css2?family=PT+Mono&amp;family=Source+Sans+3&amp;display=swap" rel="stylesheet">
 <link type="text/css" href="css/theme/jquery-ui.css" rel="stylesheet"/>
 <link type="text/css" href="css/pluso_wide_andro7.css?v=10" rel="stylesheet"/>
@@ -88,29 +91,31 @@ if($res->num_rows == 1)
 <link rel="stylesheet" type="text/css" href="css/switcher.css"/>
 <link rel="stylesheet" type="text/css" href="css/proxima.css"/>
 <link rel="stylesheet" type="text/css" href="confirm.css?v=1"/>
+<link rel="stylesheet" type="text/css" href="css/app.css?v=2"/>
 <?php if($_SESSION['a']) echo '<script src="js/admin.js"></script>';?>
 </head>
 <body>
 <input type="hidden" id="timeZoneOffsetInput" name="timeZoneOffsetInput">
 <div id="pfl"></div>
-</head>
-<body>
 <header class="header">
-<!--    <div class="greeting">   </div>-->
     <div align=center>
 <div id="ss" class="sf">
 <div class="sbox">
-<select class="sel"><option value=2>ЛОГИН</option><option value=1>ВCЁ</option><option value=3>Т.НОМЕР</option><option value=4>EMAIL</option></select>
-<input class="si" placeholder="логин|телефон|email" id=glog></input>
+<select class="sel">
+  <option value=2 data-i18n="search.opt_login">ЛОГИН</option>
+  <option value=1 data-i18n="search.opt_all">ВCЁ</option>
+  <option value=3 data-i18n="search.opt_phone">Т.НОМЕР</option>
+  <option value=4 data-i18n="search.opt_email">EMAIL</option>
+</select>
+<input class="si" placeholder="логин|телефон|email" id=glog data-i18n-attr="placeholder:search.login_placeholder"></input>
 <div style="width:25px">
-<div class="sb" title="Поиск" type="button" onclick="getuser(0,0)"></div>
+<div class="sb" title="Поиск" data-i18n-attr="title:search.tooltip" type="button" onclick="getuser(0,0)"></div>
 <div class="circle" style="display:none" ></div>
 </div>
 
 </div>
 </div>
 <div style='position:relative'><div class="s_res" style="display: none;">
-    <!-- <div class="s_res-title">НАЙДЕНО ПО НОМЕРУ ТЕЛЕФОНА</div>-->
     <ul class="s_res-list"></ul>
 </div></div>
 </div> <!-- center end -->
@@ -121,8 +126,8 @@ if($res->num_rows == 1)
     <div class="balance"></div>-->
   </header>
  
-  <button class="menu-toggle" aria-label="меню">☰</button>
-  <button class="info-toggle" aria-label="инфо">ℹ</button>
+  <button class="menu-toggle" aria-label="меню" data-i18n-attr="aria-label:menu_btn.aria">☰</button>
+  <button class="info-toggle" aria-label="инфо" data-i18n-attr="aria-label:info_btn.aria">ℹ</button>
   <div class="overlay-menu"></div>
   <div class="overlay-info"></div>
   <nav class="side-menu">
@@ -131,15 +136,21 @@ if($res->num_rows == 1)
     display: block;
     text-align: center;
     padding: 12px 0;
-    border-bottom: 1px solid #2f4253">Приветcтвуем Вас, <span><?php echo $dealerId ?><br></span></span>
+    border-bottom: 1px solid #2f4253"><span data-i18n="greeting">Приветcтвуем Вас, </span><span><?php echo $dealerId ?><br></span></span>
+    <div class="lang-switch__wrap">
+      <div class="lang-switch" role="group" aria-label="Language / Язык">
+        <button type="button" class="lang-switch__btn" data-lang="ru" data-i18n="lang.ru">RU</button>
+        <button type="button" class="lang-switch__btn" data-lang="en" data-i18n="lang.en">EN</button>
+      </div>
+    </div>
     <ul>
-      <li><a href="#" id="mkusr">СОЗДАТЬ АККАУНТ</a></li>
-      <li><a href="#" id="userlist">СПИСОК АККАУНТОВ</a></li>
-      <li><a href="#" id="loglist">ИСТОРИЯ ОПЕРАЦИЙ</a></li>
-      <li><a href="#" id="packetp">ПАКЕТЫ,ИДЕНТЫ и ЦЕНЫ</a></li>
-      <li><a href="#" id="pfedt">ПРОФИЛЬ</a></li>
-      <li><a href="#" id="bal">ПОПОЛНЕНИЕ БАЛАНСА</a></li>
-      <li><a href="#" id="nws">НОВОСТНОЙ БЛОК</a></li>
+      <li><a href="#" id="mkusr" data-i18n="menu.create_account">СОЗДАТЬ АККАУНТ</a></li>
+      <li><a href="#" id="userlist" data-i18n="menu.account_list">СПИСОК АККАУНТОВ</a></li>
+      <li><a href="#" id="loglist" data-i18n="menu.history">ИСТОРИЯ ОПЕРАЦИЙ</a></li>
+      <li><a href="#" id="packetp" data-i18n="menu.packets">ПАКЕТЫ,ИДЕНТЫ и ЦЕНЫ</a></li>
+      <li><a href="#" id="pfedt" data-i18n="menu.profile">ПРОФИЛЬ</a></li>
+      <li><a href="#" id="bal" data-i18n="menu.balance">ПОПОЛНЕНИЕ БАЛАНСА</a></li>
+      <li><a href="#" id="nws" data-i18n="menu.news">НОВОСТНОЙ БЛОК</a></li>
 <?php
 if ($_SESSION['a'] == 1) {
     $fk_merchant_id = '55712';
@@ -153,26 +164,26 @@ if (isset($_GET['prepare_once'])) {
     echo '<hash>' . $hash . '</hash>';
     exit;
 }
-    echo '<li><a href="#" id="dlst">СПИСОК ДИЛЕРОВ</a></li>
-    <li><a href="#" id="dlrhst">ОБОРОТКА ПО ДИЛЕРАМ</a></li>
-    <li><a href="#" id="fkassa">ПОПОЛНЕНИЕ ЧЕРЕЗ FK</a></li>';
+    echo '<li><a href="#" id="dlst" data-i18n="menu.dealers">СПИСОК ДИЛЕРОВ</a></li>
+    <li><a href="#" id="dlrhst" data-i18n="menu.dealers_history">ОБОРОТКА ПО ДИЛЕРАМ</a></li>
+    <li><a href="#" id="fkassa" data-i18n="menu.fk_top_up">ПОПОЛНЕНИЕ ЧЕРЕЗ FK</a></li>';
 
 echo '</div>
 <div id="fk" class="login-popup" style="left:50%;top:50%;transform:translate(-50%,-50%)">
-<div style="display:flex;background:#465b6e"><div class=title>ПОПОЛНЕНИЕ БАЛАНСА ЧЕРЕЗ FREEKASSA</div><div class="clse"></div></div>
+<div style="display:flex;background:#465b6e"><div class=title data-i18n="modal.fk_balance">ПОПОЛНЕНИЕ БАЛАНСА ЧЕРЕЗ FREEKASSA</div><div class="clse"></div></div>
 <div class="tabs" id="tabfkassa">
 <div class="fkassa">
 <form id="paymentForm" name="paymentForm"> <!-- onsubmit="openPayment(event)">-->
     <input type="hidden" name="m" value="<?= $fk_merchant_id ?>">
-<div class="lbl">СУММА ПОПОЛНЕНИЯ</div>
+<div class="lbl" data-i18n="form.amount">СУММА ПОПОЛНЕНИЯ</div>
 <div style="display:inline-block;position:relative">
 <input type="text" name="oa" id="sum" onchange="calculate()" onkeyup="calculate()" onfocusout="calculate()" class="required" autocomplete="off">
     <input name="currency" style="width:30px;background:0;color:aliceblue;position:absolute;right:1px;top:19%;text-align:center" value="<?= $fk_currency ?>">
 </div>
     <input type="hidden" name="s" id="s" value="0">
-<div class="lbl">НОМЕР ПЛАТЕЖА</div>
+<div class="lbl" data-i18n="form.payment_id">НОМЕР ПЛАТЕЖА</div>
     <input type="text" name="o" id="desc" value="" readonly> 
-    <input type="submit" id="submit" value="К ПОПОЛНЕНИЮ" disabled>
+    <input type="submit" id="submit" value="К ПОПОЛНЕНИЮ" disabled data-i18n-attr="value:form.go_to_payment">
 </form>
 </div>
 <div id="fkcntnt" style="min-height:450px;min-width:450px;display:flex;justify-content:center;align-items:center;width:100%;overflow:hidden;box-sizing:border-box">
@@ -459,7 +470,7 @@ $jsCode = str_replace("'", "\\'", $jsCode);
 echo "<script>\n" . $jsCode . "\n</script>";
 }
 ?>
-     <li><a href=logout.php>ВЫХОД</a></li>
+     <li><a href="logout.php" data-i18n="menu.logout">ВЫХОД</a></li>
     </ul>
   </nav>
   <main>
@@ -843,12 +854,12 @@ function actIptv(e) {
 </script>
 <div id="rgacc" class="mdl">
 <form method="post" id="signin" name="signin">
-<div class="t_subst"><div class="title">РЕГИСТРАЦИЯ АККАУНТА</div><span class="clse"></span></div>
+<div class="t_subst"><div class="title" data-i18n="modal.register_account">РЕГИСТРАЦИЯ АККАУНТА</div><span class="clse"></span></div>
 <div class=signin>
 <div class="fCont">
-  <div style="display: flex; justify-content:space-between; margin-right:10px"><label>ЛОГИН</label>
+  <div style="display: flex; justify-content:space-between; margin-right:10px"><label data-i18n="form.login">ЛОГИН</label>
   <div style="display:flex">
-  <LABEL>IPTV</LABEL>
+  <LABEL data-i18n="form.iptv">IPTV</LABEL>
   <input style="vertical-align:middle" type="checkbox" id="iptv" name="iptv">
   <label for=iptv class=switcher></label>
   </div>
@@ -861,11 +872,11 @@ function actIptv(e) {
      </div>
  </div>
  <div>
-  <label style='clear:both'>ПАРОЛЬ</label>
+  <label style='clear:both' data-i18n="form.password">ПАРОЛЬ</label>
   <input id="ps" name="ps" type="password" class="required password"/>
  </div>
  <div>
-  <label>СЕРВЕР ПОДКЛЮЧЕНИЯ</label><select id="srv" name='srv'>
+  <label data-i18n="form.connection_server">СЕРВЕР ПОДКЛЮЧЕНИЯ</label><select id="srv" name='srv'>
         <?php
         if(!$defserver)
      $res=$link->query("SELECT s_id,url,ip,failed FROM server where hide=0") or die("SQL req. error: ".$link->error_list);
@@ -882,7 +893,7 @@ function actIptv(e) {
 ?>
 </div>
 <div style="padding:9px">
-<button class="submit">ЗАРЕГИСТРИРОВАТЬ</button>
+<button class="submit" data-i18n="form.register">ЗАРЕГИСТРИРОВАТЬ</button>
 </div>
 </div>
 </form>
@@ -896,11 +907,11 @@ function actIptv(e) {
 
 <div style="display:flex;justify-content:flex-end"></div>
 <div class="cell"><div class=frow><input id="passu" name="passu" type="password"><button type="button" class="eye-btn" onclick="togglePassword(this)">🔒</button><label>ПАРОЛЬ</label></div>
-<div class=frow><input id="e_ml" name="e_ml" type="email"><label>EMAIL</label></div></div>
+<div class=frow><input id="e_ml" name="e_ml" type="email"><label data-i18n="form.email">EMAIL</label></div></div>
 <div class="cell">
   <div>
-    <div class=frow><input type="text" id="mph" name="mph" size="20"><label>МОБИЛЬНЫЙ #</label></div>
-    <div style="display:inline-flex;align-items:center"><input type="checkbox" id="msnd" name="snd"><label class="switcher" for="msnd"></label><el class="sendto">Отправлять оповещения на номер</el></div>
+    <div class=frow><input type="text" id="mph" name="mph" size="20"><label data-i18n="form.mobile">МОБИЛЬНЫЙ #</label></div>
+    <div style="display:inline-flex;align-items:center"><input type="checkbox" id="msnd" name="snd"><label class="switcher" for="msnd"></label><el class="sendto" data-i18n="form.notify_to_phone">Отправлять оповещения на номер</el></div>
   </div>
 
 <div class=frow><select id=msrv name=msrv>
@@ -915,8 +926,8 @@ for ($i = 0; $i < $rc; $i++) {
     echo "<option value=" . $servers[$i]['s_id'] . '>' . $servers[$i]['url'] . " - " . $servers[$i]['ip'] . "</option>";
 }
 ?>
-</select><label>СЕРВЕР</label></div></div>
-<div class="cell1 frow"><textarea rows=1 id="cmmnt" name="cmmnt"></textarea><label>КОМЕНТ</label></div>
+</select><label data-i18n="form.server">СЕРВЕР</label></div></div>
+<div class="cell1 frow"><textarea rows=1 id="cmmnt" name="cmmnt"></textarea><label data-i18n="form.comment">КОМЕНТ</label></div>
 <?php
 echo '<div style="border:1px solid #1d2f35;padding:5px;position:relative">
 <div class="bubbleslist"><div style="position:absolute;left:0;top:0;transform:translateY(-90%);font-size:9px;font-weight:700">СПИСОК КАРТ</div><div class=butaddcard id="uaddcards">+</div></div>';
@@ -927,7 +938,7 @@ echo '</div>';
 </div>
 
 <div id="paym" class="login-popup" style="left:50%;top:50%;transform:translate(-50%,-50%)">
-<div style="display:flex"><div class=title>ИНФОРМАЦИЯ О ПЛАТЕЖАХ</div><div class="clse"></div></div>
+<div style="display:flex"><div class=title data-i18n="modal.payments_info">ИНФОРМАЦИЯ О ПЛАТЕЖАХ</div><div class="clse"></div></div>
 <!--<p>Для пополнения баланса, переведите сумму на указанные ниже реквизиты для WM в примечании укажите ваш логин,
 </br> но перед этим в ПРОФИЛЕ, во вкладке Webmoney укажите ваш WMID.--><p>Для UZ переводите средства только через PayMe и уже через 5 минут средства будут зачислены. <br>!!! При переводе, укажите в примечании "d <?php echo $dealerId?>" !!!<BR>
 </p>
@@ -960,23 +971,23 @@ for($i=0;$i<$rc;$i++)
 </div>
 
 <div id="rset" class="pluso-box" style="top:50%;left:50%;display:none;width:100%;transform: translate(-50%, -50%)">
-<div style="display:flex"><div class="title">НАСТРОЙКИ ПЛАГИНОВ</div><div class="clse"></div></div>
-<div class="clear cell1 row"><el class="p1"><select id="tun" onchange="ltuns(this,'pl')"><option>Тюнер</option>
+<div style="display:flex"><div class="title" data-i18n="modal.plugin_settings">НАСТРОЙКИ ПЛАГИНОВ</div><div class="clse"></div></div>
+<div class="clear cell1 row"><el class="p1"><select id="tun" onchange="ltuns(this,'pl')"><option data-i18n="form.tuner">Тюнер</option>
 <?php
 $res=$link->query("select * from recievers order by rn_id") or die("SQL req. error: ".$link->error_list);
 $rc=$res->num_rows;
                 for($i=0;$i<$rc;$i++){$rs[$i]=$res->fetch_assoc();echo "<option value=".$rs[$i]['rn_id'].'>'.$rs[$i]['rname']."</option>";}
                 ?>
 </select></el>
-<el class="p1"><select id="pl" disabled="disabled" onchange="ltuns(this,'pr')"><option>Плагин</option></select></el>
-<el class="p1"><select id="pr" disabled="disabled" onchange="lrs()"><option>Протокол</option></select></el></div>
+<el class="p1"><select id="pl" disabled="disabled" onchange="ltuns(this,'pr')"><option data-i18n="form.plugin">Плагин</option></select></el>
+<el class="p1"><select id="pr" disabled="disabled" onchange="lrs()"><option data-i18n="form.protocol">Протокол</option></select></el></div>
 <div class="clear cell1"><div id="rsets" class="lst"></div></div>
 <el class="p1" id="hlp"></el>
 <div class="clear cell1 row">
-<el class="p1"><button onclick="stof()">Сохранить в файл</button>
-<div id="semail"><button id="bb">Отправить на email</button><form method="post" id="stoemail" name="stoemail" enctype="multipart/form-data">
+<el class="p1"><button onclick="stof()" data-i18n="form.send_to_file">Сохранить в файл</button>
+<div id="semail"><button id="bb" data-i18n="form.send_to_email">Отправить на email</button><form method="post" id="stoemail" name="stoemail" enctype="multipart/form-data">
 <div class="pluso-box" id="sedia" style="display:none;position:absolute"><input id="inputeml" name="inputeml" type="text" class="required email">
-<button class="submit" style="width:100%">Отправить</button></div>
+<button class="submit" style="width:100%" data-i18n="form.send">Отправить</button></div>
 </form>
 </div>
 </el>
@@ -986,13 +997,13 @@ $rc=$res->num_rows;
 <div id="classo" class="pluso-box" style="position:fixed;top:50%;left:50%;display:none;width:95%;max-width:650px;height:calc(60dvh);min-height:350px;max-height:calc(60dvh);transform:translate(-50%, -50%);
  margin:0;overflow-y:auto;box-sizing: border-box">
 <div style="display:flex">
-<div class=title>СПИСОК ОПЕРАЦИЙ ПО АККАУНТУ <el id="ullst"></el></div><div class="clse"></div></div>
+<div class=title><span data-i18n="modal.account_ops">СПИСОК ОПЕРАЦИЙ ПО АККАУНТУ </span><el id="ullst"></el></div><div class="clse"></div></div>
 <div id=ulist class="pluso-list"></div>
 </div>
 
 <div id=ued class=mdl>
 <form method="post" id="uedit" name="uedit">
-<div class="t_subst"><div class="title">РЕДАКТИРОВАНИЕ ДАННЫХ <el id="ue"></el></div><div class="clse"></div></div>
+<div class="t_subst"><div class="title"><span data-i18n="modal.edit_data">РЕДАКТИРОВАНИЕ ДАННЫХ </span><el id="ue"></el></div><div class="clse"></div></div>
 <div class="uedbox">
 <div class="cell1" style="justify-content:center">
 <div class="nfo">Дата регистрации</div><div id="dr"></div></div>
@@ -1020,7 +1031,7 @@ for ($i = 0; $i < $rc; $i++) {
 ?>
 </select></div></div>
 <div class="cell1"><label>Комент</label></div><div class="cell1"><textarea rows=2 id="comment" name="comment"></textarea></div>
-<div class="cell1"><button class="button" type="submit">СОХРАНИТЬ</button></div></form></div>
+<div class="cell1"><button class="button" type="submit" data-i18n="form.save">СОХРАНИТЬ</button></div></form></div>
 
 <div class="modal"></div>
    <script>
@@ -1093,95 +1104,50 @@ dc.addEventListener('keydown', (event) => {
 });
 
 
-// Оптимизированная логика свайпов
+// Краевые свайпы для открытия/закрытия бокового меню и информационной панели.
+// Свайп-навигация внутри #result (список ↔ шаринг ↔ iptv) реализована в js/pager.js.
+const SWIPE_MIN_PX = 35;
+const SWIPE_MAX_MS = 500;
 let touchStartX = 0;
 let touchStartY = 0;
-let touchEndX = 0;
-let touchEndY = 0;
 let touchStartTime = 0;
-let isSwiping = false;
+let isHorizontalEdgeSwipe = false;
 
 dc.addEventListener('touchstart', (e) => {
-  // Не игнорируем кнопки, чтобы свайпы работали
-  touchStartX = e.changedTouches[0].screenX;
-  touchStartY = e.changedTouches[0].screenY;
+  const t = e.changedTouches[0];
+  touchStartX = t.screenX;
+  touchStartY = t.screenY;
   touchStartTime = Date.now();
-  isSwiping = false;
-  
-});
-
-dc.addEventListener('touchmove', (e) => {
-  const currentX = e.changedTouches[0].screenX;
-  const currentY = e.changedTouches[0].screenY;
-  const absX = Math.abs(currentX - touchStartX);
-  const absY = Math.abs(currentY - touchStartY);
-
-  // Определяем свайп: горизонтальный или вертикальный (>15px)
-  if (absX > 15 || absY > 15) {
-    isSwiping = true;
-    e.preventDefault(); // Блокируем скролл и клик по кнопке
-  }
-});
+  isHorizontalEdgeSwipe = false;
+}, { passive: true });
 
 dc.addEventListener('touchend', (e) => {
-  if (!isSwiping || Date.now() - touchStartTime > 500) return;
+  if (Date.now() - touchStartTime > SWIPE_MAX_MS) return;
 
-  touchEndX = e.changedTouches[0].screenX;
-  touchEndY = e.changedTouches[0].screenY;
-  const swipeDistanceX = touchEndX - touchStartX;
-  const swipeDistanceY = touchEndY - touchStartY;
-  const absX = Math.abs(swipeDistanceX);
-  const absY = Math.abs(swipeDistanceY);
+  const t = e.changedTouches[0];
+  const dx = t.screenX - touchStartX;
+  const dy = t.screenY - touchStartY;
+  const absX = Math.abs(dx);
+  const absY = Math.abs(dy);
   const screenWidth = window.innerWidth;
-  const edgeZone = Math.max(50, screenWidth * 0.1); // 10% экрана
+  const edgeZone = Math.max(50, screenWidth * 0.1);
 
-  // Горизонтальные свайпы
-  if (absX > absY && absX > 15) {
-    // Свайп вправо от левого края
-    if (
-      swipeDistanceX > 15 &&
-      touchStartX < edgeZone &&
-      !sideMenu.classList.contains('open') &&
-      !infoPanel.classList.contains('open')
-    ) {
-      e.preventDefault();
+  // Только сильные горизонтальные свайпы засчитываем как edge-swipe.
+  if (absX > absY && absX > SWIPE_MIN_PX) {
+    isHorizontalEdgeSwipe = true;
+    if (dx > 0 && touchStartX < edgeZone && !sideMenu.classList.contains('open') && !infoPanel.classList.contains('open')) {
       toggleMenu();
-    }
-    // Свайп влево от правого края
-    else if (
-      swipeDistanceX < -15 &&
-      touchStartX > screenWidth - edgeZone &&
-      !infoPanel.classList.contains('open') &&
-      !sideMenu.classList.contains('open')
-    ) {
-      e.preventDefault();
+    } else if (dx < 0 && touchStartX > screenWidth - edgeZone && !sideMenu.classList.contains('open') && !infoPanel.classList.contains('open')) {
       toggleInfoPanel();
-    }
-    // Закрытие бокового меню
-    else if (swipeDistanceX < -15 && sideMenu.classList.contains('open')) {
-      e.preventDefault();
+    } else if (dx < 0 && sideMenu.classList.contains('open')) {
       closeMenu();
-    }
-    // Закрытие инфопанели
-    else if (swipeDistanceX > 15 && infoPanel.classList.contains('open')) {
-      e.preventDefault();
+    } else if (dx > 0 && infoPanel.classList.contains('open')) {
       closeInfoPanel();
     }
+  } else if (formBox && dy > SWIPE_MIN_PX && formBox.classList.contains('active')) {
+    formBox.classList.remove('active');
   }
-  else if (formBox) {
-    if (swipeDistanceY > 15 && formBox.classList.contains('active')) {
-      e.preventDefault();
-      formBox.classList.remove('active');
-    }
-  }
-});
-
-dc.addEventListener('click', (e) => {
-  if (isSwiping) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-}, true);
+}, { passive: true });
 dc.addEventListener('DOMContentLoaded', () => {
   dc.addEventListener('click', (e) => {
     const l = e.target.closest('#usrLst .loginm a');
