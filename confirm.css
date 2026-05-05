@@ -1,0 +1,8 @@
+#confirmOverlay{width:100%;height:100%;position:fixed;top:0;left:0;background: -moz-linear-gradient(rgba(11,11,11,0.1), rgba(11,11,11,0.6)) repeat-x rgba(11,11,11,0.2);z-index:1000}
+#confirmBox{background:#465b6e;width:325px;position:fixed;left:50%;top:50%;margin:-130px 0 0 -200px}
+#confirmBox h1{padding:6px 7px;color:#fff1f1;font-size:13px}
+#confirmBox p{padding:29px;text-align:center;background:#f9f9f9}
+#confirmButtons{padding:11px 2px 9px;text-align:right}
+#confirmBox input{border-bottom:1px solid #2e2e75;text-align:center}
+#confirmBox .but{color:#B5C1DE;position:relative;margin-right:5px;padding: 4px 9px 4px;background:#2d2c2c;border-radius:5px}
+#confirmBox .gray{margin-right:8px}
