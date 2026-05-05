@@ -1,0 +1,23 @@
+*{margin:0;padding:0} html,body{height:100%;font:12px/17px '/fonts/Yanone Kaffeesatz-regular',"Trebuchet MS",Helvetica,Tahoma,Verdana;margin:0;padding:0} 
+input,textarea,keygen,select,button{font-family:'/fonts/Yanone Kaffeesatz-regular',Trebuchet MS}
+body{width:100%;min-height:100%;color:#dfe8f9;background:#13212D;height:100%}
+button,html input[type="button"],input[type="reset"],input[type="submit"]{cursor:pointer}
+#carbonForm,#msg{background:rgb(65 73 86);margin: 0 auto;border-radius:3px}
+#carbonForm{width:365px} #msg{width:365px} 
+#carbonForm h1,#msg h1{font-size:14px;padding:10px 8px 10px 12px;font-weight:100} 
+.fCont{padding:17px 0 7px;text-align:center}
+.fContR{padding: 48px 0 48px;text-align:center} .fCont,.fContR{background:rgb(50 84 163/24%);border-bottom:1px solid #4a6276}
+.formRow{height:12px;position:relative} .label{float:left;vertical-align:middle;text-align:right;padding-top:7px;padding-right:2px;width:114px}
+.field{height:42px;vertical-align:middle} .field input{border: 1px solid #ffffff29;padding: 6px 14px 5px 40px;height:19px;width:64%;font-size: 14px;color:#ecfff9;border-radius:3px}
+.signupButton{padding:4px 7px;border:0;background:#617385;margin:0 0 3px;border-radius: 2px}
+.signupButton:hover{background:#374450} #login{background-position:5px 6px !important} #pass{background-position:4px -24px !important} #pasr{background-position:5px -77px !important} #eml{background-position:5px -50px !important}
+#captcha{background-position:4px 31px !important}
+#login,#pass,#eml,#pasr,#captcha{background:rgb(38 38 38 / 32%) url(/i.png) no-repeat;}
+#wm{background:url('/wm.png') no-repeat;height:31px;left:47%;position:relative}
+ul{list-style-type:none;margin:0;padding:0;font-size:22px;line-height:17px}
+ul li{margin-top:28px;padding:11px 9px;border-right:3px solid #77c379;font-size:14px;text-align:center;color:#86a1bd;border-left:3px solid #77c379;border-radius:5px;}
+.logo{background:#496c9b;padding:23px;text-align:center}
+#container{position:relative;min-height:100%;height:100%}
+#content{display:flex;flex-direction:column;padding-bottom:50px;box-sizing:border-box;height:100%}
+#footer{width: 100%;position:absolute;bottom:0;color:#6b8d67;text-align:center;padding-top:10px;height:45px}
+a,a:visited{text-align:center;height: 100%;display: inline-block;width: 100%;color: #74a5d7;font-size: 13px}

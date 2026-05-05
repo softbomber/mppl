@@ -1,0 +1,40 @@
+*{margin:0;padding:0}
+html,body{height:100%;font:12px/17px 'Yanone Kaffeesatz-regular',"Trebuchet MS",Helvetica,Tahoma,Verdana}
+body{width:100%;min-height:100%;color:#dfe8f9;background:url("/image.png") center/cover}
+input,textarea,keygen,select,button{font-family:'Yanone Kaffeesatz-regular',"Trebuchet MS"}
+button,input[type="button"],input[type="reset"],input[type="submit"]{cursor:pointer}
+button.tgme_widget_login_button{background-color:#74a5d7!important}
+#carbonForm,#msg{background:#13212D;margin:0 auto;border-radius:13px}
+#carbonForm{width:310px;padding:0 0 53px}
+#msg{width:310px}
+.title,#msg h1{font-size:13px;padding:10px 8px 10px 12px;font-weight:100;text-align:center}
+.enter{margin:19px 22px 0}
+.enter input{color:#f0f8ff;font-size:14px}
+#carbonForm.logo h1{font-size:23px}
+.logo{padding:12px;text-align:center;margin:43px 0 15px}
+.fCont{padding:17px 0 7px;text-align:center}
+.fContR{padding:48px 0;text-align:center}
+.fCont,.fContR{background:rgb(50 84 163/24%);border-bottom:1px solid #4a6276}
+.formRow{height:12px;position:relative}
+.label{float:left;text-align:right;padding-top:7px;padding-right:2px;width:114px}
+.field{height:42px;text-align:center}
+.field input{border:1px solid #15324b;padding:6px 14px 5px 40px;height:19px;width:64%;font-size:14px;color:#ecfff9;border-radius:3px}
+.signupButton{padding:7px 20px;border:0;background:#74a5d7;margin:0 0 3px;border-radius:2px;width:100%}
+.signupButton:hover{background:#374450}
+#login{background-position:5px 6px!important}
+#pass{background-position:4px -24px!important}
+#pasr{background-position:5px -77px!important}
+#eml{background-position:5px -50px!important}
+#captcha{background-position:4px 31px!important}
+#login,#pass,#eml,#pasr,#captcha{background:#121d27 url(/i.png) no-repeat}
+ul{list-style:none;margin:0;padding:0;font-size:22px;line-height:17px}
+ul li{margin-top:28px;padding:11px 9px;border-right:3px solid #77c379;font-size:14px;text-align:center;color:#86a1bd;border-left:3px solid #77c379;border-radius:5px}
+#container{position:relative;min-height:100%;height:100%}
+#content{display:flex;flex-direction:column;padding-bottom:50px;box-sizing:border-box;height:100%;justify-content:center}
+#footer{width:100%;position:absolute;bottom:0;color:black;text-align:center;padding-top:10px;height:45px;font-weight:bolder}
+a,a:visited{text-align:center;height:100%;display:inline-block;width:100%;color:#74a5d7;font-size:13px}
+@media (max-width:900px){#carbonForm{width:calc(100% - 80px);margin:0 40px}}
+.social-login{display:flex;justify-content:center;margin:4px 22px}
+.social-login #tlg{padding:2px;height:31px}
+.social-login button{display:flex;align-items:center;border:0;border-radius:2px;padding:4px;cursor:pointer;background-color:#74a5d7;width:100%;justify-content:center;color:#f0f8ff;font-size:14px}
+.social-login img{width:23px;height:22px;margin-right:5px}

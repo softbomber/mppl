@@ -1,0 +1,16 @@
+*{margin:0;padding: 0px;}
+html{height:100%}
+body{width:100%;min-height:100%;font: 12px/15px "Trebuchet MS",Helvetica,Tahoma,Verdana;color:#dfe8f9;min-width:980px;
+    background:#cce2f5;background:-moz-radial-gradient(bottom, ellipse cover, #cce2f5 0%, #cce2f5 7%, #3f6685 100%);background: -webkit-gradient(radial, bottom bottom, 0px, bottom bottom, 100%, color-stop(0%, #cce2f5), color-stop(7%, #cce2f5), color-stop(100%, #3f6685));background: -webkit-radial-gradient(bottom, ellipse cover, #cce2f5 0%, #cce2f5 7%, #3f6685 100%);background: -o-radial-gradient(bottom, ellipse cover, #cce2f5 0%, #cce2f5 7%, #3f6685 100%);background: -ms-radial-gradient(bottom, ellipse cover, #cce2f5 0%, #cce2f5 7%, #3f6685 100%);background: radial-gradient(ellipse at bottom, #cce2f5 0%, #cce2f5 7%, #142e44 100%);filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cce2f5',endColorstr='#3f6685',GradientType=1 );height:100%;}
+#carbonForm{background:#88A8CA;margin:15px auto;padding:7px 0 0;width:264px;box-shadow: 0 1px 25px rgba(10,20,45,0.12);border:1px solid #7e8c9a}
+#carbonForm h1{font-size:14px;padding:1px 8px 7px 12px;font-weight:100;color:#0e0c0c}
+.fCont{padding:32px 10px 21px;text-align:center}
+.fContR{padding:25px 18px 27px;text-align:center}
+.fCont,.fContR{background:#51677d;background:-moz-linear-gradient(top,#58709A 0%,#000000 100%);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#58709A',endColorstr='#000000',GradientType=0);}
+.formRow{height:12px;position:relative}
+.label{float:left;vertical-align:middle;text-align:right;padding-top:7px;padding-right:2px;width:114px;/* color:black */}
+.field{height:42px;vertical-align:middle}
+.field input{border: 0;color:#666666;padding:5px 4px;height:23px;width:187px;background:#e5fffd}
+.signupButton{padding:6px 8px;color:#8B8B8B;border:1px solid #6B8DC4;background:#515F6D;background:-moz-linear-gradient(top,#515F6D 0%,#000000 100%);background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#515F6D),color-stop(100%,#000000));background:-webkit-linear-gradient(top,#515F6D 0%,#000000 100%);background:-o-linear-gradient(top,#515F6D 0%,#000000 100%);background:-ms-linear-gradient(top,#515F6D 0%,#000000 100%);background:linear-gradient(to bottom,#515F6D 0%,#000000 100%);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#515F6D',endColorstr='#000000',GradientType=0);margin:0 0 3px;font-size:11px}
+.signupButton:hover{background:#374450}
+button,html input[type="button"],input[type="reset"],input[type="submit"]{cursor:pointer}

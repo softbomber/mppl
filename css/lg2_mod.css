@@ -1,0 +1,15 @@
+*{margin:0;padding:0} html,body{height:85%} body{width:100%;min-height:100%;font:12px/17px '/fonts/Yanone Kaffeesatz-regular',"Trebuchet MS",Helvetica,Tahoma,Verdana;color:#dfe8f9;background: #6a869e;height:100%;}
+input,textarea,keygen,select,button{font-family:'/fonts/Yanone Kaffeesatz-regular',Trebuchet MS} button,html input[type="button"],input[type="reset"],input[type="submit"]{cursor:pointer}
+#carbonForm,#msg{background:rgb(226, 237, 255);margin: 0 auto;border-radius:1px}
+#carbonForm{width:416px} #msg{width:408px} #carbonForm h1,#msg h1{font-size:14px;padding:1px 8px 7px 12px;font-weight:100;color:#0e0c0c} .fCont{padding:27px 0 17px;text-align:center}
+.fContR{padding:34px 0 26px;text-align:center} .fCont,.fContR{background:rgba(134, 147, 177, 0.48)}
+.formRow{height:12px;position:relative} .label{float:left;vertical-align:middle;text-align:right;padding-top:7px;padding-right:2px;width:114px}
+.field{height:42px;vertical-align:middle} .field input{border:0;padding:5px 14px 4px 40px;height: 23px;width:63%;background-color: rgba(255,255,255,.1);font-size: 14px;color:#4c6ca9;border-radius:1px}
+.signupButton{padding:4px 7px;border:1px solid #6B8DC4;background:#515F6D;background:-moz-linear-gradient(top,#515F6D 0%,#000000 100%);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#515F6D',endColorstr='#000000',GradientType=0);margin:0 0 3px;}
+.signupButton:hover{background:#374450} #login{background-position:5px 6px !important} #pass{background-position:4px -24px !important} #pasr{background-position:5px -77px !important} #eml{background-position:5px -50px !important}
+#login,#pass,#eml,#pasr{background: rgba(255, 255, 255, 0.77) url(/i.png) no-repeat}
+#footer{position:relative;color:#585858;background:#000;text-align:center;padding:10px;height:27px}
+#wm{background:url('/wm.png') no-repeat;height:31px;left:47%;position:relative}
+ul{list-style-type:none;margin:0;padding:0;font-size:22px;line-height:17px}
+ul li{margin:1px;padding:15px 20px;border-right:3px solid #77c379;background:#383e41;font-size:14px;text-align:center;color:#86a1bd}
+.logo{background:#79a5de;padding:23px;text-align:center}
