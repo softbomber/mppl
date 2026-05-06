@@ -76,11 +76,12 @@ if($res->num_rows == 1)
 <script src="jquery.inputmask.js"></script>
 <script src="jquery.bin-first.js"></script>
 <script src="jquery.inputmask-multi.js"></script>
-<script src="guser.js?v=27"></script>
+<script src="guser.js?v=28"></script>
     <?php if(isset($_SESSION['a']) && $_SESSION['a'] == 1) {echo '<script src="adaptive_admin.js?v=12'; echo "></script>";}?>
 <script src="humanmsg.js"></script>
 <script src="js/jquery-ui.min.js"></script>
-<script src="js/i18n.js?v=2"></script>
+<script src="js/i18n.js?v=3"></script>
+<script src="js/listcache.js?v=1"></script>
 <script src="js/net.js?v=1"   defer></script>
 <script src="js/reauth.js?v=1" defer></script>
 <script src="js/pager.js?v=1"  defer></script>
@@ -91,14 +92,14 @@ if($res->num_rows == 1)
 <link rel="stylesheet" type="text/css" href="css/switcher.css"/>
 <link rel="stylesheet" type="text/css" href="css/proxima.css"/>
 <link rel="stylesheet" type="text/css" href="confirm.css?v=1"/>
-<link rel="stylesheet" type="text/css" href="css/app.css?v=2"/>
+<link rel="stylesheet" type="text/css" href="css/app.css?v=3"/>
 <?php if($_SESSION['a']) echo '<script src="js/admin.js"></script>';?>
 </head>
 <body>
 <input type="hidden" id="timeZoneOffsetInput" name="timeZoneOffsetInput">
 <div id="pfl"></div>
 <header class="header">
-    <div align=center>
+    <div class="header__center">
 <div id="ss" class="sf">
 <div class="sbox">
 <select class="sel">
@@ -131,12 +132,7 @@ if($res->num_rows == 1)
   <div class="overlay-menu"></div>
   <div class="overlay-info"></div>
   <nav class="side-menu">
-  <span style="color: aliceblue;
-    margin: 0;
-    display: block;
-    text-align: center;
-    padding: 12px 0;
-    border-bottom: 1px solid #2f4253"><span data-i18n="greeting">Приветcтвуем Вас, </span><span><?php echo $dealerId ?><br></span></span>
+  <span class="side-menu__greeting"><span data-i18n="greeting">Приветcтвуем Вас, </span><span><?php echo $dealerId ?><br></span></span>
     <div class="lang-switch__wrap">
       <div class="lang-switch" role="group" aria-label="Language / Язык">
         <button type="button" class="lang-switch__btn" data-lang="ru" data-i18n="lang.ru">RU</button>
@@ -286,46 +282,31 @@ var payUrl = "https://pay.freekassa.com/?m=" + fk_merchant_id + "&oa=" + sum + "
     });
             window.calculate = function() {
                 var re = /[^0-9\\.]/gi;
-	    var desc = $("#desc").val();
-	    var sum = $("#sum").val();
+                var desc = $("#desc").val();
                 var sum = parseFloat(dc.getElementById("sum").value.replace(re, "")) || 0;
                 var min = 1;
-		var submitButton = dc.getElementById("submit");
-		var error = dc.getElementById("error")
-              if (sum < min) {
-                    error.innerHTML = "Введите сумму";
-		    error.style.display = "block";
-                    //dc.getElementById("submit").setAttribute("disabled", "disabled");
-		    submitButton.setAttribute("disabled", "disabled");
+                var submitButton = dc.getElementById("submit");
+                var error = dc.getElementById("error");
+                if (sum < min) {
+                    error.textContent = MpplI18n.t('validate.enter_sum');
+                    error.style.display = "block";
+                    submitButton.setAttribute("disabled", "disabled");
                     return false;
                 } else {
-		    submitButton.removeAttribute("disabled");
-			error.style.display = "none";
-                    dc.getElementById("error").innerHTML = "";
+                    submitButton.removeAttribute("disabled");
+                    error.style.display = "none";
+                    error.textContent = "";
                 }
 
                 var url = window.location.href + "?prepare_once=1&l=" + desc + "&oa=" + sum;
-              var xhr = new XMLHttpRequest();
-                xhr.open("GET", url, true);
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === 4 && xhr.status === 200) {
-                        var re_answer = /<hash>([0-9a-z]+)<\/hash>/gi;
-                        var match = re_answer.exec(xhr.responseText);
-                        if (match) {
-                            dc.getElementById("s").value = match[1];
-                            dc.getElementById("submit").removeAttribute("disabled");
-                        }
+                $.get(url, function(data) {
+                    var re_answer = /<hash>([0-9a-z]+)<\/hash>/gi;
+                    var match = re_answer.exec(data);
+                    if (match) {
+                        $("#s").val(match[1]);
+                        $("#submit").removeAttr("disabled");
                     }
-                };
-                xhr.send();
-    $.get(url, function(data) {
-        var re_anwer = /<hash>([0-9a-z]+)<\/hash>/gi;
-        var match = re_anwer.exec(data);
-        if (match) {
-            $("#s").val(match[1]);
-            $("#submit").removeAttr("disabled");
-        }
-    });
+                });
             };
             window.openPayment = function(event) {
                 event.preventDefault();
@@ -474,7 +455,7 @@ echo "<script>\n" . $jsCode . "\n</script>";
     </ul>
   </nav>
   <main>
-  <div align=center id="txtHint" width="500"></div>
+  <div class="u-text-center" id="txtHint"></div>
       <div id="result">
       <?PHP
       echo '<div class="nws" id=news>';
@@ -485,11 +466,11 @@ echo "<script>\n" . $jsCode . "\n</script>";
       </div>    
   </main>
     <aside class="info-panel">
-    <span><span style="text-align:center;color:#f0f8ff;margin-top:10px">Баланс</span>
-    <div align=center onclick="racc()" id="deposit" style="font-weight:700;font-size:14px;color:#e2f0ff"><?php echo sprintf("%.2f",$accsum) ?></div></span>
+    <span><span class="info-panel__label" data-i18n="info.balance">Баланс</span>
+    <div class="info-panel__deposit" onclick="racc()" id="deposit"><?php echo sprintf("%.2f",$accsum) ?></div></span>
     <?php
     if ($_SESSION['a'] != 2) {
-      echo "<div align=center style='color:#cbffa8;font-size:13px'>Ваша скидка: <div id='intrst' style='display:inline-block;color:aqua'> $intrst% </div></div>";
+      echo "<div class='info-panel__discount'><span data-i18n='info.discount'>Ваша скидка:</span> <span id='intrst' class='info-panel__discount-val'> $intrst% </span></div>";
     }
       else{
       echo "<div id='intrst' style='display:none'></div>";
@@ -504,18 +485,18 @@ echo "<script>\n" . $jsCode . "\n</script>";
    <form class="cc__form" onsubmit="addCard();return false">
      <fieldset>
         <div class="fieldgroup">
-            <label for="card-number">Номер карты</label>
+            <label for="card-number" data-i18n="cards.number">Номер карты</label>
              <!-- <input class="cc__card-value cc__card-value--large" id="cardNumber" type="text" tabindex="1" > -->
   <div class=ccnumber><input class=" cc__card-value--large" type="text" maxlength="6" id="input1" tabindex="1">
      <div class="cc__card-value--large stars">******</div>
         <input class="cc__card-value--large" type="text" maxlength="4" id="input3" disabled tabindex="2"></div>
        </div>
       <div class="fieldgroup">
-         <label for="cardholder">Владелец карты</label>
+         <label for="cardholder" data-i18n="cards.holder">Владелец карты</label>
          <input class="" id="cardholder" type="text" tabindex="3">
       </div>
       <div class="fieldgroup fieldgroup--half">
-         <label for="card-exp">Expires</label>
+         <label for="card-exp" data-i18n="cards.expires">Годен до</label>
          <input id="card-exp" type="text" placeholder="MM/YY" tabindex="4">
       </div>
          <input class="button" id="submit-button" type="submit" value="OK" tabindex="5" disabled="disabled">
@@ -656,7 +637,7 @@ function addCard() {
     else
     {
       if($(form.querySelector('.bubbleslist')).children('input').length<=2)
-      $(form.querySelector('.bubbleslist')).append(`<div class=crdnm><input  changed=1 id=0 type="text" value="${cardNumber}" tmp="${cardNumber}" data-owner="${cardholder}" data-exp="${cardExp.replace(/\//g,'')}" readonly><el class="rm"></el></div>`); //.find("input:last").focus();
+      $(form.querySelector('.bubbleslist')).append(`<div class=crdnm><input  changed=1 id=0 type="text" value="${cardNumber}" tmp="${cardNumber}" data-owner="${cardholder}" data-exp="${cardExp.replace(/\//g,'')}" readonly><span class="rm"></span></div>`); //.find("input:last").focus();
     }
 } else {
     console.error('Элемент не найден');
@@ -664,8 +645,8 @@ function addCard() {
 $('.cc').hide();$('#fmask').remove();
   return false;
 }
-vnm="Символы `!@#$%^&*()+=-[]\\\';,./{}|\\\":<>? пробел и кириллица не допустимы";
-str="Минимум 4 символа";
+vnm=MpplI18n.t('validate.bad_chars');
+str=MpplI18n.t('validate.min_chars');
 prev='';
 $('#mkusr').click(function(){var modal = dc.getElementById("rgacc");modal.style.display = "flex";});
 $('#pfedt').click(function(){chkfrm($("#pfedit"));$(dc).ready(function() {$('#profedit').css("display","flex");});});
@@ -690,21 +671,21 @@ $.validator.addMethod('vNm',function(v)
 for (var i=0;i<v.length;i++){if(Ch.indexOf(v.charAt(i))!=-1) return 0;}return rslt;});
 $("#stoemail").validate({
 submitHandler:function(){var sl,sl1;sl=$("#pl").val();sl1=$("#pr").val();var rq=$.ajax({url:"tuns.php",type:"POST",cache:0,dataType:"html",data:{rs:$("#tun").val(),pl:sl,pr:sl1,u:$("#uname").html(),eml:$("#inputeml").val()}});
-rq.success(function(r,a){hMsg.dMsg("ФАЙЛ КОНФИГУРАЦИИ УСПЕШНО ОТПРАВЛЕН");
+rq.success(function(r,a){hMsg.dMsg(MpplI18n.t('msg.config_sent'));
 });
-rq.error(function(r){hMsg.dMsg("ПРИ ОТПРАВКЕ E-MAIL ПРОИЗОШЛА ОШИБКА!");});
+rq.error(function(r){hMsg.dMsg(MpplI18n.t('msg.email_error'));});
 $('#sedia').toggle(100);
 return false;
 },
 focusInvalid:0,focusCleanup:1,
 rules:{inputeml:{required:1,email:1}},
-messages:{inputeml:{email:"Введите правильный email"},}
+messages:{inputeml:{email:MpplI18n.t('validate.valid_email')}}
 });
 $("#signin").validate({
 submitHandler:function(){
 var sdt=$("#signin").serializeArray();
 var rq=$.ajax({url:"reglog.php",type:"POST",cache:0,dataType:"json",data:sdt});
-rq.done(function(){$("#signin input[type=text],#signin input[type=password]").val("");hMsg.dMsg("АККАУНТ ЗАРЕГИСТРИРОВАН");});
+rq.done(function(){$("#signin input[type=text],#signin input[type=password]").val("");hMsg.dMsg(MpplI18n.t('msg.account_registered'));});
 return false;
 },
 focusInvalid:0,
@@ -713,8 +694,8 @@ rules:{
 un:{vNm:1,required:1,minlength:4,maxlength:20,remote:{url:"cn.php",type:"post"}},
 ps:{vNm:1,required:1,minlength:4,maxlength:20,}},
 messages:
-{un:{required:"Введите логин",minlength:str,vNm:vnm,remote:function(){return "Логин занят";}},
-ps:{required:"Введите пароль",minlength:str,vNm:vnm}
+{un:{required:MpplI18n.t('validate.enter_login'),minlength:str,vNm:vnm,remote:function(){return MpplI18n.t('validate.login_taken');}},
+ps:{required:MpplI18n.t('validate.enter_password'),minlength:str,vNm:vnm}
 }
 });
 $("#uedit").validate({
@@ -903,15 +884,15 @@ function actIptv(e) {
 <div class="m_edbox" id="formBox">
 <form id=uDtails>
 <div class="cell1"><button class="button" type="submit"></button>
-<div class="nfo">Дата регистрации</div><div id="regd""></div></div>
+<div class="nfo" data-i18n="info.reg_date">Дата регистрации</div><div id="regd"></div></div>
 
-<div style="display:flex;justify-content:flex-end"></div>
-<div class="cell"><div class=frow><input id="passu" name="passu" type="password"><button type="button" class="eye-btn" onclick="togglePassword(this)">🔒</button><label>ПАРОЛЬ</label></div>
+<div class="u-flex-end"></div>
+<div class="cell"><div class=frow><input id="passu" name="passu" type="password"><button type="button" class="eye-btn" onclick="togglePassword(this)">🔒</button><label data-i18n="form.password">ПАРОЛЬ</label></div>
 <div class=frow><input id="e_ml" name="e_ml" type="email"><label data-i18n="form.email">EMAIL</label></div></div>
 <div class="cell">
   <div>
     <div class=frow><input type="text" id="mph" name="mph" size="20"><label data-i18n="form.mobile">МОБИЛЬНЫЙ #</label></div>
-    <div style="display:inline-flex;align-items:center"><input type="checkbox" id="msnd" name="snd"><label class="switcher" for="msnd"></label><el class="sendto" data-i18n="form.notify_to_phone">Отправлять оповещения на номер</el></div>
+    <div class="u-inline-flex-center"><input type="checkbox" id="msnd" name="snd"><label class="switcher" for="msnd"></label><span class="sendto" data-i18n="form.notify_to_phone">Отправлять оповещения на номер</span></div>
   </div>
 
 <div class=frow><select id=msrv name=msrv>
@@ -957,10 +938,10 @@ for($i=0;$i<$rc;$i++)
     {
     $prs[$i]=$res->fetch_assoc();
     if(strlen($prs[$i]['purse'])>13)
-      echo "<el class=p1>Карта ".$prs[$i]['name'];
+      echo "<span class=p1>Карта ".$prs[$i]['name'];
     else
-      echo "<el class=p1>WM";
-    echo " ".$prs[$i]['desc'].' <el class=ps>'.$prs[$i]['purse']."</el> курс (1:".$prs[$i]['exch'].')</el>';
+      echo "<span class=p1>WM";
+    echo " ".$prs[$i]['desc'].' <span class=ps>'.$prs[$i]['purse']."</span> курс (1:".$prs[$i]['exch'].')</span>';
     }
 ?>
 </div>
@@ -972,52 +953,52 @@ for($i=0;$i<$rc;$i++)
 
 <div id="rset" class="pluso-box" style="top:50%;left:50%;display:none;width:100%;transform: translate(-50%, -50%)">
 <div style="display:flex"><div class="title" data-i18n="modal.plugin_settings">НАСТРОЙКИ ПЛАГИНОВ</div><div class="clse"></div></div>
-<div class="clear cell1 row"><el class="p1"><select id="tun" onchange="ltuns(this,'pl')"><option data-i18n="form.tuner">Тюнер</option>
+<div class="clear cell1 row"><span class="p1"><select id="tun" onchange="ltuns(this,'pl')"><option data-i18n="form.tuner">Тюнер</option>
 <?php
 $res=$link->query("select * from recievers order by rn_id") or die("SQL req. error: ".$link->error_list);
 $rc=$res->num_rows;
                 for($i=0;$i<$rc;$i++){$rs[$i]=$res->fetch_assoc();echo "<option value=".$rs[$i]['rn_id'].'>'.$rs[$i]['rname']."</option>";}
                 ?>
-</select></el>
-<el class="p1"><select id="pl" disabled="disabled" onchange="ltuns(this,'pr')"><option data-i18n="form.plugin">Плагин</option></select></el>
-<el class="p1"><select id="pr" disabled="disabled" onchange="lrs()"><option data-i18n="form.protocol">Протокол</option></select></el></div>
+</select></span>
+<span class="p1"><select id="pl" disabled="disabled" onchange="ltuns(this,'pr')"><option data-i18n="form.plugin">Плагин</option></select></span>
+<span class="p1"><select id="pr" disabled="disabled" onchange="lrs()"><option data-i18n="form.protocol">Протокол</option></select></span></div>
 <div class="clear cell1"><div id="rsets" class="lst"></div></div>
-<el class="p1" id="hlp"></el>
+<span class="p1" id="hlp"></span>
 <div class="clear cell1 row">
-<el class="p1"><button onclick="stof()" data-i18n="form.send_to_file">Сохранить в файл</button>
+<span class="p1"><button onclick="stof()" data-i18n="form.send_to_file">Сохранить в файл</button>
 <div id="semail"><button id="bb" data-i18n="form.send_to_email">Отправить на email</button><form method="post" id="stoemail" name="stoemail" enctype="multipart/form-data">
 <div class="pluso-box" id="sedia" style="display:none;position:absolute"><input id="inputeml" name="inputeml" type="text" class="required email">
 <button class="submit" style="width:100%" data-i18n="form.send">Отправить</button></div>
 </form>
 </div>
-</el>
+</span>
 </div>
 </div>
 
 <div id="classo" class="pluso-box" style="position:fixed;top:50%;left:50%;display:none;width:95%;max-width:650px;height:calc(60dvh);min-height:350px;max-height:calc(60dvh);transform:translate(-50%, -50%);
  margin:0;overflow-y:auto;box-sizing: border-box">
 <div style="display:flex">
-<div class=title><span data-i18n="modal.account_ops">СПИСОК ОПЕРАЦИЙ ПО АККАУНТУ </span><el id="ullst"></el></div><div class="clse"></div></div>
+<div class=title><span data-i18n="modal.account_ops">СПИСОК ОПЕРАЦИЙ ПО АККАУНТУ </span><span id="ullst"></span></div><div class="clse"></div></div>
 <div id=ulist class="pluso-list"></div>
 </div>
 
 <div id=ued class=mdl>
 <form method="post" id="uedit" name="uedit">
-<div class="t_subst"><div class="title"><span data-i18n="modal.edit_data">РЕДАКТИРОВАНИЕ ДАННЫХ </span><el id="ue"></el></div><div class="clse"></div></div>
+<div class="t_subst"><div class="title"><span data-i18n="modal.edit_data">РЕДАКТИРОВАНИЕ ДАННЫХ </span><span id="ue"></span></div><div class="clse"></div></div>
 <div class="uedbox">
-<div class="cell1" style="justify-content:center">
-<div class="nfo">Дата регистрации</div><div id="dr"></div></div>
+<div class="cell1 u-flex-center">
+<div class="nfo" data-i18n="info.reg_date">Дата регистрации</div><div id="dr"></div></div>
 <?php
-echo '<div style="border:1px solid #1d2f35;padding:5px;position:relative">
-<div style="font-weight:700">СПИСОК КАРТ</div><div class=butaddcard id="uaddcards">+</div><div class="bubbleslist"></div>';
+echo '<div class="cards-block">
+<div class="cards-block__title" data-i18n="cards.list">СПИСОК КАРТ</div><div class=butaddcard id="uaddcards">+</div><div class="bubbleslist"></div>';
 echo '</div>';
 ?>
-<div class="cell1"><div class="lft"><label>Пароль:</label></div><div class="rgt"><input id="psu" name="psu" type="password"></div></div>
-<div class="cell1"><div class="lft"><label>E-mail:</label></div><div class="rgt"><input id="eml" name="eml" type="email"></div></div>
-<div class="cell1"><div class="lft"><label>TID:</label></div><div class="rgt"><input id="tID" name="tID"></div></div>
-<div class="cell1"><div class="lft"><label>Мобильный #:</label></div><div class="rgt"><input type="text" id="ph" name="ph" size="20">
-<div><input type="checkbox" id="snd" name="snd"><label class="switcher" for="snd"></label><el class="sendto">Отправлять оповещения на номер</el></div></div></div>
-<div id="srvshow" class="cell1"><div class=lft><label>Сервер:</label></div><div class=rgt><select id=srv name=srv>
+<div class="cell1"><div class="lft"><label data-i18n="edit.password">Пароль:</label></div><div class="rgt"><input id="psu" name="psu" type="password"></div></div>
+<div class="cell1"><div class="lft"><label data-i18n="edit.email">E-mail:</label></div><div class="rgt"><input id="eml" name="eml" type="email"></div></div>
+<div class="cell1"><div class="lft"><label data-i18n="edit.tid">TID:</label></div><div class="rgt"><input id="tID" name="tID"></div></div>
+<div class="cell1"><div class="lft"><label data-i18n="edit.mobile">Мобильный #:</label></div><div class="rgt"><input type="text" id="ph" name="ph" size="20">
+<div><input type="checkbox" id="snd" name="snd"><label class="switcher" for="snd"></label><span class="sendto" data-i18n="edit.notify_phone">Отправлять оповещения на номер</span></div></div></div>
+<div id="srvshow" class="cell1"><div class=lft><label data-i18n="edit.server">Сервер:</label></div><div class=rgt><select id=srv name=srv>
 <?php
 if($defserver==0)
 $res=$link->query("SELECT s_id,url,ip,failed FROM server where hide=0") or die("SQL req. error: " . $link->error_list);
@@ -1030,29 +1011,14 @@ for ($i = 0; $i < $rc; $i++) {
 }
 ?>
 </select></div></div>
-<div class="cell1"><label>Комент</label></div><div class="cell1"><textarea rows=2 id="comment" name="comment"></textarea></div>
+<div class="cell1"><label data-i18n="edit.comment">Комент</label></div><div class="cell1"><textarea rows=2 id="comment" name="comment"></textarea></div>
 <div class="cell1"><button class="button" type="submit" data-i18n="form.save">СОХРАНИТЬ</button></div></form></div>
 
 <div class="modal"></div>
    <script>
-    $.ajaxSetup({
-    complete: function(xhr, status) {
-        if (xhr.status === 401) {
-            hMsg.dMsg("Сессия истекла. Необходима повторная авторизация.");
-            setTimeout(function() {
-                window.location.href = "/login.php";
-            }, 2000); // Задержка 2 секунды
-        }
-    },
-    statusCode: {
-        401: function() {
-            hMsg.dMsg("Сессия истекла. Необходима повторная авторизация.");
-            setTimeout(function() {
-                window.location.href = "/login.php";
-            }, 2000); // Задержка 2 секунды
-        }
-    }
-});
+/* Legacy $.ajaxSetup 401 handler removed — reauth.js now intercepts
+   expired-session responses and shows a login modal without reload. */
+
 const menuToggle = dc.querySelector('.menu-toggle');
 const sideMenu = dc.querySelector('.side-menu');
 const overlayMenu = dc.querySelector('.overlay-menu');
