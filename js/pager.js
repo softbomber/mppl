@@ -28,7 +28,8 @@
     currentLogin: null,
     canSharing: false,
     canIptv: false,
-    pendingDirection: null
+    pendingDirection: null,
+    origin: null          // 'userlist' | 'loglist' — откуда пришли на карточку
   };
 
   var dom = {};
@@ -139,6 +140,7 @@
     state.pendingDirection = direction;
 
     if (target === 'list') {
+      state.origin = null;
       if (typeof global.userlist === 'function') {
         global.userlist(0, 0, 0);
       }
@@ -256,7 +258,9 @@
     detectAvailability();
     renderNav();
     if (dom.back) {
-      dom.back.style.display = state.page === 'list' ? 'none' : '';
+      // Показываем стрелку только если пришли из списка аккаунтов или истории
+      var show = state.page !== 'list' && (state.origin === 'userlist' || state.origin === 'loglist');
+      dom.back.style.display = show ? '' : 'none';
     }
     if (dom.stage) {
       dom.stage.setAttribute('data-page', state.page);
@@ -292,13 +296,11 @@
     nav.setAttribute('aria-label', 'Навигация по карточке аккаунта');
     main.insertBefore(nav, stage);
 
-    var back = document.createElement('button');
-    back.type = 'button';
-    back.className = 'deck__back';
-    back.setAttribute('aria-label', dataI18n('pager.back'));
-    back.style.display = 'none';
-    back.addEventListener('click', function () { goTo('list'); });
-    main.insertBefore(back, nav);
+    // Кнопка «назад» в шапке (уже в DOM из mb.php)
+    var back = document.querySelector('.header-back');
+    if (back) {
+      back.addEventListener('click', function () { goTo('list'); });
+    }
 
     dom.stage = stage;
     dom.nav = nav;
@@ -323,8 +325,6 @@
     }
 
     document.addEventListener('mppl:langchange', function () {
-      // Перерисовываем aria-label/back-кнопку с актуальными переводами
-      if (dom.back) dom.back.textContent = dataI18n('pager.back');
       renderNav();
     });
   }
@@ -340,6 +340,7 @@
     goTo: goTo,
     goNext: goNext,
     goPrev: goPrev,
+    setOrigin: function (o) { state.origin = o; },
     state: function () { return Object.assign({}, state); }
   };
 })(window);

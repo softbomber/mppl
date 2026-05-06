@@ -128,6 +128,7 @@ if($res->num_rows == 1)
   </header>
  
   <button class="menu-toggle" aria-label="меню" data-i18n-attr="aria-label:menu_btn.aria">☰</button>
+  <button class="header-back" aria-label="Назад" style="display:none"></button>
   <button class="info-toggle" aria-label="инфо" data-i18n-attr="aria-label:info_btn.aria">ℹ</button>
   <div class="overlay-menu"></div>
   <div class="overlay-info"></div>
@@ -1122,8 +1123,19 @@ dc.addEventListener('DOMContentLoaded', () => {
       const lgn = l.dataset.l;
       fB=dc.getElementById('formBox');
       if(fB.classList.contains('active'))  fB.classList.remove('active');
+      if (typeof MpplPager !== 'undefined') MpplPager.setOrigin('userlist');
       getuser(0,lgn);
       return;
+    }
+    // Клик по логину в ИСТОРИИ ОПЕРАЦИЙ → переход к карточке аккаунта
+    const hLogin = e.target.closest('#result .login');
+    if (hLogin) {
+      const lgn = (hLogin.textContent || '').trim();
+      if (lgn && lgn !== 'Paybot') {
+        if (typeof MpplPager !== 'undefined') MpplPager.setOrigin('loglist');
+        getuser(0, lgn);
+        return;
+      }
     }
     const r=e.target.closest('#usrLst tr[data-l]');
     if (r) {
