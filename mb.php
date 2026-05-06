@@ -288,7 +288,7 @@ var payUrl = "https://pay.freekassa.com/?m=" + fk_merchant_id + "&oa=" + sum + "
                 var submitButton = dc.getElementById("submit");
                 var error = dc.getElementById("error");
                 if (sum < min) {
-                    error.textContent = MpplI18n.t('validate.enter_sum');
+                    error.textContent = MpplI18n.t(\'validate.enter_sum\');
                     error.style.display = "block";
                     submitButton.setAttribute("disabled", "disabled");
                     return false;
