@@ -326,13 +326,18 @@ rq.done(function(r){
 }
 function aftergetstatus(){tmtstr=0;$("#str").fadeIn(150);}
 function userlist(p=0,c=0,ud=0)
-{$(txtHint).html("");
+{
+if(!p && typeof MpplListCache !== 'undefined' && MpplListCache.hasCached()) {
+  MpplListCache.restore();
+  return;
+}
+$(txtHint).html("");
 if(!p) $(uinfo).html('');
 $.post("getupack.php",{list:1,page:p,s:c,ud:ud},function(r)
 {
-
 $(result).html($(r).filter('#lst'));
 if(p==0) $(uinfo).html($(r).filter('.box'));
+if(typeof MpplListCache !== 'undefined') MpplListCache.clear();
 });
 }
 function loglist(p){$(txtHint).html("");$(uinfo).html('');$.post("undo.php",{list:1,page:p},function(r){$(result).html(r);});}
@@ -369,7 +374,7 @@ rq.done(function(r){
 if(r.success==1) hMsg.dMsg("ДАННЫЕ СОХРАНЕНЫ");
 vr='';
 if(values.length>0){for(i=0;i<r.cards.length;i++)
-{vr=vr+'<div class=crdnm> <input changed=0 id=\''+r.cards[i].cid+'\' type="text" value="'+r.cards[i].card+'" tmp="'+r.cards[i].card+'" data-owner="' +r.cards[i].owner + '" data-exp="' +r.cards[i].exp +'"  readonly><el class="rm"></el></div>';}}
+{vr=vr+'<div class=crdnm> <input changed=0 id=\''+r.cards[i].cid+'\' type="text" value="'+r.cards[i].card+'" tmp="'+r.cards[i].card+'" data-owner="' +r.cards[i].owner + '" data-exp="' +r.cards[i].exp +'"  readonly><span class="rm"></span></div>';}}
 $("#uedit .bubbleslist").html(vr);
 $("#upsw").html($("#uedit #ps").val());
 h=($("#uedit #srv>option:selected").text()).split(' - ');
@@ -438,7 +443,7 @@ function wuserdta(row,arr) {
                         vr += '<div class="crdnm">' +
                               '<input changed="0" id="' + r.cards[i].cid + '" type="text" value="' + r.cards[i].card + '" ' +
                               'tmp="' + r.cards[i].card + '" data-owner="' + r.cards[i].owner + '" data-exp="' + r.cards[i].exp + '" readonly>' +
-                              '<el class="rm"></el></div>';
+                              '<span class="rm"></span></div>';
                     }
                     $("#uDtails .bubbleslist").html(vr);
                 }
@@ -549,7 +554,7 @@ if(r.success==1) {hMsg.dMsg("ДАННЫЕ СОХРАНЕНЫ");
 vr='';
 for(i=0;i<r.cards.length;i++)
 {
-vr=vr+'<div class=crdnm> <input changed=0 id=\''+r.cards[i].cid+'\' type="text" value="'+r.cards[i].card+'" tmp="'+r.cards[i].card+'" data-owner="' +r.cards[i].owner + '" data-exp="' +r.cards[i].exp +'"  readonly><el class="rm"></el></div>';
+vr=vr+'<div class=crdnm> <input changed=0 id=\''+r.cards[i].cid+'\' type="text" value="'+r.cards[i].card+'" tmp="'+r.cards[i].card+'" data-owner="' +r.cards[i].owner + '" data-exp="' +r.cards[i].exp +'"  readonly><span class="rm"></span></div>';
 }
 $("#pfedit .bubbleslist").html(vr);
 
@@ -725,6 +730,8 @@ function getuser(i, l, p = "") {
 
     if (tmtstr2) { clearTimeout(tmtstr2); tmtstr2 = 0; }
 
+    if (typeof MpplListCache !== 'undefined') MpplListCache.save();
+
     $("#txtHint").html("").hide();
     $(".sb, .s_res").hide();
     $(".circle").show();
@@ -815,7 +822,7 @@ function getuser(i, l, p = "") {
             const iptv = data.data.iptv || {};
 
             let infoHtml=`<div class="blk finr">
-                    <h2>ИНФО ПО <el id="uname" dreg="${account.dreg}" acccardnum="${account.acccardnum}" sdnt="${account.sndnote}">${account.user} </el></h2><table id="tinfo" border="0">
+                    <h2>ИНФО ПО <span id="uname" dreg="${account.dreg}" acccardnum="${account.acccardnum}" sdnt="${account.sndnote}">${account.user} </span></h2><table id="tinfo" border="0">
                         <tr><td align=right style="width:25%">ID:</td><td id="uid">${account.id}</td></tr>
                         <tr><td align=right id="rq" rq="${(Object.keys(iptv).length > 0 ? "1" : "0")}">Учётка:</td><td>${account.req != 0 ? "Позапросная" : (Object.keys(iptv).length > 0 ? "IPTV" : "Стандартная")}</td></tr>
                         <tr><td align=right id="accsum">Баланс:</td><td>${parseFloat(account.sum).toFixed(2)}</td></tr>`
@@ -997,7 +1004,7 @@ async function updateUserInfo(data, account, infoHtml) {
             crds += `
                 <div class="crdnm">
                     <input changed=0 id="${card.cid}" type="text" value="${card.card}" tmp="${card.card}" data-owner="${card.owner}" data-exp="${card.exp}" readonly>
-                    <el class="rm"></el>
+                    <span class="rm"></span>
                 </div>
             `;
         });

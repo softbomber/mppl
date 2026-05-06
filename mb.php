@@ -76,11 +76,12 @@ if($res->num_rows == 1)
 <script src="jquery.inputmask.js"></script>
 <script src="jquery.bin-first.js"></script>
 <script src="jquery.inputmask-multi.js"></script>
-<script src="guser.js?v=27"></script>
+<script src="guser.js?v=28"></script>
     <?php if(isset($_SESSION['a']) && $_SESSION['a'] == 1) {echo '<script src="adaptive_admin.js?v=12'; echo "></script>";}?>
 <script src="humanmsg.js"></script>
 <script src="js/jquery-ui.min.js"></script>
 <script src="js/i18n.js?v=3"></script>
+<script src="js/listcache.js?v=1"></script>
 <script src="js/net.js?v=1"   defer></script>
 <script src="js/reauth.js?v=1" defer></script>
 <script src="js/pager.js?v=1"  defer></script>
