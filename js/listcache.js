@@ -20,9 +20,12 @@
   }
 
   function save() {
+    if (cache) return;
+
     var result = document.getElementById('result');
     var uinfo  = document.getElementById('uinfo');
     if (!result) return;
+    if (!result.innerHTML.trim()) return;
 
     cache = {
       resultHTML: result.innerHTML,
