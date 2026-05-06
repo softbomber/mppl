@@ -85,18 +85,20 @@
   opacity: 0.35;
 }
 
-/* Кнопка возврата на список */
+/* Кнопка возврата (только стрелка) */
 .deck__back {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
   margin: 4px 0 6px 6px;
-  padding: 4px 10px;
+  padding: 6px;
   background: var(--app-accent-2);
   color: var(--app-fg);
   border: 0;
-  border-radius: var(--app-radius);
-  font-size: 12px;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 0;
   cursor: pointer;
   transition: background-color 180ms ease;
 }
@@ -108,7 +110,7 @@
 }
 
 .deck__back::before {
-  content: "‹";
+  content: "←";
   font-size: 18px;
   line-height: 1;
 }
@@ -172,6 +174,7 @@
   display: flex;
   justify-content: center;
   padding: 6px 0;
+  margin-top: auto;
   border-bottom: 1px solid var(--app-accent-2);
 }
 
@@ -446,4 +449,21 @@
 }
 .cards-block__title {
   font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   Side-menu: flexbox для прижатия lang-switch к низу
+   -------------------------------------------------------------------------- */
+.side-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+/* --------------------------------------------------------------------------
+   Адаптив: точечная навигация скрыта на мобильных (только десктоп)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .deck__nav {
+    display: none;
+  }
 }

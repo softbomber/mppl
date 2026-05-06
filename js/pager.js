@@ -287,8 +287,7 @@
     var back = document.createElement('button');
     back.type = 'button';
     back.className = 'deck__back';
-    back.setAttribute('data-i18n', 'pager.back');
-    back.textContent = dataI18n('pager.back');
+    back.setAttribute('aria-label', dataI18n('pager.back'));
     back.style.display = 'none';
     back.addEventListener('click', function () { goTo('list'); });
     main.insertBefore(back, nav);
