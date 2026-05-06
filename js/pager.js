@@ -197,12 +197,20 @@
   /*  Жесты                                                                */
   /* --------------------------------------------------------------------- */
 
+  function isEdgeZone(clientX) {
+    var w = window.innerWidth;
+    var edge = Math.max(50, w * 0.1);
+    return clientX < edge || clientX > w - edge;
+  }
+
   function bindSwipe(target) {
     var sx = 0, sy = 0, st = 0, tracking = false;
 
     target.addEventListener('touchstart', function (e) {
       if (e.touches.length !== 1) return;
       var t = e.touches[0];
+      // Свайпы из краёв экрана оставляем для меню / инфо-панели
+      if (isEdgeZone(t.clientX)) { tracking = false; return; }
       sx = t.clientX; sy = t.clientY; st = Date.now(); tracking = true;
     }, { passive: true });
 
@@ -287,8 +295,7 @@
     var back = document.createElement('button');
     back.type = 'button';
     back.className = 'deck__back';
-    back.setAttribute('data-i18n', 'pager.back');
-    back.textContent = dataI18n('pager.back');
+    back.setAttribute('aria-label', dataI18n('pager.back'));
     back.style.display = 'none';
     back.addEventListener('click', function () { goTo('list'); });
     main.insertBefore(back, nav);

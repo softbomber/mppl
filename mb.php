@@ -133,12 +133,6 @@ if($res->num_rows == 1)
   <div class="overlay-info"></div>
   <nav class="side-menu">
   <span class="side-menu__greeting"><span data-i18n="greeting">Приветcтвуем Вас, </span><span><?php echo $dealerId ?><br></span></span>
-    <div class="lang-switch__wrap">
-      <div class="lang-switch" role="group" aria-label="Language / Язык">
-        <button type="button" class="lang-switch__btn" data-lang="ru" data-i18n="lang.ru">RU</button>
-        <button type="button" class="lang-switch__btn" data-lang="en" data-i18n="lang.en">EN</button>
-      </div>
-    </div>
     <ul>
       <li><a href="#" id="mkusr" data-i18n="menu.create_account">СОЗДАТЬ АККАУНТ</a></li>
       <li><a href="#" id="userlist" data-i18n="menu.account_list">СПИСОК АККАУНТОВ</a></li>
@@ -453,6 +447,12 @@ echo "<script>\n" . $jsCode . "\n</script>";
 ?>
      <li><a href="logout.php" data-i18n="menu.logout">ВЫХОД</a></li>
     </ul>
+    <div class="lang-switch__wrap">
+      <div class="lang-switch" role="group" aria-label="Language / Язык">
+        <button type="button" class="lang-switch__btn" data-lang="ru" data-i18n="lang.ru">RU</button>
+        <button type="button" class="lang-switch__btn" data-lang="en" data-i18n="lang.en">EN</button>
+      </div>
+    </div>
   </nav>
   <main>
   <div class="u-text-center" id="txtHint"></div>
