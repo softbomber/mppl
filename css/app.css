@@ -180,6 +180,9 @@
    -------------------------------------------------------------------------- */
 .u-hidden { display: none !important; }
 .u-flex-center { display: flex; justify-content: center; align-items: center; }
+.u-flex-end { display: flex; justify-content: flex-end; }
+.u-text-center { text-align: center; }
+.u-inline-flex-center { display: inline-flex; align-items: center; }
 
 /* Лёгкая полировка скроллбара внутри карточек pager-а */
 .deck__panel::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -387,3 +390,60 @@
 }
 .auth-modal__submit:disabled { opacity: 0.6; cursor: progress; }
 .auth-modal.is-busy { pointer-events: none; }
+
+
+/* ============================================================================
+   Side-menu greeting (BEM: .side-menu__greeting)
+   Replaces inline style block on the greeting <span> in the side nav.
+   ============================================================================ */
+.side-menu__greeting {
+  color: var(--app-fg);
+  margin: 0;
+  display: block;
+  text-align: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--app-accent-2);
+}
+
+/* ============================================================================
+   Header center wrapper
+   ============================================================================ */
+.header__center { text-align: center; }
+
+/* ============================================================================
+   Info-panel components (balance, discount)
+   Replaces inline styles on the balance / discount area in <aside>.
+   ============================================================================ */
+.info-panel__label {
+  text-align: center;
+  color: #f0f8ff;
+  margin-top: 10px;
+}
+.info-panel__deposit {
+  text-align: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: #e2f0ff;
+  cursor: pointer;
+}
+.info-panel__discount {
+  text-align: center;
+  color: #cbffa8;
+  font-size: 13px;
+}
+.info-panel__discount-val {
+  display: inline-block;
+  color: aqua;
+}
+
+/* ============================================================================
+   Cards block (edit modal)
+   ============================================================================ */
+.cards-block {
+  border: 1px solid #1d2f35;
+  padding: 5px;
+  position: relative;
+}
+.cards-block__title {
+  font-weight: 700;
+}
