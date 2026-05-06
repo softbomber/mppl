@@ -50,13 +50,17 @@ cleanMemberSession(
     isset($row['postpaid']) ? $row['postpaid'] : 0
 );
 
-// Куки те же, что выставляет ajax_auth.php — чтобы поведение совпадало.
-$s_time = time() + 60 * 60 * 24;
-setcookie('a',   isset($row['a'])    ? $row['a']    : 0, $s_time, '/');
-setcookie('i',   isset($row['id'])   ? $row['id']   : 0, $s_time, '/');
-setcookie('hsh', isset($row['hash']) ? $row['hash'] : '', $s_time, '/');
-if (isset($row['postpaid'])) {
-    setcookie('pp', $row['postpaid'], $s_time, '/');
+// Куки те же, что выставляет login.php — чтобы поведение совпадало.
+$s_time = time() + 86400;
+if (isset($row['a'])) {
+    setcookie('a', $row['a'], $s_time, '/');
+} else {
+    unset($_COOKIE['a']);
+    setcookie('a', '', time() - 86400, '/');
 }
+setcookie('i',    $row['id'],       $s_time, '/');
+setcookie('hsh',  $row['hash'],     $s_time, '/');
+setcookie('pp',   $row['postpaid'], $s_time, '/');
+setcookie('sort', $row['t_srt'],    $s_time, '/');
 
 echo json_encode(['ok' => true]);

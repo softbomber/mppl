@@ -26,19 +26,20 @@ if(isset($_POST["captcha"])) {
        }
 
   $a=$d=0;  
-$s_time=time()+60;
+$s_time=time()+86400;
 //   if($row['a']==1 || $row['a']==2)
     //{
       $a=$row['a'];
-      setcookie("a",$a,$s_time);
+      setcookie("a",$a,$s_time,'/');
       //}
     if(isset($row['id']))
         {$d=$row['id'];
-        setcookie("i", $d,$s_time);}
+        setcookie("i", $d,$s_time,'/');}
     if(isset($row['hash']))
         {$hash=$row['hash'];
-        setcookie("hsh", $hash,$s_time);}
-        setcookie("pp", $row['postpaid'],$s_time);
+        setcookie("hsh", $hash,$s_time,'/');}
+        setcookie("pp", $row['postpaid'],$s_time,'/');
+        setcookie("sort", $row['t_srt'],$s_time,'/');
   ini_set('session.cookie_lifetime',$s_time);
   ini_set('session.gc_maxlifetime',$s_time);
     $ip=$_SERVER['REMOTE_ADDR'];
