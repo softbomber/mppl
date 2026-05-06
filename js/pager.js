@@ -142,8 +142,6 @@
       if (typeof global.userlist === 'function') {
         global.userlist(0, 0, 0);
       }
-      // info-панель очищаем, чтобы карточка не висела
-      if (dom.uinfo) dom.uinfo.innerHTML = '';
       return;
     }
 
