@@ -257,10 +257,16 @@
     state.page = detectPage();
     detectAvailability();
     renderNav();
-    if (dom.back) {
-      // Показываем стрелку только если пришли из списка аккаунтов или истории
-      var show = state.page !== 'list' && (state.origin === 'userlist' || state.origin === 'loglist');
-      dom.back.style.display = show ? '' : 'none';
+    if (dom.back && dom.menuToggle) {
+      if (state.page === 'list' && !state.origin) {
+        // Вернулись на начальную страницу — показываем ☰
+        dom.back.style.display = 'none';
+        dom.menuToggle.style.display = '';
+      } else if (state.origin && dom.back.style.display === 'none') {
+        // Первый показ стрелки — заменяем ☰
+        dom.back.style.display = '';
+        dom.menuToggle.style.display = 'none';
+      }
     }
     if (dom.stage) {
       dom.stage.setAttribute('data-page', state.page);
@@ -298,6 +304,7 @@
 
     // Кнопка «назад» в шапке (уже в DOM из mb.php)
     var back = document.querySelector('.header-back');
+    var menuToggle = document.querySelector('.menu-toggle');
     if (back) {
       back.addEventListener('click', function () { goTo('list'); });
     }
@@ -305,6 +312,7 @@
     dom.stage = stage;
     dom.nav = nav;
     dom.back = back;
+    dom.menuToggle = menuToggle;
 
     bindSwipe(stage);
     return true;
