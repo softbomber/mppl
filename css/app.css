@@ -85,11 +85,11 @@
   opacity: 0.35;
 }
 
-/* Кнопка возврата в шапке (рядом с ☰) */
+/* Кнопка возврата в шапке (на месте ☰) */
 .header-back {
   position: fixed;
   top: 14px;
-  left: 30px;
+  left: 5px;
   z-index: 19;
   width: 20px;
   height: 20px;

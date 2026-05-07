@@ -157,7 +157,8 @@ if (isset($_GET['prepare_once'])) {
 }
     echo '<li><a href="#" id="dlst" data-i18n="menu.dealers">СПИСОК ДИЛЕРОВ</a></li>
     <li><a href="#" id="dlrhst" data-i18n="menu.dealers_history">ОБОРОТКА ПО ДИЛЕРАМ</a></li>
-    <li><a href="#" id="fkassa" data-i18n="menu.fk_top_up">ПОПОЛНЕНИЕ ЧЕРЕЗ FK</a></li>';
+    <li><a href="#" id="fkassa" data-i18n="menu.fk_top_up">ПОПОЛНЕНИЕ ЧЕРЕЗ FK</a></li>
+    <li><a href="#" id="uman">МОНИТОР</a></li>';
 
 echo '</div>
 <div id="fk" class="login-popup" style="left:50%;top:50%;transform:translate(-50%,-50%)">
@@ -236,6 +237,22 @@ window.dlst = function() {
           var rDiv = dc.getElementById("result");
           rDiv.innerHTML = xhr.responseText;
 
+          var scripts = rDiv.getElementsByTagName("script");
+          for (var i = 0; i < scripts.length; i++) {
+              eval(scripts[i].innerHTML);
+          }
+      }
+  };
+  xhr.send();
+};
+
+window.uman = function() {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "uman.php", true);
+  xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+          var rDiv = dc.getElementById("result");
+          rDiv.innerHTML = xhr.responseText;
           var scripts = rDiv.getElementsByTagName("script");
           for (var i = 0; i < scripts.length; i++) {
               eval(scripts[i].innerHTML);
@@ -346,29 +363,36 @@ var payUrl = "https://pay.freekassa.com/?m=" + fk_merchant_id + "&oa=" + sum + "
         return false;
     };
     function initializeForm() {
-        function updateMaxDate() {
+        function todayStr() {
             var now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            var formattedDate = now.toISOString().split("T")[0];
-            var startDateInput = dc.getElementById("start_date");
-            var endDateInput = dc.getElementById("end_date");
-            if (startDateInput && endDateInput) {
-                startDateInput.max = formattedDate;
-                endDateInput.max = formattedDate;
-            } else {
-                console.error("Поля start_date или end_date не найдены");
-            }
+            return now.toISOString().split("T")[0];
         }
-        updateMaxDate();
         var startDateInput = dc.getElementById("start_date");
         var endDateInput = dc.getElementById("end_date");
         if (startDateInput && endDateInput) {
-            startDateInput.removeEventListener("focus", updateMaxDate);
-            endDateInput.removeEventListener("focus", updateMaxDate);
-            startDateInput.addEventListener("focus", updateMaxDate);
-            endDateInput.addEventListener("focus", updateMaxDate);
+            var today = todayStr();
+            // При загрузке: обе даты = текущая
+            endDateInput.value = today;
+            startDateInput.value = today;
+            endDateInput.max = today;
+            startDateInput.max = today;
+
+            endDateInput.addEventListener("change", function() {
+                // Макс. дата для начальной = конечная дата
+                startDateInput.max = endDateInput.value || today;
+                // Если начальная > конечной → выровнять
+                if (startDateInput.value > endDateInput.value) {
+                    startDateInput.value = endDateInput.value;
+                }
+            });
+            startDateInput.addEventListener("change", function() {
+                // Если начальная > конечной → выровнять
+                if (startDateInput.value > endDateInput.value) {
+                    startDateInput.value = endDateInput.value;
+                }
+            });
         }
-        setInterval(updateMaxDate, 30000);
         var dealerTimeout;
         var dealerInput = dc.getElementById("dealer");
         var suggestions = dc.getElementById("dealer-suggestions");
@@ -1165,7 +1189,7 @@ dc.querySelector('.sbox').addEventListener('click', (e) => {
       'packetp': packetp,
       'bal': bal,
       'nws': nws,
-     <?php if ($_SESSION['a'] == 1)  echo "'dlrhst': dlrhst,'fkassa': fkassa,'dlst': dlst,"; ?>
+     <?php if ($_SESSION['a'] == 1)  echo "'dlrhst': dlrhst,'fkassa': fkassa,'dlst': dlst,'uman': uman,"; ?>
     };
     if (a[link.id]) a[link.id]();
   });
