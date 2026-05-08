@@ -246,20 +246,69 @@ window.dlst = function() {
   xhr.send();
 };
 
+window._umanHeaderSaved = null;
+window._umanActive = false;
+
 window.uman = function() {
   var xhr = new XMLHttpRequest();
-  xhr.open("GET", "uman.php", true);
+  xhr.open("GET", "uman.php?embed", true);
   xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status === 200) {
+          var tmp = dc.createElement("div");
+          tmp.innerHTML = xhr.responseText;
+
+          var tabsEl = tmp.querySelector("#uman-tabs");
+          var headerCenter = dc.querySelector(".header__center");
+          if (headerCenter && tabsEl) {
+              window._umanHeaderSaved = headerCenter.innerHTML;
+              headerCenter.innerHTML = "";
+              headerCenter.appendChild(tabsEl);
+          }
+
+          tabsEl && tabsEl.remove();
+
           var rDiv = dc.getElementById("result");
-          rDiv.innerHTML = xhr.responseText;
-          var scripts = rDiv.getElementsByTagName("script");
+          var uinfo = dc.getElementById("uinfo");
+          if (uinfo) uinfo.innerHTML = "";
+
+          var styles = tmp.querySelectorAll("style");
+          var scripts = tmp.querySelectorAll("script");
+
+          rDiv.innerHTML = "";
+          for (var s = 0; s < styles.length; s++) {
+              rDiv.appendChild(styles[s]);
+          }
+          var contentNodes = tmp.childNodes;
+          while (contentNodes.length) {
+              if (contentNodes[0].tagName === "SCRIPT") {
+                  contentNodes[0].remove();
+                  continue;
+              }
+              rDiv.appendChild(contentNodes[0]);
+          }
+
+          window._umanActive = true;
+          if (typeof MpplPager !== "undefined") MpplPager.setOrigin("uman");
+
           for (var i = 0; i < scripts.length; i++) {
-              eval(scripts[i].innerHTML);
+              var scr = dc.createElement("script");
+              scr.textContent = "(function(){" + scripts[i].textContent + "})();";
+              rDiv.appendChild(scr);
           }
       }
   };
   xhr.send();
+};
+
+window.umanExit = function() {
+  if (!window._umanActive) return;
+  window._umanActive = false;
+  var headerCenter = dc.querySelector(".header__center");
+  if (headerCenter && window._umanHeaderSaved !== null) {
+      headerCenter.innerHTML = window._umanHeaderSaved;
+      window._umanHeaderSaved = null;
+  }
+  if (typeof MpplPager !== "undefined") MpplPager.setOrigin(null);
 };
 $("#paymentForm").validate({
     submitHandler:function(){
@@ -1183,6 +1232,7 @@ dc.querySelector('.sbox').addEventListener('click', (e) => {
       div.classList.remove('active');
     });
     closeMenu();closeInfoPanel();
+    if (link.id !== 'uman' && typeof window.umanExit === 'function') window.umanExit();
     const a = {
       'userlist': userlist,
       'loglist': loglist,

@@ -705,6 +705,9 @@ function handle_check_stream_alive(array $serversMap, string $sshUser): void {
     $alive = (strpos($output, 'hls_p') !== false);
     respond_json(['ok' => true, 'alive' => $alive, 'root_id' => $rootId]);
 }
+
+$isEmbed = isset($_GET['embed']);
+if (!$isEmbed):
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -712,10 +715,12 @@ function handle_check_stream_alive(array $serversMap, string $sshUser): void {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Monitor Dashboard</title>
+<?php else: ob_end_clean(); endif; ?>
 <style>
 /* ============================================================================
    Дизайн-система: тёмная тема, минимальный набор переменных и компонентов.
    ========================================================================== */
+<?php if (!$isEmbed): ?>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 100%; min-height: 100vh; }
 :root {
@@ -757,6 +762,74 @@ body {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
 }
+<?php else: ?>
+#result *, #result *::before, #result *::after { box-sizing: border-box; }
+#result {
+    --bg:           #0a0e16;
+    --bg-elevated:  #0f1520;
+    --surface:      #131a26;
+    --surface-2:    #1a2333;
+    --surface-hi:   #22304a;
+    --border:       #243043;
+    --border-hi:    #324562;
+    --text:         #e6edf3;
+    --text-dim:     #8b96a8;
+    --text-faint:   #5b6678;
+    --primary:      #4d8eff;
+    --primary-hov:  #6ba1ff;
+    --primary-bg:   rgba(77, 142, 255, 0.12);
+    --success:      #3ecf8e;
+    --success-bg:   rgba(62, 207, 142, 0.12);
+    --warning:      #f5a623;
+    --warning-bg:   rgba(245, 166, 35, 0.12);
+    --danger:       #ef4444;
+    --danger-bg:    rgba(239, 68, 68, 0.12);
+    --radius:       10px;
+    --radius-lg:    14px;
+    --radius-pill:  999px;
+    --shadow-1:     0 1px 2px rgba(0,0,0,.3), 0 4px 12px rgba(0,0,0,.2);
+    --shadow-2:     0 10px 30px rgba(0,0,0,.45);
+    --transition:   150ms ease;
+    --font:         -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono:         "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+<?php endif; ?>
+
+/* ---- Uman tabs (embed mode — внутри header mb.php) ---- */
+#uman-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    align-items: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+.uman-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    color: #8b96a8;
+    padding: 5px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    transition: 150ms ease;
+    white-space: nowrap;
+}
+.uman-tab:hover { color: #e6edf3; background: rgba(255,255,255,0.08); }
+.uman-tab.active { background: #4d8eff; color: #fff; }
+.uman-tab--danger { color: #ff8b8b; }
+.uman-tab--danger.active { background: #ef4444; color: #fff; }
 
 /* ---- Top bar / Tabs ---- */
 .topbar {
@@ -1358,8 +1431,21 @@ a.user-link:hover { color: var(--text); border-bottom-color: var(--primary); }
     .tab span.label { display: none; }
 }
 </style>
+<?php if (!$isEmbed): ?>
 </head>
 <body>
+<?php endif; ?>
+<?php if ($isEmbed): ?>
+<!-- UMAN-TABS-START -->
+<div id="uman-tabs">
+    <button class="uman-tab active" data-view="search">Поиск</button>
+    <button class="uman-tab"        data-view="streams">Потоки</button>
+    <button class="uman-tab"        data-view="stats">Статистика</button>
+    <button class="uman-tab"        data-view="users">Зрители</button>
+    <button class="uman-tab uman-tab--danger" data-view="zapping">🚫 Zapping</button>
+</div>
+<!-- UMAN-TABS-END -->
+<?php else: ?>
 <header class="topbar">
     <div class="brand"><span>Metropoliten Monitor</span></div>
     <nav class="tabs" id="tabs" role="tablist">
@@ -1370,6 +1456,7 @@ a.user-link:hover { color: var(--text); border-bottom-color: var(--primary); }
         <button class="tab tab--danger" data-view="zapping" role="tab">🚫 Zapping</button>
     </nav>
 </header>
+<?php endif; ?>
 
 <main class="container">
 
@@ -1546,6 +1633,8 @@ a.user-link:hover { color: var(--text); border-bottom-color: var(--primary); }
    Утилиты: API, форматтеры, escape, toast/modal/confirm.
    ========================================================================== */
 
+const UMAN_API_URL = <?php echo $isEmbed ? "'uman.php'" : "''"; ?>;
+
 const Api = {
     async post(action, params = {}) {
         const fd = new FormData();
@@ -1553,7 +1642,7 @@ const Api = {
         for (const [k, v] of Object.entries(params)) {
             if (v !== undefined && v !== null) fd.append(k, String(v));
         }
-        const res = await fetch('', { method: 'POST', body: fd, credentials: 'same-origin' });
+        const res = await fetch(UMAN_API_URL, { method: 'POST', body: fd, credentials: 'same-origin' });
         if (!res.ok) {
             // пытаемся достать JSON-ошибку, иначе текст
             let body;
@@ -1665,10 +1754,12 @@ function modalConfirm({ title = 'Подтверждение', body = '', confirm
    Глобальная навигация по табам
    ========================================================================== */
 
+const UMAN_TAB_SEL = <?php echo $isEmbed ? "'.uman-tab'" : "'.tab'"; ?>;
+
 const App = {
     currentView: 'search',
     init() {
-        document.querySelectorAll('.tab').forEach(btn => {
+        document.querySelectorAll(UMAN_TAB_SEL).forEach(btn => {
             btn.addEventListener('click', () => this.switchView(btn.dataset.view));
         });
         Search.init();
@@ -1681,7 +1772,7 @@ const App = {
     switchView(name) {
         this.currentView = name;
         document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === `view-${name}`));
-        document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === name));
+        document.querySelectorAll(UMAN_TAB_SEL).forEach(t => t.classList.toggle('active', t.dataset.view === name));
         switch (name) {
             case 'streams': Streams.load(); break;
             case 'stats':   Stats.loadIfEmpty(); break;
@@ -2294,7 +2385,12 @@ const Zapping = {
    Старт
    ========================================================================== */
 
+<?php if ($isEmbed): ?>
+App.init();
+</script>
+<?php else: ?>
 document.addEventListener('DOMContentLoaded', () => App.init());
 </script>
 </body>
 </html>
+<?php endif; ?>

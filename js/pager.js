@@ -29,7 +29,7 @@
     canSharing: false,
     canIptv: false,
     pendingDirection: null,
-    origin: null          // 'userlist' | 'loglist' — откуда пришли на карточку
+    origin: null          // 'userlist' | 'loglist' | 'uman' — откуда пришли
   };
 
   var dom = {};
@@ -120,6 +120,7 @@
   }
 
   function goNext() {
+    if (state.origin === 'uman') return;
     var pages = pagesAvailable();
     var i = pages.indexOf(state.page);
     if (i < 0 || i >= pages.length - 1) return;
@@ -127,10 +128,14 @@
   }
 
   function goPrev() {
+    if (state.origin === 'uman') return;
     var pages = pagesAvailable();
     var i = pages.indexOf(state.page);
     if (i <= 0) return;
-    goTo(pages[i - 1]);
+    var target = pages[i - 1];
+    // Если пришли из поиска (origin не установлен) — не позволяем свайпом вернуться к списку
+    if (target === 'list' && !state.origin) return;
+    goTo(target);
   }
 
   function goTo(target) {
@@ -168,13 +173,14 @@
 
   function renderNav() {
     if (!dom.nav) return;
+    dom.nav.innerHTML = '';
+    if (state.origin === 'uman') return;
     var pages = pagesAvailable();
     var labels = {
       list: dataI18n('pager.tab_accounts'),
       sharing: dataI18n('pager.tab_sharing'),
       iptv: dataI18n('pager.tab_iptv')
     };
-    dom.nav.innerHTML = '';
     if (pages.length < 2) return;
 
     pages.forEach(function (p) {
@@ -258,7 +264,11 @@
     detectAvailability();
     renderNav();
     if (dom.back && dom.menuToggle) {
-      if (state.page === 'list' && !state.origin) {
+      if (state.origin === 'uman') {
+        // На странице монитора — ☰ остаётся, стрелка скрыта
+        dom.back.style.display = 'none';
+        dom.menuToggle.style.display = '';
+      } else if (state.page === 'list' && !state.origin) {
         // Вернулись на начальную страницу — показываем ☰
         dom.back.style.display = 'none';
         dom.menuToggle.style.display = '';
