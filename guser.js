@@ -327,6 +327,7 @@ rq.done(function(r){
 function aftergetstatus(){tmtstr=0;$("#str").fadeIn(150);}
 function userlist(p=0,c=0,ud=0)
 {
+if (typeof window.umanExit === 'function') window.umanExit();
 if(!p && typeof MpplListCache !== 'undefined' && MpplListCache.hasCached()) {
   MpplListCache.restore();
   return;
@@ -340,7 +341,7 @@ if(p==0) $(uinfo).html($(r).filter('.box'));
 if(typeof MpplListCache !== 'undefined') MpplListCache.clear();
 });
 }
-function loglist(p){$(txtHint).html("");$(uinfo).html('');$.post("undo.php",{list:1,page:p},function(r){$(result).html(r);});}
+function loglist(p){if (typeof window.umanExit === 'function') window.umanExit();$(txtHint).html("");$(uinfo).html('');$.post("undo.php",{list:1,page:p},function(r){$(result).html(r);});}
 function racc(){$.post("pbuy.php",{racc:1},function(r){if(r) {$("#deposit").text(Number(r.s).toFixed(2));$(intrst).val(r.i + "%")} else hMsg.dMsg("Произошла ошибка!");});}
 function utj(t){var dn=new Date(t*1000);return addnull(dn.getDate(),dn.getMonth()+1,dn.getFullYear(),dn.getHours(),dn.getMinutes())}
 function gck(cnm){var r=dc.cookie.match('(^|;) ?'+cnm+'=([^;]*)(;|$)');if(!r)return null;else return(unescape(r[2]))}
@@ -719,6 +720,7 @@ function iptvsign(l) {
 }
 
 function getuser(i, l, p = "") {
+    if (typeof window.umanExit === 'function') window.umanExit();
     // Проверяем, передан ли логин напрямую
     const isDirectCall = l && l.trim().length > 0;
 

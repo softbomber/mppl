@@ -44,7 +44,7 @@ cleanMemberSession(
     $row['id'],
     $row['a'],
     $row['hash'],
-    isset($row['dealer']) ? $row['dealer'] : 0,
+    $row['id'],
     isset($row['currency']) ? $row['currency'] : '',
     isset($row['rate']) ? $row['rate'] : 0,
     isset($row['postpaid']) ? $row['postpaid'] : 0

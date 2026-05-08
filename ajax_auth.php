@@ -45,7 +45,7 @@ $s_time=time()+86400;
     $ip=$_SERVER['REMOTE_ADDR'];
     $d=$row['id'];
     $link->sql_query("INSERT INTO ip_log (did, ip,`when`) VALUES ($d, '$ip',NOW())" ) or die("inserting.  Error returned if any: ".mysql_error());
-cleanMemberSession($row["user"],$d,$a,$row['hash'],$row['dealer'],$row['currency'],$row['rate'],$row['postpaid']);
+cleanMemberSession($row["user"],$d,$a,$row['hash'],$d,$row['currency'],$row['rate'],$row['postpaid']);
 
 
 if (!$row['dealer'])
