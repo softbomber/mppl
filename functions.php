@@ -2129,6 +2129,11 @@ function checkLoggedIn($status) {
                   exit;
               }
           }
+          // fallback: восстанавливаем $_SESSION['d'] из $_SESSION['i']
+          // для сессий, созданных до фикса ajax_login.php
+          if (empty($_SESSION['d']) && !empty($_SESSION['i'])) {
+              $_SESSION['d'] = $_SESSION['i'];
+          }
           break;
 
       case "no":
