@@ -1372,7 +1372,7 @@ $_ = $isEmbed ? '#result ' : '';
     font-family: var(--font);
 }
 .modal-overlay.active { display: flex; }
-.modal {
+.modal-overlay .uman-modal {
     background: var(--surface);
     border: 1px solid var(--border-hi);
     border-radius: var(--radius-lg);
@@ -1381,9 +1381,10 @@ $_ = $isEmbed ? '#result ' : '';
     max-width: 440px;
     overflow: hidden;
     animation: scaleIn 180ms ease;
+    display: block;
 }
 @keyframes scaleIn { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.modal-header {
+.modal-overlay .modal-header {
     padding: 16px 20px;
     border-bottom: 1px solid var(--border);
     display: flex;
@@ -1392,9 +1393,9 @@ $_ = $isEmbed ? '#result ' : '';
     font-weight: 600;
     color: var(--text);
 }
-.modal-header i { color: var(--warning); width: 18px; height: 18px; }
-.modal-body { padding: 16px 20px; color: var(--text-dim); font-size: 13px; line-height: 1.6; }
-.modal-body .modal-info {
+.modal-overlay .modal-header i { color: var(--warning); width: 18px; height: 18px; }
+.modal-overlay .modal-body { padding: 16px 20px; color: var(--text-dim); font-size: 13px; line-height: 1.6; }
+.modal-overlay .modal-body .modal-info {
     background: var(--bg-elevated);
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -1405,8 +1406,8 @@ $_ = $isEmbed ? '#result ' : '';
     gap: 4px;
     color: var(--text);
 }
-.modal-body .modal-info span { color: var(--text-dim); }
-.modal-footer {
+.modal-overlay .modal-body .modal-info span { color: var(--text-dim); }
+.modal-overlay .modal-footer {
     padding: 12px 20px;
     border-top: 1px solid var(--border);
     display: flex;
@@ -1414,7 +1415,7 @@ $_ = $isEmbed ? '#result ' : '';
     gap: 8px;
     background: var(--bg-elevated);
 }
-.modal-footer .btn {
+.modal-overlay .modal-footer .btn {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -1429,9 +1430,9 @@ $_ = $isEmbed ? '#result ' : '';
     transition: var(--transition);
     font-family: inherit;
 }
-.modal-footer .btn--danger { background: var(--danger); border-color: var(--danger); color: #fff; }
-.modal-footer .btn--primary { background: var(--primary); border-color: var(--primary); color: #fff; }
-.modal-footer .btn--success { background: #3ecf8e; border-color: #3ecf8e; color: #07140d; font-weight: 600; }
+.modal-overlay .modal-footer .btn--danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+.modal-overlay .modal-footer .btn--primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.modal-overlay .modal-footer .btn--success { background: #3ecf8e; border-color: #3ecf8e; color: #07140d; font-weight: 600; }
 
 /* ---- Toast ---- */
 .toast-stack {
@@ -1513,7 +1514,7 @@ $_ = $isEmbed ? '#result ' : '';
   #result table.data td { padding: 7px 8px; font-size: 12px; }
   #result .session-body { grid-template-columns: 1fr; }
   #result .zapping-grid { grid-template-columns: 1fr; }
-  #result .modal { max-width: calc(100vw - 32px); }
+  .modal-overlay .uman-modal { max-width: calc(100vw - 32px); }
   #result .sessions-list { padding: 10px; }
   #result .user-card .card-header { padding: 12px 14px; }
   #result .user-card .user-name { font-size: 15px; }
@@ -1716,7 +1717,7 @@ $_ = $isEmbed ? '#result ' : '';
 
 <!-- Modal & toasts -->
 <div class="modal-overlay" id="modal" role="dialog" aria-modal="true">
-    <div class="modal" id="modalDialog"></div>
+    <div class="uman-modal" id="modalDialog"></div>
 </div>
 <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
 
