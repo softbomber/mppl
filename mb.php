@@ -265,7 +265,7 @@ window.uman = function() {
               headerCenter.innerHTML = "";
               headerCenter.appendChild(tabsEl);
           }
-          if (infoBtn) infoBtn.style.display = "none";
+          if (infoBtn) infoBtn.classList.add("hidden");
 
           var rDiv = dc.getElementById("result");
           var uinfo = dc.getElementById("uinfo");
@@ -309,7 +309,7 @@ window.umanExit = function() {
       window._umanHeaderSaved = null;
   }
   var infoBtn = dc.querySelector(".info-toggle");
-  if (infoBtn) infoBtn.style.display = "";
+  if (infoBtn) infoBtn.classList.remove("hidden");
   if (typeof MpplPager !== "undefined") MpplPager.setOrigin(null);
 };
 $("#paymentForm").validate({

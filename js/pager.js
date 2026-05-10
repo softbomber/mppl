@@ -265,17 +265,14 @@
     renderNav();
     if (dom.back && dom.menuToggle) {
       if (state.origin === 'uman') {
-        // На странице монитора — ☰ остаётся, стрелка скрыта
-        dom.back.style.display = 'none';
-        dom.menuToggle.style.display = '';
+        dom.back.classList.add('hidden');
+        dom.menuToggle.classList.remove('hidden');
       } else if (state.page === 'list' && !state.origin) {
-        // Вернулись на начальную страницу — показываем ☰
-        dom.back.style.display = 'none';
-        dom.menuToggle.style.display = '';
-      } else if (state.origin && dom.back.style.display === 'none') {
-        // Первый показ стрелки — заменяем ☰
-        dom.back.style.display = '';
-        dom.menuToggle.style.display = 'none';
+        dom.back.classList.add('hidden');
+        dom.menuToggle.classList.remove('hidden');
+      } else if (state.origin && dom.back.classList.contains('hidden')) {
+        dom.back.classList.remove('hidden');
+        dom.menuToggle.classList.add('hidden');
       }
     }
     if (dom.stage) {

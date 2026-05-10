@@ -830,6 +830,10 @@ body {
 .uman-tab.active { background: #4d8eff; color: #fff; }
 .uman-tab--danger { color: #ff8b8b; }
 .uman-tab--danger.active { background: #ef4444; color: #fff; }
+@media (max-width: 480px) {
+  .uman-tab { padding: 4px 7px; font-size: 10px; }
+  #uman-tabs { gap: 2px; padding: 2px; }
+}
 
 <?php if ($isEmbed): ?>
 /* Embed mode: scope all rules under #result to avoid conflicts with mb.php */
@@ -1438,6 +1442,31 @@ a.user-link:hover { color: var(--text); border-bottom-color: var(--primary); }
 
 <?php if ($isEmbed): ?>
 } /* close #result scope */
+
+/* Embed mobile overrides — explicit selectors (no nesting) for max compat */
+@media (max-width: 640px) {
+  #result .container { padding: 0 6px; margin: 8px auto; }
+  #result .search-bar { margin: 0 auto 14px; max-width: 100%; }
+  #result .view-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  #result .view-title { font-size: 15px; }
+  #result .btn { padding: 6px 10px; font-size: 12px; }
+  #result .info-grid { grid-template-columns: 1fr 1fr; padding: 10px; gap: 8px; }
+  #result .info-item { padding: 8px 10px; }
+  #result .info-item .val { font-size: 14px; }
+  #result table.data th,
+  #result table.data td { padding: 7px 8px; font-size: 12px; }
+  #result .session-body { grid-template-columns: 1fr; }
+  #result .zapping-grid { grid-template-columns: 1fr; }
+  #result .modal { max-width: calc(100vw - 32px); }
+  #result .sessions-list { padding: 10px; }
+  #result .user-card .card-header { padding: 12px 14px; }
+  #result .user-card .user-name { font-size: 15px; }
+}
+@media (max-width: 400px) {
+  #result .container { padding: 0 2px; margin: 4px auto; }
+  #result .info-grid { grid-template-columns: 1fr; }
+  #result .search-bar input { font-size: 13px; padding: 8px 6px; }
+}
 <?php endif; ?>
 </style>
 <?php if (!$isEmbed): ?>
