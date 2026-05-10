@@ -267,8 +267,6 @@ window.uman = function() {
           }
           if (infoBtn) infoBtn.style.display = "none";
 
-          tabsEl && tabsEl.remove();
-
           var rDiv = dc.getElementById("result");
           var uinfo = dc.getElementById("uinfo");
           if (uinfo) uinfo.innerHTML = "";
