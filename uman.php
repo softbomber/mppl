@@ -1475,7 +1475,7 @@ a.user-link:hover { color: var(--text); border-bottom-color: var(--primary); }
     <!-- STREAMS VIEW -->
     <section class="view" id="view-streams">
         <div class="view-header">
-            <div class="view-title">Активные аллокации <span id="streamsCount" class="text-muted" style="font-weight:400; font-size:13px"></span></div>
+            <div class="view-title">Активные аллокации <span id="streamsCount" class="text-muted uman-count"></span></div>
             <div class="view-actions">
                 <button class="btn btn--success" id="btnReloadStreams">↻ Обновить</button>
             </div>
@@ -1492,7 +1492,7 @@ a.user-link:hover { color: var(--text); border-bottom-color: var(--primary); }
                             <th class="sortable" data-col="cdn_ip" data-type="str">CDN IP <span class="sort-arrow"></span></th>
                             <th class="sortable" data-col="allocated_at" data-type="num">Allocated <span class="sort-arrow"></span></th>
                             <th>Source</th>
-                            <th style="text-align:right">Действия</th>
+                            <th class="text-right">Действия</th>
                         </tr>
                     </thead>
                     <tbody id="streamsBody">
@@ -1540,7 +1540,7 @@ a.user-link:hover { color: var(--text); border-bottom-color: var(--primary); }
     <!-- USERS ONLINE VIEW -->
     <section class="view" id="view-users">
         <div class="view-header">
-            <div class="view-title">Зрители онлайн <span id="usersCount" class="text-muted" style="font-weight:400; font-size:13px"></span></div>
+            <div class="view-title">Зрители онлайн <span id="usersCount" class="text-muted uman-count"></span></div>
             <div class="view-actions">
                 <button class="btn btn--success" id="btnReloadUsers">↻ Обновить</button>
             </div>
@@ -2073,7 +2073,7 @@ const Streams = {
         const dotCls = s.is_live ? 'status-dot--live' : (s.is_archive ? 'status-dot--archive' : 'status-dot--unknown');
         const dotTitle = s.is_live ? 'Прямой эфир' : (s.is_archive ? 'Архив' : 'Статус не указан');
         const qInfo = s.quality ? `<div class="ch-meta">📺 ${esc(s.quality)}</div>` : '';
-        const sInfo = s.switch_count > 0 ? `<div class="ch-meta" style="color:var(--warning)">🔄 Переключений: ${s.switch_count}</div>` : '';
+        const sInfo = s.switch_count > 0 ? `<div class="ch-meta ch-meta--warning">🔄 Переключений: ${s.switch_count}</div>` : '';
         return `
             <tr id="stream-row-${esc(s.allocation_id)}">
                 <td class="cell-channel">
@@ -2220,7 +2220,7 @@ const Stats = {
             </tr>`).join('');
         this.foot.innerHTML = `
             <tr>
-                <td colspan="2" style="text-align:right">ИТОГО:</td>
+                <td colspan="2" class="text-right">ИТОГО:</td>
                 <td class="num online-cell">${this.totals.online}</td>
                 <td class="num">${this.totals.daily}</td>
             </tr>`;

@@ -31,7 +31,7 @@ if($("#"+elemid+" .crdnm").length <3 || deletedel)
 {
  dc.querySelector('.cc__form').reset();
  e=dc.querySelector(".cc");
- $('body').append('<div style="display:block" id="fmask"></div>');
+ $('body').append('<div id="fmask"></div>');
  $(dc).on('click','#fmask',function(){$("#fmask").fadeOut(200,function(){$('#fmask').remove()});e.style.display="none";});
  e.style.top = '50%';
  e.style.left = '50%';
@@ -63,7 +63,7 @@ $(dc).delegate(".crdnm","click", function()
 	crdh.value=inelem.dataset.owner;
 	exp=dc.getElementById("card-exp");
 	exp.value=inelem.dataset.exp.replace(/(.{2})/, '$1\/');
-	$('body').append('<div style="display:block" id="fmask"></div>');
+	$('body').append('<div id="fmask"></div>');
 	$(dc).on('click','#fmask',function(){$("#fmask").fadeOut(200,function(){$('#fmask').remove()});e.style.display="none";});
   	e.style.top = '50%';
 	e.style.left = '50%';
@@ -594,7 +594,7 @@ setInterval(function(){t=t+60000;$("#st").html(mkdt(t*1000,0,1));},60000);
 function pfile(){chkfrm($("#pfedit"));cntr($("#pfl"))}
 function bal(){paylog(1);cntr($("#paym"))}
 function rset(){cntr($('#rset'))}
-function cntr(f){$('body').append('<div style="display:flex" id="mask"></div>');f.css("display","flex").fadeIn(200);
+function cntr(f){$('body').append('<div id="mask"></div>');f.css("display","flex").fadeIn(200);
 $(document).on('click','#mask',function(){$("#mask").fadeOut(200,function(){$('#mask').remove()});f.fadeOut(200)})}
 function ued()
 {
@@ -679,7 +679,7 @@ svAs(blob,fname);
 function nws(){clr();var rq=$.ajax({url:"news.php",type:"POST",cache:0,dataType:"html"});rq.done(function(d){$(result).html(d);})}
 function clr(){$(uinfo,result).html('')}
 function br2nl(str){return str.replace(/<br\s*\/?>/mg,"\n")}
-function prl(){$("body").prepend("<div id='spin'style='z-index:1000;width:100%;height:100%;position:fixed'><span id='spinner' class='spinner' style='top:45%;left:50%'></span><span id='spinner2' class='spinn' style='top:45%;left:50%'> </span></div>").fadeIn(500);}
+function prl(){$("body").prepend("<div id='spin'><span id='spinner' class='spinner'></span><span id='spinner2' class='spinn'> </span></div>").fadeIn(500);}
 function packetp(){$(txtHint).html("").hide();$("#uinfo").html();var rq=$.ajax({url:"getupack.php",type:"POST",cache:0,dataType:"html",data:{price:1}});rq.done(function(r){$("#result").html(r).fadeIn();});}
 function tOn(e){event=e || window.event;const target = event.target || event.srcElement;const row = $(target).closest("tr");
 const checkbox = row.find("input[type='checkbox']");if (checkbox.length && checkbox.prop("disabled")) {
@@ -825,18 +825,18 @@ function getuser(i, l, p = "") {
 
             let infoHtml=`<div class="blk finr">
                     <h2>ИНФО ПО <span id="uname" dreg="${account.dreg}" acccardnum="${account.acccardnum}" sdnt="${account.sndnote}">${account.user} </span></h2><table id="tinfo" border="0">
-                        <tr><td align=right style="width:25%">ID:</td><td id="uid">${account.id}</td></tr>
+                        <tr><td align=right class="td-id">ID:</td><td id="uid">${account.id}</td></tr>
                         <tr><td align=right id="rq" rq="${(Object.keys(iptv).length > 0 ? "1" : "0")}">Учётка:</td><td>${account.req != 0 ? "Позапросная" : (Object.keys(iptv).length > 0 ? "IPTV" : "Стандартная")}</td></tr>
                         <tr><td align=right id="accsum">Баланс:</td><td>${parseFloat(account.sum).toFixed(2)}</td></tr>`
             if (dealer.user === session.l || session.a == 1 || session.a == 2 || dealer.id === session.i) {
                 let descr="";
                 if(account.dscr)
                 descr=rSpaces(account.dscr);
-                infoHtml += `<tr ${!account.phone ? 'style="display:none"' : ''}><td align=right>Тел.#:</td><td id="phnm">${account.phone || ''}</td></tr>
-                    <tr><td style="display:none"></td><td id=upsw style="display:none">${account.pwd || ''}</td></tr>
-                    <tr ${account.tcid==0 ? 'style="display:none"' : ''}><td align=right>tId:</td><td id="tID">${account.tcid || ''}</td></tr>
-                    <tr ${!account.email ? 'style="display:none"' : ''}><td align=right>Email:</td><td id="email">${account.email || ''}</td></tr>
-                    <tr ${!descr ? 'style="display:none"' : ''}><td align=right>Комент:</td><td id="scmnt" data-tooltip="${descr || ''}" data-tooltip-position="left">${descr && descr.length > 16 ? descr.substr(0, 13) + '...' : (descr || '')}</td></tr>
+                infoHtml += `<tr ${!account.phone ? 'class="hidden"' : ''}><td align=right>Тел.#:</td><td id="phnm">${account.phone || ''}</td></tr>
+                    <tr><td class="hidden"></td><td id=upsw class="hidden">${account.pwd || ''}</td></tr>
+                    <tr ${account.tcid==0 ? 'class="hidden"' : ''}><td align=right>tId:</td><td id="tID">${account.tcid || ''}</td></tr>
+                    <tr ${!account.email ? 'class="hidden"' : ''}><td align=right>Email:</td><td id="email">${account.email || ''}</td></tr>
+                    <tr ${!descr ? 'class="hidden"' : ''}><td align=right>Комент:</td><td id="scmnt" data-tooltip="${descr || ''}" data-tooltip-position="left">${descr && descr.length > 16 ? descr.substr(0, 13) + '...' : (descr || '')}</td></tr>
                     ${data.data.server ? `<tr><td align="right">Сервер:</td><td id="server" s="${data.data.server.s_id}">${data.data.server.url}</td></tr>`:''}`
                 if (session.a == 1 || session.a == 2 || dealer.user === session.l) { infoHtml += `<tr><td align=center colspan=2><button onclick="accop()">ОПЕРАЦИИ ПО АККАУНТУ</button></td></tr>`}
                 if (session.a == 1 || dealer.user === session.l) {
@@ -861,7 +861,7 @@ function getuser(i, l, p = "") {
                     infoHtml += '<tr><td align=center colspan=2><table width=60px align=center border=0 id="stps"><tr align="center">';
                     infoHtml += `<td><div class="rstp"`;
                     if (!showPauseButton) {
-                        infoHtml += " style=display:none ";
+                        infoHtml += " class='hidden' ";
                     }
                     infoHtml += ' title="Поставить на паузу/Снять с паузы.\n Данная функция доступна раз в неделю!"><div id="pacc" class="ui-icon ';
                     infoHtml += `${account.paused==1 ? ' ui-icon-play' : 'ui-icon-pause'}`;
@@ -898,7 +898,7 @@ function getuser(i, l, p = "") {
                         <div class="iptvcntr"><div class="actbutt"><div id="activateButton" onclick="actIptv(event)">
                                 ${iptvenddate && iptvenddate >= Date.now() / 1000 ? 'ПРОДЛИТЬ' : 'АКТИВИРОВАТЬ'} ПОДПИСКУ НА
                             </div>
-                            <div style="display: flex; align-items: center;" onclick="tDrpd()">
+                            <div class="info-row" onclick="tDrpd()">
                                 <div class="selnum">1</div>
                                 <div class="mnths"> МЕС</div>
                             </div>
@@ -907,7 +907,7 @@ function getuser(i, l, p = "") {
                                     ${[1,2,3,4,5,6,7,8,9,10,11,12].map(m => `<a onclick="sMn(${m})">${m} Мес</a>`).join('')}
                                 </div>
                             </div>
-                        <div style="display: flex; align-content: center; flex-wrap: wrap; flex-direction: row; justify-content: flex-start; color: #ffffff;">
+                        <div class="info-meta">
                             <div class="iptv url">URL <input id="url" type="text" value="${iptvurl}"/><button id="copyButton" onclick="cpUrl()"><img src="/copy.png" alt="Копировать"></button></div>
                             <div class="iptv cdn"><div class="iptvsrv">СЕРВЕР ПОДКЛЮЧЕНИЯ</div>
                                 <select id="iptvsrv" name="iptvsrv">
@@ -985,7 +985,7 @@ async function updateUserInfo(data, account, infoHtml) {
         mcHtml += `
             <div id="mc" class="fin">
                 <input type=hidden id="psd" value="${account.paused}" ptmt="${data.data.tmt}">
-            </div><div id="pauseOverlay" class="pause-overlay" ${account.paused != 1 ? 'style="display:none"':''}>
+            </div><div id="pauseOverlay" class="pause-overlay${account.paused != 1 ? ' hidden':''}">
             <button id="playButton" class="plb" onclick="pause()"></button></div>`;
         const subscriptionsHtml = await loadSubscriptions(account.user);
         mcHtml += subscriptionsHtml;
@@ -993,7 +993,7 @@ async function updateUserInfo(data, account, infoHtml) {
     const paused = account.paused;
     const packets = data.data.packets || [];
     const hasActiveSubscription = packets.some(packet => Number(packet.unixt) >= Date.now() / 1000);
-    infoHtml += `<div id="Layer1" class="fin"${(hasActiveSubscription != true|| Number(paused)) ? ' style="display:none"' : ''}>`;
+    infoHtml += `<div id="Layer1" class="fin${(hasActiveSubscription != true|| Number(paused)) ? ' hidden' : ''}">`;
     infoHtml += '<h2>СТАТУС ПОДКЛЮЧЕНИЯ<span id="str" class="str" onclick="stu(\'c\')"></span></h2>';
     infoHtml += '<div id="stu">';
     const cards = data.data.cards || [];
@@ -1001,7 +1001,7 @@ async function updateUserInfo(data, account, infoHtml) {
     let crds='';
 
     if (numOfCards > 0) {
-        infoHtml += '<div id="Cardslst" style="display:none">';
+        infoHtml += '<div id="Cardslst" class="hidden">';
         cards.forEach(card => {
             crds += `
                 <div class="crdnm">
@@ -1013,7 +1013,7 @@ async function updateUserInfo(data, account, infoHtml) {
         infoHtml += cards;
         infoHtml += '</div>';
     } else {
-        infoHtml += '<div id="Cardslst" style="display:none"></div>';
+        infoHtml += '<div id="Cardslst" class="hidden"></div>';
     }
     infoHtml += '</div>';
     infoHtml += '</div>';
@@ -1215,10 +1215,10 @@ async function fetchSubscriptions(l) {
                         <div class="packet_name">
                             <div>${packet.pname}</div>
                         </div>
-<button class="stopButton" ${(!isActive && !packet.dstart && !packet.dend) || (packet.dend && (packet.dend * 1000 - 15 * 24 * 60 * 60 * 1000 <= Date.now())  && adm !=1) ? 'style="display:none"' : ''}> Стоп </button>
+<button class="stopButton${(!isActive && !packet.dstart && !packet.dend) || (packet.dend && (packet.dend * 1000 - 15 * 24 * 60 * 60 * 1000 <= Date.now())  && adm !=1) ? ' hidden' : ''}"> Стоп </button>
                         <div class="price">${packet.price}</div>
                     </div>
-                    <div class="mt-3 space-y-1" ${!isActive && !packet.dstart && !packet.dend ? 'style="display:none"' : ''}>
+                    <div class="mt-3 space-y-1${!isActive && !packet.dstart && !packet.dend ? ' hidden' : ''}">
                         <div class="flex justify-between-end text-xs text-gray-600 actendinfo">
                             <span class="activation">Дата активации:</span>
                             <span class="font-medium" id="activation">${formattedDstart}</span>

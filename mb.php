@@ -109,14 +109,14 @@ if($res->num_rows == 1)
   <option value=4 data-i18n="search.opt_email">EMAIL</option>
 </select>
 <input class="si" placeholder="логин|телефон|email" id=glog data-i18n-attr="placeholder:search.login_placeholder"></input>
-<div style="width:25px">
+<div class="sb-wrap">
 <div class="sb" title="Поиск" data-i18n-attr="title:search.tooltip" type="button" onclick="getuser(0,0)"></div>
-<div class="circle" style="display:none" ></div>
+<div class="circle hidden"></div>
 </div>
 
 </div>
 </div>
-<div style='position:relative'><div class="s_res" style="display: none;">
+<div class="s_res-wrap"><div class="s_res hidden">
     <ul class="s_res-list"></ul>
 </div></div>
 </div> <!-- center end -->
@@ -128,7 +128,7 @@ if($res->num_rows == 1)
   </header>
  
   <button class="menu-toggle" aria-label="меню" data-i18n-attr="aria-label:menu_btn.aria">☰</button>
-  <button class="header-back" aria-label="Назад" style="display:none"></button>
+  <button class="header-back hidden" aria-label="Назад"></button>
   <button class="info-toggle" aria-label="инфо" data-i18n-attr="aria-label:info_btn.aria">ℹ</button>
   <div class="overlay-menu"></div>
   <div class="overlay-info"></div>
@@ -161,16 +161,16 @@ if (isset($_GET['prepare_once'])) {
     <li><a href="#" id="uman">МОНИТОР</a></li>';
 
 echo '</div>
-<div id="fk" class="login-popup" style="left:50%;top:50%;transform:translate(-50%,-50%)">
-<div style="display:flex;background:#465b6e"><div class=title data-i18n="modal.fk_balance">ПОПОЛНЕНИЕ БАЛАНСА ЧЕРЕЗ FREEKASSA</div><div class="clse"></div></div>
+<div id="fk" class="login-popup popup-center">
+<div class="modal-header--fk"><div class=title data-i18n="modal.fk_balance">ПОПОЛНЕНИЕ БАЛАНСА ЧЕРЕЗ FREEKASSA</div><div class="clse"></div></div>
 <div class="tabs" id="tabfkassa">
 <div class="fkassa">
 <form id="paymentForm" name="paymentForm"> <!-- onsubmit="openPayment(event)">-->
     <input type="hidden" name="m" value="<?= $fk_merchant_id ?>">
 <div class="lbl" data-i18n="form.amount">СУММА ПОПОЛНЕНИЯ</div>
-<div style="display:inline-block;position:relative">
+<div class="fk-currency-wrap">
 <input type="text" name="oa" id="sum" onchange="calculate()" onkeyup="calculate()" onfocusout="calculate()" class="required" autocomplete="off">
-    <input name="currency" style="width:30px;background:0;color:aliceblue;position:absolute;right:1px;top:19%;text-align:center" value="<?= $fk_currency ?>">
+    <input name="currency" class="fk-currency-input" value="<?= $fk_currency ?>">
 </div>
     <input type="hidden" name="s" id="s" value="0">
 <div class="lbl" data-i18n="form.payment_id">НОМЕР ПЛАТЕЖА</div>
@@ -178,8 +178,8 @@ echo '</div>
     <input type="submit" id="submit" value="К ПОПОЛНЕНИЮ" disabled data-i18n-attr="value:form.go_to_payment">
 </form>
 </div>
-<div id="fkcntnt" style="min-height:450px;min-width:450px;display:flex;justify-content:center;align-items:center;width:100%;overflow:hidden;box-sizing:border-box">
-<iframe id="paymentFrame" style="width:100%; height:450px; display: none; border: none;"></iframe>
+<div id="fkcntnt">
+<iframe id="paymentFrame"></iframe>
 </div>
 </div>
 </div>';
@@ -549,13 +549,13 @@ echo "<script>\n" . $jsCode . "\n</script>";
       echo "<div class='info-panel__discount'><span data-i18n='info.discount'>Ваша скидка:</span> <span id='intrst' class='info-panel__discount-val'> $intrst% </span></div>";
     }
       else{
-      echo "<div id='intrst' style='display:none'></div>";
+      echo "<div id='intrst' class='hidden'></div>";
     }
     ?>
     <div id="uinfo"></div>
   </aside>
 
-  <div class="cc" style="display:none">
+  <div class="cc hidden">
 <div class="clseCC"></div>
 <div class="cc__card" data-crdfid=''>
    <form class="cc__form" onsubmit="addCard();return false">
@@ -914,10 +914,10 @@ function actIptv(e) {
 <div class="t_subst"><div class="title" data-i18n="modal.register_account">РЕГИСТРАЦИЯ АККАУНТА</div><span class="clse"></span></div>
 <div class=signin>
 <div class="fCont">
-  <div style="display: flex; justify-content:space-between; margin-right:10px"><label data-i18n="form.login">ЛОГИН</label>
-  <div style="display:flex">
+  <div class="reg-row"><label data-i18n="form.login">ЛОГИН</label>
+  <div class="reg-iptv-wrap">
   <LABEL data-i18n="form.iptv">IPTV</LABEL>
-  <input style="vertical-align:middle" type="checkbox" id="iptv" name="iptv">
+  <input class="valign-mid" type="checkbox" id="iptv" name="iptv">
   <label for=iptv class=switcher></label>
   </div>
 </div>
@@ -929,7 +929,7 @@ function actIptv(e) {
      </div>
  </div>
  <div>
-  <label style='clear:both' data-i18n="form.password">ПАРОЛЬ</label>
+  <label class="label--clear" data-i18n="form.password">ПАРОЛЬ</label>
   <input id="ps" name="ps" type="password" class="required password"/>
  </div>
  <div>
@@ -949,7 +949,7 @@ function actIptv(e) {
   echo '<div><input type="checkbox" id="req" name="req"><label for=req class=switcher></label><p style="display:block">Позапросная учётка</p></div>';*/
 ?>
 </div>
-<div style="padding:9px">
+<div class="reg-actions">
 <button class="submit" data-i18n="form.register">ЗАРЕГИСТРИРОВАТЬ</button>
 </div>
 </div>
@@ -986,16 +986,16 @@ for ($i = 0; $i < $rc; $i++) {
 </select><label data-i18n="form.server">СЕРВЕР</label></div></div>
 <div class="cell1 frow"><textarea rows=1 id="cmmnt" name="cmmnt"></textarea><label data-i18n="form.comment">КОМЕНТ</label></div>
 <?php
-echo '<div style="border:1px solid #1d2f35;padding:5px;position:relative">
-<div class="bubbleslist"><div style="position:absolute;left:0;top:0;transform:translateY(-90%);font-size:9px;font-weight:700">СПИСОК КАРТ</div><div class=butaddcard id="uaddcards">+</div></div>';
+echo '<div class="cards-block">
+<div class="bubbleslist"><div class="cards-block__header">СПИСОК КАРТ</div><div class=butaddcard id="uaddcards">+</div></div>';
 echo '</div>';
 ?>
 
 </form>
 </div>
 
-<div id="paym" class="login-popup" style="left:50%;top:50%;transform:translate(-50%,-50%)">
-<div style="display:flex"><div class=title data-i18n="modal.payments_info">ИНФОРМАЦИЯ О ПЛАТЕЖАХ</div><div class="clse"></div></div>
+<div id="paym" class="login-popup popup-center">
+<div class="modal-header"><div class=title data-i18n="modal.payments_info">ИНФОРМАЦИЯ О ПЛАТЕЖАХ</div><div class="clse"></div></div>
 <!--<p>Для пополнения баланса, переведите сумму на указанные ниже реквизиты для WM в примечании укажите ваш логин,
 </br> но перед этим в ПРОФИЛЕ, во вкладке Webmoney укажите ваш WMID.--><p>Для UZ переводите средства только через PayMe и уже через 5 минут средства будут зачислены. <br>!!! При переводе, укажите в примечании "d <?php echo $dealerId?>" !!!<BR>
 </p>
@@ -1027,8 +1027,8 @@ for($i=0;$i<$rc;$i++)
 </div>
 </div>
 
-<div id="rset" class="pluso-box" style="top:50%;left:50%;display:none;width:100%;transform: translate(-50%, -50%)">
-<div style="display:flex"><div class="title" data-i18n="modal.plugin_settings">НАСТРОЙКИ ПЛАГИНОВ</div><div class="clse"></div></div>
+<div id="rset" class="pluso-box">
+<div class="modal-header"><div class="title" data-i18n="modal.plugin_settings">НАСТРОЙКИ ПЛАГИНОВ</div><div class="clse"></div></div>
 <div class="clear cell1 row"><span class="p1"><select id="tun" onchange="ltuns(this,'pl')"><option data-i18n="form.tuner">Тюнер</option>
 <?php
 $res=$link->query("select * from recievers order by rn_id") or die("SQL req. error: ".$link->error_list);
@@ -1043,17 +1043,16 @@ $rc=$res->num_rows;
 <div class="clear cell1 row">
 <span class="p1"><button onclick="stof()" data-i18n="form.send_to_file">Сохранить в файл</button>
 <div id="semail"><button id="bb" data-i18n="form.send_to_email">Отправить на email</button><form method="post" id="stoemail" name="stoemail" enctype="multipart/form-data">
-<div class="pluso-box" id="sedia" style="display:none;position:absolute"><input id="inputeml" name="inputeml" type="text" class="required email">
-<button class="submit" style="width:100%" data-i18n="form.send">Отправить</button></div>
+<div class="pluso-box" id="sedia"><input id="inputeml" name="inputeml" type="text" class="required email">
+<button class="submit submit--wide" data-i18n="form.send">Отправить</button></div>
 </form>
 </div>
 </span>
 </div>
 </div>
 
-<div id="classo" class="pluso-box" style="position:fixed;top:50%;left:50%;display:none;width:95%;max-width:650px;height:calc(60dvh);min-height:350px;max-height:calc(60dvh);transform:translate(-50%, -50%);
- margin:0;overflow-y:auto;box-sizing: border-box">
-<div style="display:flex">
+<div id="classo" class="pluso-box">
+<div class="modal-header">
 <div class=title><span data-i18n="modal.account_ops">СПИСОК ОПЕРАЦИЙ ПО АККАУНТУ </span><span id="ullst"></span></div><div class="clse"></div></div>
 <div id=ulist class="pluso-list"></div>
 </div>
