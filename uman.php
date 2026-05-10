@@ -831,6 +831,11 @@ body {
 .uman-tab--danger { color: #ff8b8b; }
 .uman-tab--danger.active { background: #ef4444; color: #fff; }
 
+<?php if ($isEmbed): ?>
+/* Embed mode: scope all rules under #result to avoid conflicts with mb.php */
+#result {
+<?php endif; ?>
+
 /* ---- Top bar / Tabs ---- */
 .topbar {
     position: sticky;
@@ -1430,6 +1435,10 @@ a.user-link:hover { color: var(--text); border-bottom-color: var(--primary); }
     .tabs { width: 100%; justify-content: space-between; overflow-x: auto; }
     .tab span.label { display: none; }
 }
+
+<?php if ($isEmbed): ?>
+} /* close #result scope */
+<?php endif; ?>
 </style>
 <?php if (!$isEmbed): ?>
 </head>
