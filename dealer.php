@@ -91,7 +91,7 @@ if($res->num_rows == 1)
 </head>
 <body>
 <input type="hidden" id="timeZoneOffsetInput" name="timeZoneOffsetInput">
-<div class="popup" id="userDetailsPopup" style="display: none;">
+<div class="popup hidden" id="userDetailsPopup">
 <div class="t_subst" ><div class="title">ДАННЫЕ ПО АККАУНТУ <span id=usrinfo></span></div><span class="clse"></span></div>
 <form id="userDetailsForm">
 <label>Пароль: <input type="password" name="password"><button type="button" class="eye-btn" onclick="togglePassword(this)">🔒</button></label>
@@ -121,14 +121,14 @@ echo '<script>$(".closed").click(function(){$("#fed").hide(150)});</script>';
 <div class="sbox">
 <select class="sel"><option value=1>ЛОГИН</option><option value=2>Т.НОМЕР</option><option value=3>EMAIL</option><option value=4>ВCЁ</option></select>
 <input class="si" placeholder="логин | телефон | email" id=glog></input>
-<div style="width:25px">
+<div class="sb-wrap">
 <div class="sb" title="Поиск" type="button" onclick="getuser(0,0)"></div>
-<div class="circle" style="display:none" ></div>
+<div class="circle hidden"></div>
 </div>
 
 </div>
 </div>
-<div style='position:relative'><table class="s_res"></table></div>
+<div class="s_res-wrap"><table class="s_res"></table></div>
 </div> <!-- center end -->
 
 </div>
@@ -136,13 +136,13 @@ echo '<script>$(".closed").click(function(){$("#fed").hide(150)});</script>';
 <div align=center>
 <?php
 echo '<TABLE align=center border=0 width="135px">';
-echo  '<tr><td align=center style="color:#cbffa8;font-size:13px">БAЛАНС</td></tr>';
-echo '<tr><td align=center onclick="racc()" id="deposit" style="font-weight:700;font-size:14px;color:#e2f0ff">';echo sprintf("%.2f",$accsum);echo'</td></tr>';
+echo  '<tr><td align=center class="balance-label">БAЛАНС</td></tr>';
+echo '<tr><td align=center onclick="racc()" id="deposit" class="balance-value">';echo sprintf("%.2f",$accsum);echo'</td></tr>';
 if ($_SESSION['a'] != 2) {
-  echo "<div align=center style='color:#cbffa8;font-size:13px'>Ваша скидка: <div id='intrst' style='display:inline-block;color:aqua'> $intrst% </div></div>";
+  echo "<div align=center class='discount-label'>Ваша скидка: <div id='intrst' class='discount-val'> $intrst% </div></div>";
 }
   else{
-  echo "<div id='intrst' style='display:none'></div>";
+  echo "<div id='intrst' class='hidden'></div>";
 }
 echo "</table>";
 ?></div>
@@ -178,16 +178,16 @@ if (isset($_GET['prepare_once'])) {
 }
 ?>
 </div>
-<div id="fk" class="login-popup" style="left:50%;top:50%;transform:translate(-50%,-50%)">
-<div style="display:flex;background:#465b6e"><div class=title>ПОПОЛНЕНИЕ БАЛАНСА ЧЕРЕЗ FREEKASSA</div><div class="clse"></div></div>
+<div id="fk" class="login-popup popup-center">
+<div class="modal-header--fk"><div class=title>ПОПОЛНЕНИЕ БАЛАНСА ЧЕРЕЗ FREEKASSA</div><div class="clse"></div></div>
 <div class="tabs" id="tabfkassa">
 <div class='fkassa'>
 <form id="paymentForm" name="paymentForm"> <!-- onsubmit="openPayment(event)">-->
     <input type="hidden" name="m" value="<?= $fk_merchant_id ?>">
 <div class="lbl">СУММА ПОПОЛНЕНИЯ</div>
-<div style="display:inline-block;position:relative">
+<div class="fk-currency-wrap">
 <input type="text" name="oa" id="sum" onchange="calculate()" onkeyup="calculate()" onfocusout="calculate()" class="required" autocomplete="off">
-    <input name="currency" style="width:30px;background:0;color:aliceblue;position:absolute;right:1px;top:19%;text-align:center" value="<?= $fk_currency ?>">
+    <input name="currency" class="fk-currency-input" value="<?= $fk_currency ?>">
 </div>
     <input type="hidden" name="s" id="s" value="0">
 <div class="lbl">НОМЕР ПЛАТЕЖА</div>
@@ -195,8 +195,8 @@ if (isset($_GET['prepare_once'])) {
     <input type="submit" id="submit" value="К ПОПОЛНЕНИЮ" disabled>
 </form>
 </div>
-<div id="fkcntnt" style="min-height:450px;min-width:450px;display:flex;justify-content:center;align-items:center;width:100%;overflow:hidden;box-sizing:border-box">
-<iframe id="paymentFrame" style="width:100%; height:450px; display: none; border: none;"></iframe>
+<div id="fkcntnt">
+<iframe id="paymentFrame"></iframe>
 </div>
 </div>
 </div>
@@ -404,7 +404,7 @@ var desc = params["o"];
 </div>
 <!-- </div> -->
 <!-- <div id="footer">© Metropoliten 2005-2023 | <a href="http://">Наш Форум</a><div>ICQ:<em>356362469</em></div></div>-->
-<div class="cc" style="display:none">
+<div class="cc hidden">
 <div class="clseCC"></div>
 <div class="cc__card" data-crdfid=''>
       <form class="cc__form" onsubmit="addCard();return false">
@@ -581,10 +581,10 @@ $('.cc').hide();$('#fmask').remove();
 <div class="t_subst"><div class="title">РЕГИСТРАЦИЯ АККАУНТА</div><span class="clse"></span></div>
 <div class=signin>
 <div class="fCont">
-  <div style="display: flex; justify-content:space-between; margin-right:10px"><label>ЛОГИН</label>
-  <div style="display:flex">
+  <div class="reg-row"><label>ЛОГИН</label>
+  <div class="reg-iptv-wrap">
   <LABEL>IPTV</LABEL>
-  <input style="vertical-align:middle" type="checkbox" id="iptv" name="iptv">
+  <input class="valign-mid" type="checkbox" id="iptv" name="iptv">
   <label for=iptv class=switcher></label>
   </div>
 </div>
@@ -596,7 +596,7 @@ $('.cc').hide();$('#fmask').remove();
      </div>
  </div>
  <div>
-  <label style='clear:both'>ПАРОЛЬ</label>
+  <label class="label--clear">ПАРОЛЬ</label>
   <input id="ps" name="ps" type="password" class="required password"/>
  </div>
  <div>
@@ -616,7 +616,7 @@ $('.cc').hide();$('#fmask').remove();
   echo '<div><input type="checkbox" id="req" name="req"><label for=req class=switcher></label><p style="display:block">Позапросная учётка</p></div>';*/
 ?>
 </div>
-<div style="padding:9px">
+<div class="reg-actions">
 <button class="submit">ЗАРЕГИСТРИРОВАТЬ</button>
 </div>
 </div>
@@ -624,8 +624,8 @@ $('.cc').hide();$('#fmask').remove();
 </div>
 </div>
 
-<div id="paym" class="login-popup" style="left:50%;top:50%;transform:translate(-50%,-50%)">
-<div style="display:flex"><div class=title>ИНФОРМАЦИЯ О ПЛАТЕЖАХ</div><div class="clse"></div></div>
+<div id="paym" class="login-popup popup-center">
+<div class="modal-header"><div class=title>ИНФОРМАЦИЯ О ПЛАТЕЖАХ</div><div class="clse"></div></div>
 <!--<p>Для пополнения баланса, переведите сумму на указанные ниже реквизиты для WM в примечании укажите ваш логин,
 </br> но перед этим в ПРОФИЛЕ, во вкладке Webmoney укажите ваш Z кошелёк.--><p>Для UZ переводите средства только через PayMe. И уже через 5 минут средства будут зачислены с учётом процентных бонусов.<BR>
 </p>
@@ -657,8 +657,8 @@ for($i=0;$i<$rc;$i++)
 </div>
 </div>
 
-<div id="rset" class="pluso-box" style="top:50%;left:50%;display:none;width:494px;transform: translate(-50%, -50%)">
-<div style="display:flex"><div class="title">НАСТРОЙКИ ПЛАГИНОВ</div><div class="clse"></div></div>
+<div id="rset" class="pluso-box rset--desktop">
+<div class="modal-header"><div class="title">НАСТРОЙКИ ПЛАГИНОВ</div><div class="clse"></div></div>
 <div class="clear cell1 row"><el class="p1"><select id="tun" onchange="ltuns(this,'pl')"><option>Тюнер</option>
 <?php
 $res=$link->query("select * from recievers order by rn_id") or die("SQL req. error: ".$link->error_list);
@@ -673,17 +673,17 @@ $rc=$res->num_rows;
 <div class="clear cell1 row">
 <el class="p1"><button onclick="stof()">Сохранить в файл</button>
 <div id="semail"><button id="bb">Отправить на email</button><form method="post" id="stoemail" name="stoemail">
-<div class="pluso-box" id="sedia" style="display:none;position:absolute"><input id="inputeml" name="inputeml" type="text" class="required email">
-<button class="submit" style="width:100%">Отправить</button></div>
+<div class="pluso-box" id="sedia"><input id="inputeml" name="inputeml" type="text" class="required email">
+<button class="submit submit--wide">Отправить</button></div>
 </form>
 </div>
 </el>
 </div>
 </div>
 
-<div id="classo" class="pluso-box" style="position:absolute;top:50%;left:50%;display:none;width:690px;height:322px;transform:translate(-50%,-50%)">
-<div style="display:flex">
-<div class=title>СПИСОК ОПЕРАЦИЙ ПО АККАУНТУ <el id="ullst"></el></div><div class="clse"></div></div>
+<div id="classo" class="pluso-box classo--desktop">
+<div class="modal-header">
+<div class=title>СПИСОК ОПЕРАЦИЙ ПО АККАУНТУ <span id="ullst"></span></div><div class="clse"></div></div>
 <div id=ulist class="pluso-list"></div>
 </div>
 
@@ -694,7 +694,7 @@ $rc=$res->num_rows;
 <div class="clear cell1">
 <div class="nfo">Дата регистрации <div id="dr""></div></div></div>
 <?php
-echo '<div style="text-align:center">СПИСОК КАРТ</div>
+echo '<div class="text-center">СПИСОК КАРТ</div>
 <div class="bubbleslist"></div>';
 echo '<div class=butaddcard id="uaddcards">ДОБАВИТЬ КАРТУ</div>';
 ?>
