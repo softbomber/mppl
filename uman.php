@@ -887,10 +887,12 @@ $_ = $isEmbed ? '#result ' : '';
     font-weight: 500;
     transition: var(--transition);
     white-space: nowrap;
+    /* override adaptive.css .tab */
+    border-bottom: none;
 }
 <?= $_ ?>.tab .glyph { font-size: 14px; }
 <?= $_ ?>.tab:hover { color: var(--text); background: var(--surface-2); }
-<?= $_ ?>.tab.active { background: var(--primary); color: #fff; }
+<?= $_ ?>.tab.active { background: var(--primary); color: #fff; border-bottom: none; }
 <?= $_ ?>.tab--danger { color: #ff8b8b; }
 <?= $_ ?>.tab--danger.active { background: var(--danger); color: #fff; }
 
@@ -902,6 +904,11 @@ $_ = $isEmbed ? '#result ' : '';
     padding: 0 20px;
     height: auto;
     overflow: visible;
+    /* override adaptive.css .container */
+    background: transparent;
+    grid-template-columns: none;
+    width: auto;
+    box-sizing: border-box;
 }
 <?= $_ ?>.view { display: none; animation: fadeIn 200ms ease; }
 <?= $_ ?>.view.active { display: block; }
@@ -942,6 +949,15 @@ $_ = $isEmbed ? '#result ' : '';
     cursor: pointer;
     transition: var(--transition);
     font-family: inherit;
+    /* override adaptive.css .btn */
+    margin-bottom: 0;
+    text-align: left;
+    vertical-align: baseline;
+    white-space: normal;
+    line-height: 1.5;
+    -webkit-user-select: auto;
+    user-select: auto;
+    box-shadow: none;
 }
 <?= $_ ?>.btn:hover { background: var(--surface-2); border-color: var(--border-hi); }
 <?= $_ ?>.btn:active { transform: translateY(1px); }
@@ -1254,7 +1270,7 @@ $_ = $isEmbed ? '#result ' : '';
     font-size: 12px;
     color: var(--text-dim);
 }
-<?= $_ ?>.session-body .field { display: flex; gap: 6px; }
+<?= $_ ?>.session-body .field { display: flex; gap: 6px; padding-bottom: 0; vertical-align: baseline; }
 <?= $_ ?>.session-body .field b { color: var(--text); font-weight: 500; }
 <?= $_ ?>.session-foot {
     margin-top: 10px;
