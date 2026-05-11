@@ -1325,6 +1325,7 @@ $_ = $isEmbed ? '#result ' : '';
 <?= $_ ?>.cell-channel .ch-row { display: flex; align-items: center; gap: 6px; }
 <?= $_ ?>.cell-channel .ch-row strong { color: var(--text); }
 <?= $_ ?>.cell-channel .ch-meta { display: block; font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+<?= $_ ?>.cell-channel .ch-meta.ch-meta--warning { color: var(--warning); }
 <?= $_ ?>.cell-channel .ch-meta i { width: 11px; height: 11px; vertical-align: -2px; }
 
 <?= $_ ?>.action-cell { display: flex; gap: 4px; justify-content: flex-end; }

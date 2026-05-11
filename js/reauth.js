@@ -58,22 +58,28 @@
     ov.setAttribute('aria-modal', 'true');
     ov.innerHTML =
       '<div class="auth-modal__box" role="document">' +
-        '<div class="auth-modal__title" data-i18n="auth.session_expired_title">Сессия истекла</div>' +
-        '<div class="auth-modal__msg"   data-i18n="auth.session_expired_msg">Войдите заново — мы вернёмся туда же.</div>' +
+        '<div class="auth-modal__logo">' +
+          '<h2>METROPOLITEN</h2>' +
+          '<div class="auth-modal__logo-sub">IPTV/OTT and Cardsharing<br>Premium System</div>' +
+        '</div>' +
+        '<div class="auth-modal__title" data-i18n="auth.session_expired_title">ПОВТОРНЫЙ ВХОД</div>' +
+        '<div class="auth-modal__msg"   data-i18n="auth.session_expired_msg">Сессия истекла — войдите заново</div>' +
         '<form class="auth-modal__form" autocomplete="off">' +
           '<div class="auth-modal__field">' +
             '<label data-i18n="auth.login_label">Логин</label>' +
-            '<input type="text" name="login" autocomplete="username" required>' +
+            '<input type="text" name="login" autocomplete="username" placeholder="логин или email" required>' +
           '</div>' +
           '<div class="auth-modal__field">' +
             '<label data-i18n="auth.password_label">Пароль</label>' +
-            '<input type="password" name="password" autocomplete="current-password" required>' +
+            '<input type="password" name="password" autocomplete="current-password" placeholder="пароль" required>' +
           '</div>' +
           '<div class="auth-modal__error" hidden></div>' +
           '<div class="auth-modal__actions">' +
             '<button type="submit" class="auth-modal__submit" data-i18n="auth.submit">ВОЙТИ</button>' +
           '</div>' +
         '</form>' +
+        '<div class="auth-modal__forgot"><a href="restore.php" data-i18n="auth.forgot">Забыли пароль?</a></div>' +
+        '<div class="auth-modal__social"><form method="POST" action="glogin.php" style="width:100%"><button type="submit"><img src="gologo.png" alt="Google"> Войти через Google</button></form></div>' +
       '</div>';
 
     DOC.body.appendChild(ov);
