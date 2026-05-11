@@ -1,9 +1,10 @@
 <?php
 
+require_once(__DIR__ . '/env_loader.php');
 $pdo = new PDO(
-    'mysql:host=localhost;dbname=mpol;charset=utf8mb4',
-    'root',        // ← пользователь БД
-    'uiF5bcaw8',    // ← пароль
+    'mysql:host=' . (getenv('DB_HOST') ?: 'localhost') . ';dbname=' . (getenv('DB_NAME') ?: 'mpol') . ';charset=utf8mb4',
+    getenv('DB_USER') ?: 'root',
+    getenv('DB_PASS') ?: '',
     [
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

@@ -4,10 +4,11 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
 // Подключение к базе данных (замените данными вашей БД)
-$servername = "localhost";
-$username = "root";
-$password = "uiF5bcaw8";
-$dbname = "mpol";
+require_once(__DIR__ . '/env_loader.php');
+$servername = getenv('DB_HOST') ?: 'localhost';
+$username = getenv('DB_USER') ?: 'root';
+$password = getenv('DB_PASS') ?: '';
+$dbname = getenv('DB_NAME') ?: 'mpol';
 
 // Создание подключения
 $conn = new mysqli($servername, $username, $password, $dbname);

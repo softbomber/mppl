@@ -2,7 +2,7 @@
 header('Content-Type: text/html; charset=utf-8');
 include_once("config.php");
 
-$token = "967967173:AAG4CEMpB-SyYC0jN6Z2aOlhvGSp9YvCPpM";
+$token = getenv('TG_BOT_TOKEN') ?: '';
 $bot = new TelegramBot($token);
 
 // Проверяем наличие файла registered.trigger
@@ -134,30 +134,47 @@ $bot->on(function ($update) use ($bot, $link) {
 // Функции для управления ролью пользователя (можно реализовать через базу или временное хранилище)
 function saveUserRole($chatId, $role) {
     global $link;
-    $link->query("INSERT INTO temp_roles (chat_id, role) VALUES ('$chatId', '$role') ON DUPLICATE KEY UPDATE role='$role'");
+    $stmt = $link->prepare("INSERT INTO temp_roles (chat_id, role) VALUES (?, ?) ON DUPLICATE KEY UPDATE role=?");
+    $stmt->bind_param('sss', $chatId, $role, $role);
+    $stmt->execute();
+    $stmt->close();
 }
 
 function getUserRole($chatId) {
     global $link;
-    $result = $link->query("SELECT role FROM temp_roles WHERE chat_id='$chatId'");
-    return $result->num_rows ? $result->fetch_assoc()['role'] : null;
+    $stmt = $link->prepare("SELECT role FROM temp_roles WHERE chat_id=?");
+    $stmt->bind_param('s', $chatId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $val = $result->num_rows ? $result->fetch_assoc()['role'] : null;
+    $stmt->close();
+    return $val;
 }
 
 function clearUserRole($chatId) {
     global $link;
-    $link->query("DELETE FROM temp_roles WHERE chat_id='$chatId'");
+    $stmt = $link->prepare("DELETE FROM temp_roles WHERE chat_id=?");
+    $stmt->bind_param('s', $chatId);
+    $stmt->execute();
+    $stmt->close();
 }
 
 function tstat($cid) {
     global $link;
     $link->set_charset("utf8mb4");
-    $r = $link->query("SELECT id, user, iptvusr FROM accounts WHERE tcid='$cid'");
+    $stmt = $link->prepare("SELECT id, user, iptvusr FROM accounts WHERE tcid=?");
+    $stmt->bind_param('s', $cid);
+    $stmt->execute();
+    $r = $stmt->get_result();
     $prow = '';
     while ($usrlst = $r->fetch_assoc()) {
         $prow .= "Логин <b>{$usrlst['user']}</b>\n";
         $uid = $usrlst['id'];
         $iptvusr = $usrlst['iptvusr'];
-        $r2 = $link->query("SELECT packets.pname, DATE_FORMAT(pdates.dend, '%d.%m.%y %H:%i') AS dend FROM pdates INNER JOIN packets ON pdates.packet = packets.id WHERE user_id='$uid' AND pdates.dend >= NOW()");
+        $stmt2 = $link->prepare("SELECT packets.pname, DATE_FORMAT(pdates.dend, '%d.%m.%y %H:%i') AS dend FROM pdates INNER JOIN packets ON pdates.packet = packets.id WHERE user_id=? AND pdates.dend >= NOW()");
+        $stmt2->bind_param('i', $uid);
+        $stmt2->execute();
+        $r2 = $stmt2->get_result();
         $rnums2 = $r2->num_rows;
 
         if ($rnums2) {
@@ -169,7 +186,10 @@ function tstat($cid) {
         }
     }
     if ($iptvusr !== null && $iptvusr !== '') {
-        $r2 = $link->query("SELECT iptvactdate, iptvmonths FROM accounts WHERE id='$uid'");
+        $stmt3 = $link->prepare("SELECT iptvactdate, iptvmonths FROM accounts WHERE id=?");
+        $stmt3->bind_param('i', $uid);
+        $stmt3->execute();
+        $r2 = $stmt3->get_result();
         $rnums2 = $r2->num_rows;
         $prow .= "Пакет IPTV 4600+ "; 
         if ($rnums2) {
@@ -195,16 +215,21 @@ function make_user($fname, $lname, $phone, $chat_id) {
     $phone = $link->real_escape_string($phone ?? '');
     $chat_id = $link->real_escape_string($chat_id);
 
-    $r = $link->query("SELECT * FROM tbase WHERE phone='$phone' LIMIT 1");
+    $stmt = $link->prepare("SELECT * FROM tbase WHERE phone=? LIMIT 1");
+    $stmt->bind_param('s', $phone);
+    $stmt->execute();
+    $r = $stmt->get_result();
 
     if (!$r->num_rows) {
-        $q = "INSERT INTO `tbase` (fname, lname, phone, cid) VALUES ('$fname', '$lname', '$phone', '$chat_id')";
-        $link->query($q) or die("пользователя создать не удалось");
+        $stmt2 = $link->prepare("INSERT INTO `tbase` (fname, lname, phone, cid) VALUES (?, ?, ?, ?)");
+        $stmt2->bind_param('ssss', $fname, $lname, $phone, $chat_id);
+        $stmt2->execute() or die("пользователя создать не удалось");
     }
 
     if ($rows = is_ph_set($phone)) {
-        $q = "UPDATE accounts SET tcid='$chat_id' WHERE phone='$phone'";
-        $link->query($q) or die("ошибка обновления аккаунта");
+        $stmt3 = $link->prepare("UPDATE accounts SET tcid=? WHERE phone=?");
+        $stmt3->bind_param('ss', $chat_id, $phone);
+        $stmt3->execute() or die("ошибка обновления аккаунта");
         return true;
     } else {
         return false;
@@ -220,7 +245,10 @@ function registerDealer($fname, $lname, $phone, $user_id, $username, $chatId) {
     $user_id = $link->real_escape_string($user_id);
     $username = $link->real_escape_string($username ?? '');
 
-    $result = $link->query("SELECT id FROM dealers WHERE phone='$phone' OR t_id='$user_id' LIMIT 1");
+    $stmt = $link->prepare("SELECT id FROM dealers WHERE phone=? OR t_id=? LIMIT 1");
+    $stmt->bind_param('ss', $phone, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
         $stmt = $link->prepare("UPDATE dealers SET t_id=?, t_fname=?, t_lname=?, phone=?, t_usr=? WHERE phone=? OR t_id=?");
@@ -228,7 +256,10 @@ function registerDealer($fname, $lname, $phone, $user_id, $username, $chatId) {
         $stmt->execute();
         $stmt->close();
     } else {
-        $result = $link->query("SELECT id FROM dealers WHERE t_usr='$username' AND (t_fname='$fname' OR t_lname='$lname') LIMIT 1");
+        $result2 = $link->prepare("SELECT id FROM dealers WHERE t_usr=? AND (t_fname=? OR t_lname=?) LIMIT 1");
+        $result2->bind_param('sss', $username, $fname, $lname);
+        $result2->execute();
+        $result = $result2->get_result();
         if ($result->num_rows > 0) {
             $stmt = $link->prepare("UPDATE dealers SET t_id=?, t_fname=?, t_lname=?, phone=?, t_usr=? WHERE t_usr=? AND (t_fname=? OR t_lname=?)");
             $stmt->bind_param("ssssssss", $user_id, $fname, $lname, $phone, $username, $username, $fname, $lname);
@@ -247,27 +278,44 @@ function registerDealer($fname, $lname, $phone, $user_id, $username, $chatId) {
 
 function is_ph_set($phone) {
     global $link;
-    $phone = $link->real_escape_string($phone);
-    $result = $link->query("SELECT * FROM accounts WHERE phone='$phone' LIMIT 1");
-    return $result->num_rows > 0;
+    $stmt = $link->prepare("SELECT id FROM accounts WHERE phone=? LIMIT 1");
+    $stmt->bind_param('s', $phone);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $val = $result->num_rows > 0;
+    $stmt->close();
+    return $val;
 }
 
 function saveSearchState($chatId, $state) {
     global $link;
     $state = $state ? 1 : 0;
-    $link->query("INSERT INTO temp_search (chat_id, is_searching) VALUES ('$chatId', '$state') ON DUPLICATE KEY UPDATE is_searching='$state'");
+    $stmt = $link->prepare("INSERT INTO temp_search (chat_id, is_searching) VALUES (?, ?) ON DUPLICATE KEY UPDATE is_searching=?");
+    $stmt->bind_param('sii', $chatId, $state, $state);
+    $stmt->execute();
+    $stmt->close();
 }
 
 function isSearchState($chatId) {
     global $link;
-    $result = $link->query("SELECT is_searching FROM temp_search WHERE chat_id='$chatId'");
-    return $result->num_rows && $result->fetch_assoc()['is_searching'] == 1;
+    $stmt = $link->prepare("SELECT is_searching FROM temp_search WHERE chat_id=?");
+    $stmt->bind_param('s', $chatId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $val = $result->num_rows && $result->fetch_assoc()['is_searching'] == 1;
+    $stmt->close();
+    return $val;
 }
 
 function getDealerId($chatId) {
     global $link;
-    $result = $link->query("SELECT id FROM dealers WHERE t_id='$chatId' LIMIT 1");
-    return $result->num_rows ? $result->fetch_assoc()['id'] : null;
+    $stmt = $link->prepare("SELECT id FROM dealers WHERE t_id=? LIMIT 1");
+    $stmt->bind_param('s', $chatId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $val = $result->num_rows ? $result->fetch_assoc()['id'] : null;
+    $stmt->close();
+    return $val;
 }
 
 function searchAccountByUsername($username, $dId) {
@@ -287,7 +335,10 @@ function searchAccountByUsername($username, $dId) {
 
 function clearSearchState($chatId) {
     global $link;
-    $link->query("DELETE FROM temp_search WHERE chat_id='$chatId'");
+    $stmt = $link->prepare("DELETE FROM temp_search WHERE chat_id=?");
+    $stmt->bind_param('s', $chatId);
+    $stmt->execute();
+    $stmt->close();
 }
 
 function getAccountInfoForDealer($accountId) {

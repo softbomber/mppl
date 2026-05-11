@@ -1,8 +1,5 @@
 <?php
-// Если config.php нет, раскомментируйте и заполните:
-// $redis_host = '45.9.73.98';
-// $redis_port = 6379;
-// $redis_pass = 'qw34rfvgtU9snaWE';
+// Redis credentials are loaded from .env via config.php
 
 include_once("config.php"); 
 

@@ -8,57 +8,7 @@ include_once("config.php");
 checkLoggedIn("yes");
 if($_SESSION['a'] != 1) exit();
 
-$dbConfig = [
-    'host' => 'localhost',
-    'name' => 'mpol',
-    'user' => 'root',
-    'pass' => 'uiF5bcaw8'
-];
-
-$redisConfig = [
-    'host' => '45.9.73.98',
-    'port' => 6379,
-    'pass' => 'qw34rfvgtU9snaWE'
-];
-
-$sshUser = 'root';
-
-$serversMap = [
-    '51.254.135.10' => [
-        'pass' => 'bossismyname', 
-        'port' => 45822
-    ],
-    '45.90.217.114' => [
-        'pass' => 'uikjm9', 
-        'port' => 22
-    ],
-    '83.136.233.101' => [
-        'pass' => 'bossismyname', 
-        'port' => 45822
-    ],
-    '103.213.249.5' => [
-        'pass' => 'SSK4w6DfSGzk', 
-        'port' => 45822
-    ],
-    '77.110.104.120' => [
-        'pass' => 'y677Wd2jEdPQ', 
-        'port' => 45822
-    ],
-    '84.252.101.140' => [
-        'pass' => 'SSK4w6DfSGzk', 
-        'port' => 45822
-    ],
-];
-
-// Подключение к БД
-try {
-    $dsn = "mysql:host={$dbConfig['host']};dbname={$dbConfig['name']};charset=utf8";
-    $pdo = new PDO($dsn, $dbConfig['user'], $dbConfig['pass']);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    if (isset($_POST['action'])) die(json_encode(['error' => 'Ошибка БД']));
-}
+require_once(__DIR__ . '/db_connect.php');
 
 // ------------------------------------------
 // AJAX ОБРАБОТЧИКИ

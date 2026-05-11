@@ -4,7 +4,12 @@ function getBestAccountId($monthsInput) {
     $currentDate = time();
     
     // Подключение к базе данных
-    $pdo = new PDO("mysql:host=localhost;dbname=mpol", "root", "uiF5bcaw8");
+    require_once(__DIR__ . '/env_loader.php');
+    $pdo = new PDO(
+        "mysql:host=" . (getenv('DB_HOST') ?: 'localhost') . ";dbname=" . (getenv('DB_NAME') ?: 'mpol'),
+        getenv('DB_USER') ?: 'root',
+        getenv('DB_PASS') ?: ''
+    );
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // SQL запрос с добавлением accounts.user

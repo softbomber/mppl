@@ -4,7 +4,12 @@ checkLoggedIn("yes");
 $adm = $_SESSION['a'];
 if (!$adm) exit();
 
-$link = new mysqli("localhost", "root", "uiF5bcaw8", "mpol");
+$link = new mysqli(
+    getenv('DB_HOST') ?: 'localhost',
+    getenv('DB_USER') ?: 'root',
+    getenv('DB_PASS') ?: '',
+    getenv('DB_NAME') ?: 'mpol'
+);
 if ($link->connect_error) exit(json_encode(["error" => "Ошибка подключения к БД"]));
 
 $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;

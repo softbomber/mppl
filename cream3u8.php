@@ -20,7 +20,12 @@ $domain        = rtrim(trim($_POST['iptvsdom']), '/');
 $key           = trim($_POST['iptvkey']);
 $sdom="xyz.com";
 
-$pdo = new PDO("mysql:host=localhost;dbname=mpol;charset=utf8mb4", "root", "uiF5bcaw8", [
+require_once(__DIR__ . '/env_loader.php');
+$pdo = new PDO(
+    "mysql:host=" . (getenv('DB_HOST') ?: 'localhost') . ";dbname=" . (getenv('DB_NAME') ?: 'mpol') . ";charset=utf8mb4",
+    getenv('DB_USER') ?: 'root',
+    getenv('DB_PASS') ?: '',
+    [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
 ]);
 

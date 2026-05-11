@@ -1,11 +1,11 @@
 <?php
 //require_once("Mpolbot/vendor/autoload.php");
-$token = "967967173:AAG4CEMpB-SyYC0jN6Z2aOlhvGSp9YvCPpM";
+$token = getenv('TG_BOT_TOKEN') ?: '';
 $bot = new TelegramBot($token);
 
-$redis_host = '45.9.73.98';
-$redis_port = 6379;
-$redis_pass = 'qw34rfvgtU9snaWE';
+$redis_host = getenv('REDIS_HOST') ?: '127.0.0.1';
+$redis_port = (int)(getenv('REDIS_PORT') ?: 6379);
+$redis_pass = getenv('REDIS_PASS') ?: '';
 
 
 function tgSend(string $token, string $chatId, string $text): array {
@@ -30,8 +30,8 @@ function tgSend(string $token, string $chatId, string $text): array {
     return json_decode($body, true) ?? ['ok' => false, 'error_code' => 0];
 }
 
-define('TG_TOKEN', '967967173:AAG4CEMpB-SyYC0jN6Z2aOlhvGSp9YvCPpM');
-define('TG_ADMIN', '85534516');
+define('TG_TOKEN', getenv('TG_BOT_TOKEN') ?: '');
+define('TG_ADMIN', getenv('TG_ADMIN_CHAT_ID') ?: '85534516');
 
 $headers = array(
 //  'User-Agent' => 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0',
@@ -1887,15 +1887,18 @@ function newUser($login, $password, $email, $ip, $srv, $req = 0, $iptv = 0)
 function checkPass($login, $password)
 {
   global $link;
-    $lgn=$link->real_escape_string($login);
-    $pswd=$link->real_escape_string($password);
-      $res=$link->query("SELECT id,user,a,hash,currency,rate,postpaid,t_srt FROM dealers WHERE (user='$lgn' or eml='$lgn') and pwd='$pswd' and (block=0 or block is null)") or die("checkPass fatal error: " . $link->error_list);
+    $stmt=$link->prepare("SELECT id,user,a,hash,currency,rate,postpaid,t_srt FROM dealers WHERE (user=? or eml=?) and pwd=? and (block=0 or block is null)");
+    $stmt->bind_param('sss', $login, $login, $password);
+    $stmt->execute();
+    $res=$stmt->get_result();
     if ($res->num_rows == 1) {
         $row = $res->fetch_assoc();
         $hash = gensessionhash();
         $row['hash'] = $hash;
 //        $row['dealer'] = 1;
-        $link->query("update dealers set hash='$hash' where (user='$lgn' or eml='$lgn') and pwd='$pswd'");
+        $stmt2=$link->prepare("UPDATE dealers SET hash=? WHERE (user=? or eml=?) and pwd=?");
+        $stmt2->bind_param('ssss', $hash, $login, $login, $password);
+        $stmt2->execute();
         return $row;
     }
 /*else
@@ -1918,19 +1921,23 @@ function checkPass($login, $password)
 function newDealerOld($login,$password,$email,$ip)
 {
    global $link;
-    $l = $link->real_escape_string($login);
-    $p = $link->real_escape_string($password);
-    $e = $link->real_escape_string($email);
-   $link->query("INSERT INTO dealers (user,pwd,sum,eml,ip,dreg,fe,currency,rate) VALUES('$l','$p',0,'$e','$ip',NOW(),1,0,0)") or die("Died inserting login into db. Error returned if any: ".$link->error_list);
+    $stmt=$link->prepare("INSERT INTO dealers (user,pwd,sum,eml,ip,dreg,fe,currency,rate) VALUES(?,?,0,?,?,NOW(),1,0,0)");
+    $stmt->bind_param('ssss', $login, $password, $email, $ip);
+    $stmt->execute() or die("Died inserting login into db.");
 
-  $res=$link->query("SELECT id, user, a, hash,currency,rate,postpaid FROM dealers WHERE user='$l' and pwd='$p'") or die("nD fatal error: ".$link->error_list);
+    $stmt2=$link->prepare("SELECT id, user, a, hash,currency,rate,postpaid FROM dealers WHERE user=? and pwd=?");
+    $stmt2->bind_param('ss', $login, $password);
+    $stmt2->execute();
+    $res=$stmt2->get_result();
     if ($res->num_rows==1)
      {
         $row = $res->fetch_assoc();
         $hash=gensessionhash();
         $row['hash']=$hash;
         $row['dealer']=1;
-        $link->query("update dealers set hash='$hash' where user='$l' and pwd='$p'");
+        $stmt3=$link->prepare("UPDATE dealers SET hash=? WHERE user=? and pwd=?");
+        $stmt3->bind_param('sss', $hash, $login, $password);
+        $stmt3->execute();
       return $row;
     }
    return true;

@@ -43,8 +43,8 @@ function syncRedisUser(string $token, int $expireTimestamp): void {
         static $redis = null;
         if ($redis === null) {
             $redis = new TinyRedis();
-            $redis->connect('45.9.73.98', 6379);
-            $redis->execute(['AUTH', 'qw34rfvgtU9snaWE']);
+            $redis->connect(getenv('REDIS_HOST') ?: '127.0.0.1', (int)(getenv('REDIS_PORT') ?: 6379));
+            $redis->execute(['AUTH', getenv('REDIS_PASS') ?: '']);
         }
 
         $redis->execute(['SET', "user:{$token}:status", "active"]);

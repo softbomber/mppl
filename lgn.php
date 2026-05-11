@@ -5,30 +5,12 @@ checkLoggedIn("no");
 
 $title = "Качественный кардшаринг! Стабильные сервера!";
 
-// Функция для проверки аутентификации через Telegram
-function verifyTelegramAuth($data, $botToken) {
-    $check_hash = $data['hash'];
-    unset($data['hash']);
-    $data_check_arr = [];
-    foreach ($data as $key => $value) {
-        $data_check_arr[] = $key . '=' . $value;
-    }
-    sort($data_check_arr);
-    $data_check_string = implode("\n", $data_check_arr);
-    $secret_key = hash('sha256', $botToken, true);
-    $hash = hash_hmac('sha256', $data_check_string, $secret_key);
-    if (strcmp($hash, $check_hash) !== 0) {
-        throw new Exception('Data is NOT from Telegram');
-    }
-    if ((time() - $data['auth_date']) > 86400) {
-        throw new Exception('Data is outdated');
-    }
-    return hash_equals($hash, $check_hash);
-}
+require_once(__DIR__ . '/telegram_auth.php');
 
 
 if (isset($_GET['id']) && isset($_GET['hash'])) {
-    $botToken = '967967173:AAG4CEMpB-SyYC0jN6Z2aOlhvGSp9YvCPpM';
+    require_once(__DIR__ . '/env_loader.php');
+    $botToken = getenv('TG_BOT_TOKEN') ?: '';
 
     $data = [ 
         'id' => $_GET['id'],
