@@ -222,7 +222,7 @@
 
 /* ============================================================================
    Net offline modal + restored toast
-   Стиль как у .mdl (Регистрация Аккаунта): overlay + t_subst header + signin body
+   Стиль как у .mdl (Регистрация Аккаунта)
    ============================================================================ */
 .net-modal {
   position: fixed;
@@ -231,6 +231,7 @@
   display: none;
   align-items: center;
   justify-content: center;
+  overflow: auto;
   background-color: rgb(38 38 38 / 36%);
 }
 .net-modal.is-active { display: flex; }
@@ -238,19 +239,21 @@
 .net-modal__box {
   min-width: 280px;
   max-width: min(90vw, 352px);
+  background: #313444;
   box-shadow: 0px 0px 6px 0px rgba(119,119,119,.47);
   overflow: hidden;
 }
 .net-modal__header {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
   background: #465b6e;
-  padding: 6px 7px 6px;
+  padding: 6px 7px;
 }
 .net-modal__header-title {
   color: #f9f9f9;
   font-size: 13px;
   flex: 1;
+  padding: 0;
 }
 .net-modal__body {
   background: #f9faff;
@@ -326,7 +329,7 @@
   display: none;
   align-items: center;
   justify-content: center;
-  background: url('/image.png') center/cover;
+  background: rgba(0, 0, 0, 0.7);
 }
 .auth-modal.is-active { display: flex; }
 
@@ -336,15 +339,20 @@
   border-radius: 13px;
   padding: 0 0 30px;
   text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,.45);
 }
 .auth-modal__logo {
   padding: 18px 12px 8px;
   text-align: center;
 }
 .auth-modal__logo h2 {
-  font-size: 20px;
+  font-size: 23px;
   color: #dfe8f9;
   margin: 0;
+  padding: 0;
+  font-weight: normal;
+  background: none;
+  text-align: center;
 }
 .auth-modal__logo-sub {
   font-size: 11px;
@@ -366,15 +374,16 @@
 .auth-modal__form {
   padding: 0 22px;
 }
-.auth-modal__field {
+.auth-modal .auth-modal__field {
   height: 42px;
   text-align: center;
   margin-bottom: 0;
+  padding-bottom: 0;
 }
-.auth-modal__field label {
+.auth-modal .auth-modal__field label {
   display: none;
 }
-.auth-modal__field input {
+.auth-modal .auth-modal__field input {
   border: 1px solid #15324b;
   padding: 6px 14px 5px 40px;
   height: 19px;
@@ -384,10 +393,11 @@
   border-radius: 3px;
   background: #121d27 url('/i.png') no-repeat;
   outline: none;
+  box-sizing: content-box;
 }
-.auth-modal__field input[name="login"] { background-position: 5px 6px; }
-.auth-modal__field input[name="password"] { background-position: 4px -24px; }
-.auth-modal__field input:focus {
+.auth-modal .auth-modal__field input[name="login"] { background-position: 5px 6px; }
+.auth-modal .auth-modal__field input[name="password"] { background-position: 4px -24px; }
+.auth-modal .auth-modal__field input:focus {
   border-color: #74a5d7;
 }
 .auth-modal__error {
@@ -420,6 +430,9 @@
   color: #6bc498;
   text-decoration: none;
   font-size: 13px;
+  display: inline;
+  width: auto;
+  height: auto;
 }
 .auth-modal__social {
   display: flex;
@@ -444,6 +457,16 @@
   width: 23px;
   height: 22px;
   margin-right: 5px;
+}
+.auth-modal__social--tlg {
+  margin-top: 0;
+}
+.auth-modal__social--tlg button {
+  padding: 2px;
+  height: 31px;
+}
+@media (max-width:900px) {
+  .auth-modal__box { width: calc(100% - 80px); }
 }
 
 
