@@ -424,481 +424,354 @@ usort($chanmap_array, function($a, $b) use ($sort_by, $sort_order) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chanmap Editor</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            background: #0F0F0F; 
-            color: #A1A1AA;
-            padding: 20px;
-            line-height: 1.5;
-        }
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
+/* ============================================================================
+   Дизайн-система: тёмная тема (как в uman.php)
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; min-height: 100vh; }
+:root {
+    --bg:           #0a0e16;
+    --bg-elevated:  #0f1520;
+    --surface:      #131a26;
+    --surface-2:    #1a2333;
+    --surface-hi:   #22304a;
+    --border:       #243043;
+    --border-hi:    #324562;
+    --text:         #e6edf3;
+    --text-dim:     #8b96a8;
+    --text-faint:   #5b6678;
+    --primary:      #4d8eff;
+    --primary-hov:  #6ba1ff;
+    --primary-bg:   rgba(77, 142, 255, 0.12);
+    --success:      #3ecf8e;
+    --success-bg:   rgba(62, 207, 142, 0.12);
+    --warning:      #f5a623;
+    --warning-bg:   rgba(245, 166, 35, 0.12);
+    --danger:       #ef4444;
+    --danger-bg:    rgba(239, 68, 68, 0.12);
+    --radius:       10px;
+    --radius-lg:    14px;
+    --radius-pill:  999px;
+    --shadow-1:     0 1px 2px rgba(0,0,0,.3), 0 4px 12px rgba(0,0,0,.2);
+    --shadow-2:     0 10px 30px rgba(0,0,0,.45);
+    --transition:   150ms ease;
+    --font:         -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono:         "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    padding: 20px;
+}
+.container { max-width: 1600px; margin: 0 auto; }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 20px;
-            background: #1A1A2E;
-            border-radius: 12px;
-            border: 1px solid #27272A;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .header h1 {
-            color: #FFFFFF;
-            font-size: 28px;
-            font-weight: 600;
-            margin: 0;
-        }
+/* ---- Topbar (хедер) ---- */
+.topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10, 14, 22, 0.85);
+    backdrop-filter: saturate(180%) blur(12px);
+    border: 1px solid var(--border);
+    padding: 12px 20px; display: flex; flex-wrap: wrap; gap: 12px;
+    align-items: center; justify-content: space-between;
+    margin-bottom: 16px; border-radius: var(--radius-lg);
+}
+.brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 600; color: var(--text); font-size: 18px;
+}
+.brand-glyph { color: var(--primary); font-size: 22px; }
 
-        .header-stats {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
+/* ---- Info grid (stat cards) ---- */
+.info-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px; margin-bottom: 16px;
+}
+.info-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 14px;
+}
+.info-item .lbl {
+    display: block; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--text-dim); margin-bottom: 4px;
+}
+.info-item .val { font-size: 20px; font-weight: 600; color: var(--text); }
+.info-item .val.mono { font-family: var(--mono); font-size: 16px; }
+.info-item .val.success { color: var(--success); }
+.info-item .val.info { color: var(--primary); }
+.info-item .val.muted { color: var(--text-dim); }
 
-        .header-stat {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+/* ---- View actions ---- */
+.view-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
-        .header-stat-value {
-            font-size: 12px;
-            font-weight: 700;
-            color: #3B82F6;
-        }
+/* ---- Card (для таблицы) ---- */
+.card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-1); overflow: hidden;
+}
+.table-wrap {
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    max-height: calc(100vh - 260px); overflow-y: auto;
+}
+.table-wrap::-webkit-scrollbar { width: 8px; height: 8px; }
+.table-wrap::-webkit-scrollbar-track { background: var(--bg-elevated); }
+.table-wrap::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
 
-        .header-stat-label {
-            color: #71717A;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 2px;
-        }
+/* ---- Tables ---- */
+table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.data th, table.data td {
+    padding: 10px 14px; text-align: left;
+    border-bottom: 1px solid var(--border); vertical-align: top;
+}
+table.data thead th {
+    background: var(--bg-elevated); color: var(--text-dim);
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+    font-weight: 600; user-select: none; position: sticky; top: 0; z-index: 1;
+}
+table.data tbody tr { transition: background var(--transition); }
+table.data tbody tr:hover { background: var(--bg-elevated); }
+table.data td.num { font-family: var(--mono); font-weight: 500; }
+.col-id { width: 90px; }
+.col-name { width: 200px; }
+.col-name .name-cell { color: var(--text); word-wrap: break-word; }
+.col-type { width: 120px; }
+.col-url { min-width: 320px; }
+.col-url small { word-break: break-all; display: block; color: var(--text-dim); font-family: var(--mono); font-size: 12px; }
+.col-allow { width: 130px; }
+.col-actions { width: 100px; text-align: right; }
 
-        .table-container {
-            background: #1A1A2E;
-            border-radius: 12px;
-            border: 1px solid #27272A;
-        }
+/* ---- Badges ---- */
+.badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: var(--radius-pill);
+    font-size: 11px; font-weight: 600; line-height: 1.6;
+}
+.badge--info { background: var(--primary-bg); color: var(--primary-hov); }
+.badge--success { background: var(--success-bg); color: var(--success); }
+.badge--warning { background: var(--warning-bg); color: var(--warning); }
+.badge--danger { background: var(--danger-bg); color: var(--danger); }
+.badge--muted { background: var(--surface-2); color: var(--text-dim); }
 
-        .table-wrapper {
-            max-height: calc(100vh - 140px);
-            overflow-y: auto;
-        }
+/* ---- Sort link & filter input in th ---- */
+.sort-link {
+    color: var(--text-dim); text-decoration: none; cursor: pointer;
+    font-weight: 600; transition: var(--transition);
+    display: inline-flex; align-items: center; gap: 4px;
+}
+.sort-link:hover { color: var(--text); }
+.sort-link.active { color: var(--primary); }
+.sort-arrow { font-size: 10px; }
+.filter-input {
+    width: 100%; margin-top: 6px;
+    padding: 4px 8px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 11px;
+    background: var(--bg-elevated); color: var(--text);
+    font-family: var(--mono);
+}
+.filter-input:focus {
+    outline: none; border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-bg);
+}
 
-        .table-wrapper::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
+/* ---- Buttons ---- */
+.btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border: 1px solid var(--border);
+    border-radius: var(--radius); background: var(--surface);
+    color: var(--text); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: var(--transition); font-family: inherit;
+}
+.btn:hover { background: var(--surface-2); border-color: var(--border-hi); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn--primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.btn--primary:hover { background: var(--primary-hov); border-color: var(--primary-hov); }
+.btn--success { background: var(--success); border-color: var(--success); color: #07140d; font-weight: 600; }
+.btn--success:hover { filter: brightness(1.1); }
+.btn--danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+.btn--danger:hover { filter: brightness(1.1); }
+.btn--ghost { background: transparent; }
+.btn--sm { padding: 5px 9px; font-size: 12px; }
 
-        .table-wrapper::-webkit-scrollbar-track {
-            background: #18181B;
-        }
+/* ---- Message ---- */
+.message {
+    padding: 12px 16px; border-radius: var(--radius);
+    margin-bottom: 16px; font-size: 13px;
+    border: 1px solid transparent;
+}
+.message.success {
+    background: var(--success-bg); color: var(--success);
+    border-color: var(--success);
+}
+.message.error {
+    background: var(--danger-bg); color: var(--danger);
+    border-color: var(--danger);
+}
 
-        .table-wrapper::-webkit-scrollbar-thumb {
-            background: #3F3F46;
-            border-radius: 4px;
-        }
-
-        .table-wrapper::-webkit-scrollbar-thumb:hover {
-            background: #52525B;
-        }
-        
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-        }
-        th, td { 
-            padding: 14px 16px; 
-            text-align: left; 
-            border-bottom: 1px solid #27272A;
-        }
-        th { 
-            background: #18181B; 
-            font-weight: 600; 
-            color: #FFFFFF;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        tr:hover { 
-            background: rgba(59, 130, 246, 0.05); 
-        }
-
-        .col-id { width: 90px; }
-        .col-name { width: 180px; max-width: 180px; }
-        .col-name-cell { 
-            word-wrap: break-word; 
-            white-space: normal;
-            color: #E4E4E7;
-        }
-        .col-type { width: 110px; }
-        .col-url { width: auto; min-width: 400px; }
-        .col-url small { 
-            word-break: break-all;
-            white-space: normal;
-            display: block;
-            max-width: 100%;
-            overflow-wrap: break-word;
-        }
-        .col-allow { width: 130px; }
-        .col-actions { width: 90px; }
-
-        .badge { 
-            display: inline-block; 
-            padding: 4px 10px; 
-            border-radius: 6px; 
-            font-size: 11px; 
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        .badge-direct { 
-            background: rgba(59, 130, 246, 0.1); 
-            color: #3B82F6;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-        }
-        .badge-provider { 
-            background: rgba(168, 85, 247, 0.1); 
-            color: #A855F7;
-            border: 1px solid rgba(168, 85, 247, 0.2);
-        }
-        .badge-empty { 
-            background: rgba(113, 113, 122, 0.1); 
-            color: #71717A;
-            border: 1px solid rgba(113, 113, 122, 0.2);
-        }
-
-        .filter-input { 
-            width: 100%; 
-            padding: 8px 10px; 
-            border: 1px solid #27272A; 
-            border-radius: 6px; 
-            font-size: 12px; 
-            margin-top: 8px;
-            background: #18181B;
-            color: #E4E4E7;
-        }
-        .filter-input:focus { 
-            border-color: #3B82F6; 
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-        }
-
-        .sort-link { 
-            color: #3B82F6; 
-            text-decoration: none; 
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .sort-link:hover { 
-            text-decoration: underline;
-            color: #60A5FA;
-        }
-        .sort-link.active { 
-            font-weight: 700;
-            color: #FFFFFF;
-        }
-        .sort-arrow { 
-            margin-left: 4px;
-        }
-
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 9999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
-        }
-        .modal.show { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-        }
-        .modal-content { 
-            background: #1A1A2E; 
-            padding: 32px; 
-            border-radius: 16px; 
-            width: 90%; 
-            max-width: 700px; 
-            max-height: 90vh; 
-            overflow-y: auto;
-            border: 1px solid #27272A;
-        }
-        .modal-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 24px; 
-        }
-        .modal-header h2 { 
-            margin: 0; 
-            color: #FFFFFF;
-            font-size: 22px;
-            font-weight: 600;
-        }
-        .close-btn { 
-            font-size: 28px; 
-            font-weight: 300; 
-            color: #71717A; 
-            cursor: pointer; 
-            border: none; 
-            background: none;
-            transition: color 0.2s;
-        }
-        .close-btn:hover { 
-            color: #FFFFFF;
-        }
-
-        .form-row { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-            gap: 16px; 
-            margin-bottom: 16px; 
-        }
-        .form-group { 
-            display: flex; 
-            flex-direction: column; 
-        }
-        .form-group label { 
-            margin-bottom: 8px; 
-            font-weight: 500; 
-            color: #E4E4E7;
-            font-size: 14px;
-        }
-        .form-group input,
-        .form-group select,
-        .form-group input[list] {
-            padding: 12px 14px;
-            border: 1px solid #27272A;
-            border-radius: 8px;
-            font-size: 14px;
-            background: #18181B;
-            color: #E4E4E7;
-            transition: border-color 0.2s;
-            min-width: 100%;
-            resize: vertical;
-            min-height: 40px;
-        }
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: #3B82F6;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-        }
-        .form-group small {
-            margin-top: 6px;
-            color: #71717A;
-            font-size: 12px;
-        }
-        
-        /* Autocomplete styles */
-        .autocomplete-container {
-            position: relative;
-        }
-        .autocomplete-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: #18181B;
-            border: 1px solid #27272A;
-            border-radius: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-            margin-top: 4px;
-        }
-        .autocomplete-results.show {
-            display: block;
-        }
-        .autocomplete-item {
-            padding: 10px 14px;
-            cursor: pointer;
-            border-bottom: 1px solid #27272A;
-            color: #E4E4E7;
-            font-size: 13px;
-        }
-        .autocomplete-item:hover {
-            background: rgba(59, 130, 246, 0.1);
-        }
-        .autocomplete-item:last-child {
-            border-bottom: none;
-        }
-        .autocomplete-item strong {
-            color: #3B82F6;
-        }
-        .autocomplete-item span {
-            color: #71717A;
-            margin-left: 8px;
-        }
-        .autocomplete-loading {
-            padding: 10px 14px;
-            color: #71717A;
-            font-size: 13px;
-            text-align: center;
-        }
-
-        .message {
-            padding: 16px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .message.success {
-            background: rgba(34, 197, 94, 0.1);
-            color: #22C55E;
-            border: 1px solid rgba(34, 197, 94, 0.2);
-        }
-        .message.error {
-            background: rgba(239, 68, 68, 0.1);
-            color: #EF4444;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #3B82F6, #2563EB);
-            color: white;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #2563EB, #1D4ED8);
-            transform: translateY(-1px);
-        }
-        .btn-success {
-            background: linear-gradient(135deg, #22C55E, #16A34A);
-            color: white;
-        }
-        .btn-success:hover {
-            background: linear-gradient(135deg, #16A34A, #15803D);
-            transform: translateY(-1px);
-        }
-        .btn-warning {
-            background: #27272A;
-            color: #A1A1AA;
-            border: 1px solid #3F3F46;
-        }
-        .btn-warning:hover {
-            background: #3F3F46;
-            color: #FFFFFF;
-        }
-        .btn-danger {
-            background: rgba(239, 68, 68, 0.1);
-            color: #EF4444;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            padding: 6px 12px;
-            font-size: 13px;
-        }
-        .btn-danger:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
-        .btn-warning.btn-sm {
-            padding: 6px 12px;
-            font-size: 13px;
-        }
-/* Подсветка редактируемой строки */
+/* ---- Row states ---- */
 tr.editing {
-    background: rgba(168, 85, 247, 0.15) !important;
-    border-left: 3px solid #A855F7;
-    transition: all 0.2s;
+    background: var(--primary-bg) !important;
+    box-shadow: inset 3px 0 0 var(--primary);
 }
-
-/* Строка с накопленными изменениями */
 tr.pending-change {
-    background: rgba(59, 130, 246, 0.08) !important;
-    border-left: 3px solid #3B82F6;
+    background: var(--warning-bg) !important;
+    box-shadow: inset 3px 0 0 var(--warning);
 }
-
 tr.pending-change[data-pending="delete"] {
-    background: rgba(239, 68, 68, 0.1) !important;
-    border-left: 3px solid #EF4444;
+    background: var(--danger-bg) !important;
+    box-shadow: inset 3px 0 0 var(--danger);
+    opacity: 0.7;
 }
 
-/* === Расширяемое поле URL === */
-#form-url {
-    min-height: 40px;
-    height: auto;
-    resize: vertical;
-    overflow-y: hidden;
+/* ---- Pending count ---- */
+#pending-count {
+    padding: 6px 12px; background: var(--warning-bg);
+    color: var(--warning); border-radius: var(--radius-pill);
+    font-size: 12px; font-weight: 600;
+}
+
+/* ---- Modal ---- */
+.modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(5, 9, 16, 0.7);
+    backdrop-filter: blur(4px); z-index: 9999;
+    align-items: center; justify-content: center; padding: 16px;
+}
+.modal-overlay.active { display: flex; }
+.modal-content {
+    background: var(--surface); border: 1px solid var(--border-hi);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-2);
+    width: 100%; max-width: 700px; max-height: 90vh; overflow-y: auto;
+}
+.modal-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.modal-header h2 { margin: 0; color: var(--text); font-size: 18px; font-weight: 600; }
+.modal-body { padding: 20px; }
+.modal-footer {
+    padding: 12px 20px; border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; gap: 8px;
+    background: var(--bg-elevated);
+}
+.close-btn {
+    font-size: 22px; color: var(--text-dim);
+    cursor: pointer; border: none; background: none;
+    transition: color 0.2s;
+}
+.close-btn:hover { color: var(--text); }
+
+/* ---- Form ---- */
+.form-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin-bottom: 16px;
+}
+.form-group { display: flex; flex-direction: column; position: relative; }
+.form-group label {
+    margin-bottom: 6px; font-weight: 500;
+    color: var(--text); font-size: 13px;
+}
+.form-group input,
+.form-group select,
+.form-group textarea,
+.form-group input[list] {
+    padding: 10px 12px; border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 13px;
+    background: var(--bg-elevated); color: var(--text);
     font-family: inherit;
-    line-height: 1.4;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none; border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-bg);
+}
+.form-group small {
+    margin-top: 4px; color: var(--text-dim); font-size: 11px;
+}
+
+/* ---- Autocomplete ---- */
+.autocomplete-container { position: relative; }
+.autocomplete-results {
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--surface-2); border: 1px solid var(--border-hi);
+    border-radius: var(--radius); max-height: 200px; overflow-y: auto;
+    z-index: 1000; display: none; margin-top: 4px;
+    box-shadow: var(--shadow-2);
+}
+.autocomplete-results.show { display: block; }
+.autocomplete-item {
+    padding: 8px 12px; cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    color: var(--text); font-size: 12px;
+}
+.autocomplete-item:hover { background: var(--primary-bg); }
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-item strong { color: var(--primary); font-family: var(--mono); }
+.autocomplete-item span { color: var(--text-dim); margin-left: 8px; }
+.autocomplete-loading { padding: 10px; text-align: center; color: var(--text-dim); font-size: 12px; }
+
+/* ---- Form URL textarea ---- */
+#form-url {
+    min-height: 40px; height: auto; resize: vertical;
+    overflow-y: hidden; font-family: inherit; line-height: 1.4;
     transition: min-height 0.15s ease;
 }
+#form-url::placeholder { color: var(--text-faint); }
+#form-url:focus { min-height: 60px; }
 
-#form-url::placeholder {
-    color: #71717A;
-}
-
-#form-url:focus {
-    min-height: 60px;
-}
-
-/* Адаптив для мобильных */
+/* ---- Responsive ---- */
 @media (max-width: 768px) {
-    #form-url {
-        min-height: 50px;
-    }
+    body { padding: 10px; }
+    .topbar { padding: 10px 14px; }
+    .brand { font-size: 15px; }
+    .info-grid { grid-template-columns: repeat(2, 1fr); }
+    .info-item .val { font-size: 16px; }
+    table.data th, table.data td { padding: 8px 10px; font-size: 12px; }
+    #form-url { min-height: 50px; }
 }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>📺 Chanmap Editor</h1>
-            <div class="header-stats">
-                <div class="header-stat">
-                    <div class="header-stat-value"><?= count($chanmap) ?></div>
-                    <div class="header-stat-label">Всего</div>
-                </div>
-                <div class="header-stat">
-                    <div class="header-stat-value"><?= count(array_filter($chanmap, fn($c) => !empty($c['url']))) ?></div>
-                    <div class="header-stat-label">С URL</div>
-                </div>
-                <div class="header-stat">
-                    <div class="header-stat-value"><?= count(array_filter($chanmap, fn($c) => empty($c['url']) && !empty($c['id']))) ?></div>
-                    <div class="header-stat-label">TVClub</div>
-                </div>
-                <div class="header-stat">
-                    <div class="header-stat-value"><?= count(array_filter($chanmap, fn($c) => empty($c['url']) && empty($c['id']))) ?></div>
-                    <div class="header-stat-label">Пустые</div>
-                </div>
-                <div style="display: flex; gap: 10px; align-items: center; margin-left: 20px; padding-left: 20px; border-left: 1px solid #27272A;">
-                    <span id="pending-count" style="display: none; color: #EF4444; font-weight: bold; font-size: 12px;">
-                        ⚠️ <span id="pending-number">0</span>
-                    </span>
-                    <button id="save-btn" class="btn btn-success" style="display: none;" onclick="saveChanges()">💾</button>
-                    <button id="discard-btn" class="btn btn-warning" style="display: none;" onclick="discardChanges()">✖</button>
-                    <?php if (array_filter($filters)): ?>
-                        <button class="btn btn-warning" onclick="clearAllFilters()" title="Сбросить фильтры">🔄</button>
-                    <?php endif; ?>
-                    <button class="btn btn-primary" onclick="openAddModal()">+ Добавить</button>
-                </div>
+        <div class="topbar">
+            <div class="brand">
+                <span class="brand-glyph">📺</span>
+                <span>Chanmap Editor</span>
+            </div>
+            <div class="view-actions">
+                <span id="pending-count" style="display: none;">
+                    ⚠️ <span id="pending-number">0</span> изменений
+                </span>
+                <button id="save-btn" class="btn btn--success" style="display: none;" onclick="saveChanges()">💾 Сохранить</button>
+                <button id="discard-btn" class="btn btn--ghost" style="display: none;" onclick="discardChanges()">✖ Отмена</button>
+                <?php if (array_filter($filters)): ?>
+                    <button class="btn btn--ghost" onclick="clearAllFilters()" title="Сбросить фильтры">🔄 Сброс</button>
+                <?php endif; ?>
+                <button class="btn btn--primary" onclick="openAddModal()">+ Добавить</button>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="lbl">Всего</span>
+                <span class="val"><?= count($chanmap) ?></span>
+            </div>
+            <div class="info-item">
+                <span class="lbl">С URL</span>
+                <span class="val success"><?= count(array_filter($chanmap, fn($c) => !empty($c['url']))) ?></span>
+            </div>
+            <div class="info-item">
+                <span class="lbl">TVClub</span>
+                <span class="val info"><?= count(array_filter($chanmap, fn($c) => empty($c['url']) && !empty($c['id']))) ?></span>
+            </div>
+            <div class="info-item">
+                <span class="lbl">Пустые</span>
+                <span class="val muted"><?= count(array_filter($chanmap, fn($c) => empty($c['url']) && empty($c['id']))) ?></span>
             </div>
         </div>
 
@@ -907,9 +780,9 @@ tr.pending-change[data-pending="delete"] {
         <?php endif; ?>
 
         <!-- Таблица каналов -->
-        <div class="table-container">
-            <div class="table-wrapper">
-                <table>
+        <div class="card">
+            <div class="table-wrap">
+                <table class="data">
                 <thead>
                     <tr>
                         <th class="col-id">
@@ -968,8 +841,8 @@ tr.pending-change[data-pending="delete"] {
                         $id = $channel['_id'];
                     ?>
                         <tr data-id="<?= htmlspecialchars($id) ?>">
-                            <td class="col-id"><strong><?= htmlspecialchars($id) ?></strong></td>
-                            <td class="col-name"><span class="col-name-cell"><?= htmlspecialchars($channel['name'] ?? '-') ?></span></td>
+                            <td class="col-id num"><strong><?= htmlspecialchars($id) ?></strong></td>
+                            <td class="col-name"><span class="name-cell"><?= htmlspecialchars($channel['name'] ?? '-') ?></span></td>
                             <td class="col-url">
                                 <?php if (!empty($channel['url'])): ?>
                                     <small><?= htmlspecialchars($channel['url']) ?></small>
@@ -982,16 +855,16 @@ tr.pending-change[data-pending="delete"] {
                             <td class="col-allow"><?= htmlspecialchars($channel['allow'] ?? '-') ?></td>
                             <td class="col-type">
                                 <?php if (!empty($channel['url'])): ?>
-                                    <span class="badge badge-direct">Direct URL</span>
+                                    <span class="badge badge--info">Direct URL</span>
                                 <?php elseif (!empty($channel['id'])): ?>
-                                    <span class="badge badge-provider">TVClub</span>
+                                    <span class="badge badge--success">TVClub</span>
                                 <?php else: ?>
-                                    <span class="badge badge-empty">Пустой</span>
+                                    <span class="badge badge--muted">Пустой</span>
                                 <?php endif; ?>
                             </td>
                             <td class="col-actions">
-                                <button type="button" class="btn btn-warning btn-sm" onclick='openEditModal("<?= htmlspecialchars($id) ?>", <?= json_encode($channel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>✏️</button>
-                                <button type="button" class="btn btn-danger" onclick="queueDeleteChannel('<?= htmlspecialchars($id) ?>')">🗑️</button>
+                                <button type="button" class="btn btn--sm" onclick='openEditModal("<?= htmlspecialchars($id) ?>", <?= json_encode($channel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>✏️</button>
+                                <button type="button" class="btn btn--sm btn--danger" onclick="queueDeleteChannel('<?= htmlspecialchars($id) ?>')">🗑️</button>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -1001,7 +874,7 @@ tr.pending-change[data-pending="delete"] {
     </div>
 
     <!-- Модальное окно редактирования/добавления -->
-    <div id="edit-modal" class="modal">
+    <div id="edit-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modal-title">Редактирование канала</h2>
@@ -1011,72 +884,70 @@ tr.pending-change[data-pending="delete"] {
                 <input type="hidden" id="form-action" value="add">
                 <input type="hidden" id="form-channel-id" value="">
 
-                <div class="form-row">
-                    <div class="form-group autocomplete-container">
-                        <label>ID канала *</label>
-                        <input type="number" id="form-id-input" required oninput="handleIdInput(this.value)" autocomplete="off">
-                        <div id="id-autocomplete" class="autocomplete-results"></div>
-                        <small>Введите ID (поиск после 2 цифр) или название (поиск после 3 букв)</small>
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group autocomplete-container">
+                            <label>ID канала *</label>
+                            <input type="number" id="form-id-input" required oninput="handleIdInput(this.value)" autocomplete="off">
+                            <div id="id-autocomplete" class="autocomplete-results"></div>
+                            <small>Введите ID (поиск после 2 цифр) или название (поиск после 3 букв)</small>
+                        </div>
+                        <div class="form-group autocomplete-container">
+                            <label>Название *</label>
+                            <input type="text" id="form-name" required oninput="handleNameInput(this.value)" autocomplete="off">
+                            <div id="name-autocomplete" class="autocomplete-results"></div>
+                            <small>Введите название для поиска в базе</small>
+                        </div>
                     </div>
-                    <div class="form-group autocomplete-container">
-                        <label>Название *</label>
-                        <input type="text" id="form-name" required oninput="handleNameInput(this.value)" autocomplete="off">
-                        <div id="name-autocomplete" class="autocomplete-results"></div>
-                        <small>Введите название для поиска в базе</small>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>URL потока</label>
+                            <textarea id="form-url" placeholder="http://..." rows="1"></textarea>
+                            <small>Если не указан — используется ID для tvclub</small>
+                        </div>
+                        <div class="form-group">
+                            <label>ID для tvclub</label>
+                            <input type="text" id="form-tvclub-id" placeholder="8150">
+                            <small>Обязательно если нет URL</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Quality</label>
+                            <input type="text" id="form-quality" placeholder="1920x1080">
+                        </div>
+                        <div class="form-group">
+                            <label>User-Agent</label>
+                            <input list="user-agents-list" id="form-agent" placeholder="Выберите или введите свой" autocomplete="on">
+                            <datalist id="user-agents-list"></datalist>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Referer</label>
+                            <input type="url" id="form-referer" placeholder="https://example.com/">
+                            <small>Заголовок Referer для запросов (опционально)</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Allow (CDN)</label>
+                            <input type="text" id="form-allow" placeholder="77.110.105.57">
+                        </div>
+                        <div class="form-group">
+                            <label>Disallow (CDN)</label>
+                            <input type="text" id="form-disallow" placeholder="51.254.135.10">
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>URL потока</label>
-		    <textarea id="form-url" placeholder="http://..." rows="1" 
-	              style="width: 100%; padding: 12px 14px; border: 1px solid #27272A; 
-                     border-radius: 8px; font-size: 14px; background: #18181B; 
-                     color: #E4E4E7; min-height: 40px; resize: vertical;"></textarea>
-                        <small>Если не указан — используется ID для tvclub</small>
-                    </div>
-                    <div class="form-group">
-                        <label>ID для tvclub</label>
-                        <input type="text" id="form-tvclub-id" placeholder="8150">
-                        <small>Обязательно если нет URL</small>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Quality</label>
-                        <input type="text" id="form-quality" placeholder="1920x1080">
-                    </div>
-                    <div class="form-group">
-                        <label>User-Agent</label>
-                        <input list="user-agents-list" id="form-agent" placeholder="Выберите или введите свой" autocomplete="on" style="min-width: 100%; resize: vertical; min-height: 40px;">
-                        <datalist id="user-agents-list">
-                        </datalist>
-                    </div>
-                </div>
-
-<div class="form-row">
-    <div class="form-group">
-        <label>Referer</label>
-        <input type="url" id="form-referer" placeholder="https://example.com/">
-        <small>Заголовок Referer для запросов (опционально)</small>
-    </div>
-</div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Allow (CDN)</label>
-                        <input type="text" id="form-allow" placeholder="77.110.105.57">
-                    </div>
-                    <div class="form-group">
-                        <label>Disallow (CDN)</label>
-                        <input type="text" id="form-disallow" placeholder="51.254.135.10">
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
-                    <button type="button" class="btn btn-warning" onclick="closeModal()">Отмена</button>
-                    <button type="submit" class="btn btn-success">В очередь</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn" onclick="closeModal()">Отмена</button>
+                    <button type="submit" class="btn btn--success">В очередь</button>
                 </div>
             </form>
         </div>
@@ -1211,7 +1082,7 @@ tr.pending-change[data-pending="delete"] {
             document.getElementById('form-disallow').value = channelData.disallow || '';
 
             document.getElementById('modal-title').textContent = 'Редактирование канала ' + id;
-            document.getElementById('edit-modal').classList.add('show');
+            document.getElementById('edit-modal').classList.add('active');
             highlightRow(id);
             // Загружаем агенты если ещё не загружены
         if (document.getElementById('user-agents-list').children.length === 0) {
@@ -1236,7 +1107,7 @@ tr.pending-change[data-pending="delete"] {
             document.getElementById('form-disallow').value = '';
 
             document.getElementById('modal-title').textContent = 'Добавление канала';
-            document.getElementById('edit-modal').classList.add('show');
+            document.getElementById('edit-modal').classList.add('active');
 
             // Загружаем агенты если ещё не загружены
             if (document.getElementById('user-agents-list').children.length === 0) {
@@ -1246,7 +1117,7 @@ tr.pending-change[data-pending="delete"] {
 
         // Закрытие модального окна
         function closeModal() {
-            document.getElementById('edit-modal').classList.remove('show');
+            document.getElementById('edit-modal').classList.remove('active');
         }
 
         // Закрытие по клику вне модального окна
@@ -1450,7 +1321,7 @@ function highlightRow(id) {
 
 // Снятие подсветки при закрытии модального окна
 function closeModal() {
-    document.getElementById('edit-modal').classList.remove('show');
+    document.getElementById('edit-modal').classList.remove('active');
     // Снимаем подсветку через небольшую задержку (после анимации)
     setTimeout(() => {
         document.querySelectorAll('tr.editing').forEach(row => {
@@ -1499,7 +1370,7 @@ function applyPendingChangeToTable(change) {
     if (row) {
         // Обновляем ячейки
         const cells = row.querySelectorAll('td');
-        if (cells[1]) cells[1].innerHTML = `<span class="col-name-cell">${escapeHtml(change.name || '-')}</span>`;
+        if (cells[1]) cells[1].innerHTML = `<span class="name-cell">${escapeHtml(change.name || '-')}</span>`;
         
         if (cells[2]) {
             if (change.url) {
@@ -1516,11 +1387,11 @@ function applyPendingChangeToTable(change) {
         // Обновляем бейдж типа
         if (cells[4]) {
             if (change.url) {
-                cells[4].innerHTML = '<span class="badge badge-direct">Direct URL</span>';
+                cells[4].innerHTML = '<span class="badge badge--info">Direct URL</span>';
             } else if (change.tvclub_id) {
-                cells[4].innerHTML = '<span class="badge badge-provider">TVClub</span>';
+                cells[4].innerHTML = '<span class="badge badge--success">TVClub</span>';
             } else {
-                cells[4].innerHTML = '<span class="badge badge-empty">Пустой</span>';
+                cells[4].innerHTML = '<span class="badge badge--muted">Пустой</span>';
             }
         }
         
@@ -1601,7 +1472,7 @@ function initUrlAutoResize() {
     
     // При открытии модалки — подстраиваем под существующее значение
     const observer = new MutationObserver(function() {
-        if (document.getElementById('edit-modal').classList.contains('show')) {
+        if (document.getElementById('edit-modal').classList.contains('active')) {
             autoResizeTextarea(urlField);
         }
     });
