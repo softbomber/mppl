@@ -153,7 +153,12 @@ function deleteChannel($config, $channel_id) {
 // ============================================================================
 
 // Единое подключение к базе данных
-$pdo = new PDO("mysql:host=localhost;dbname=mpol;charset=utf8", "root", "uiF5bcaw8");
+require_once(__DIR__ . '/env_loader.php');
+$pdo = new PDO(
+    "mysql:host=" . (getenv('DB_HOST') ?: 'localhost') . ";dbname=" . (getenv('DB_NAME') ?: 'mpol') . ";charset=utf8",
+    getenv('DB_USER') ?: 'root',
+    getenv('DB_PASS') ?: ''
+);
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 // Обработка POST запросов
@@ -424,425 +429,408 @@ usort($chanmap_array, function($a, $b) use ($sort_by, $sort_order) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chanmap Editor</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            background: #0F0F0F; 
-            color: #A1A1AA;
-            padding: 20px;
-            line-height: 1.5;
-        }
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-        }
+/* === Design system (aligned with uman.php) === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; min-height: 100vh; }
+:root {
+    --bg:           #0a0e16;
+    --bg-elevated:  #0f1520;
+    --surface:      #131a26;
+    --surface-2:    #1a2333;
+    --surface-hi:   #22304a;
+    --border:       #243043;
+    --border-hi:    #324562;
+    --text:         #e6edf3;
+    --text-dim:     #8b96a8;
+    --text-faint:   #5b6678;
+    --primary:      #4d8eff;
+    --primary-hov:  #6ba1ff;
+    --primary-bg:   rgba(77, 142, 255, 0.12);
+    --success:      #3ecf8e;
+    --success-bg:   rgba(62, 207, 142, 0.12);
+    --warning:      #f5a623;
+    --warning-bg:   rgba(245, 166, 35, 0.12);
+    --danger:       #ef4444;
+    --danger-bg:    rgba(239, 68, 68, 0.12);
+    --purple:       #a78bfa;
+    --purple-bg:    rgba(167, 139, 250, 0.12);
+    --radius:       10px;
+    --radius-lg:    14px;
+    --radius-pill:  999px;
+    --shadow-1:     0 1px 2px rgba(0,0,0,.3), 0 4px 12px rgba(0,0,0,.2);
+    --shadow-2:     0 10px 30px rgba(0,0,0,.45);
+    --transition:   150ms ease;
+    --font:         -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono:         "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 20px;
-            background: #1A1A2E;
-            border-radius: 12px;
-            border: 1px solid #27272A;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .header h1 {
-            color: #FFFFFF;
-            font-size: 28px;
-            font-weight: 600;
-            margin: 0;
-        }
+/* ---- Top bar ---- */
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10, 14, 22, 0.85);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+}
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    font-size: 15px;
+}
+.brand-glyph { color: var(--primary); }
 
-        .header-stats {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
+/* ---- Layout ---- */
+.container {
+    display: block;
+    max-width: 1600px;
+    margin: 24px auto;
+    padding: 0 20px;
+}
 
-        .header-stat {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+/* ---- Info grid (stats) ---- */
+.info-grid {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.info-item {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 14px;
+    text-align: center;
+}
+.info-item .lbl {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
+    margin-top: 2px;
+}
+.info-item .val {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary);
+    font-family: var(--mono);
+}
 
-        .header-stat-value {
-            font-size: 12px;
-            font-weight: 700;
-            color: #3B82F6;
-        }
+/* ---- Buttons ---- */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+}
+.btn:hover { background: var(--surface-2); border-color: var(--border-hi); }
+.btn:active { transform: translateY(1px); }
+.btn--primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.btn--primary:hover { background: var(--primary-hov); border-color: var(--primary-hov); }
+.btn--success { background: var(--success); border-color: var(--success); color: #07140d; font-weight: 600; }
+.btn--success:hover { filter: brightness(1.1); }
+.btn--danger  { background: var(--danger); border-color: var(--danger); color: #fff; }
+.btn--danger:hover  { filter: brightness(1.1); }
+.btn--ghost   { background: transparent; }
+.btn--sm { padding: 5px 9px; font-size: 12px; }
+.btn--icon { padding: 5px 9px; font-size: 16px; line-height: 1; }
 
-        .header-stat-label {
-            color: #71717A;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 2px;
-        }
+/* ---- Card ---- */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-1);
+    overflow: hidden;
+}
 
-        .table-container {
-            background: #1A1A2E;
-            border-radius: 12px;
-            border: 1px solid #27272A;
-        }
+/* ---- Table ---- */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.table-wrap::-webkit-scrollbar { width: 8px; height: 8px; }
+.table-wrap::-webkit-scrollbar-track { background: var(--bg-elevated); }
+.table-wrap::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
+.table-wrap::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+.table-wrap { max-height: calc(100vh - 120px); overflow-y: auto; }
 
-        .table-wrapper {
-            max-height: calc(100vh - 140px);
-            overflow-y: auto;
-        }
+table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.data th, table.data td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+table.data thead th {
+    background: var(--bg-elevated);
+    color: var(--text-dim);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    user-select: none;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+table.data tbody tr { transition: background var(--transition); }
+table.data tbody tr:hover { background: var(--bg-elevated); }
 
-        .table-wrapper::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
+.col-id { width: 90px; }
+.col-name { width: 180px; max-width: 180px; }
+.col-name-cell { word-wrap: break-word; white-space: normal; color: var(--text); }
+.col-type { width: 110px; }
+.col-url { width: auto; min-width: 400px; }
+.col-url small { word-break: break-all; white-space: normal; display: block; max-width: 100%; overflow-wrap: break-word; color: var(--text-dim); }
+.col-allow { width: 130px; }
+.col-actions { width: 90px; }
 
-        .table-wrapper::-webkit-scrollbar-track {
-            background: #18181B;
-        }
+/* ---- Sort links ---- */
+.sort-link {
+    color: var(--primary);
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.sort-link:hover { color: var(--primary-hov); }
+.sort-link.active { font-weight: 700; color: var(--text); }
+.sort-arrow { margin-left: 4px; }
 
-        .table-wrapper::-webkit-scrollbar-thumb {
-            background: #3F3F46;
-            border-radius: 4px;
-        }
+/* ---- Filter inputs ---- */
+.filter-input {
+    width: 100%;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 11px;
+    margin-top: 6px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-family: var(--mono);
+}
+.filter-input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-bg);
+}
 
-        .table-wrapper::-webkit-scrollbar-thumb:hover {
-            background: #52525B;
-        }
-        
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-        }
-        th, td { 
-            padding: 14px 16px; 
-            text-align: left; 
-            border-bottom: 1px solid #27272A;
-        }
-        th { 
-            background: #18181B; 
-            font-weight: 600; 
-            color: #FFFFFF;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        tr:hover { 
-            background: rgba(59, 130, 246, 0.05); 
-        }
+/* ---- Badges ---- */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.6;
+}
+.badge-direct  { background: var(--primary-bg); color: var(--primary); }
+.badge-provider { background: var(--purple-bg); color: var(--purple); }
+.badge-empty   { background: var(--surface-2); color: var(--text-faint); }
 
-        .col-id { width: 90px; }
-        .col-name { width: 180px; max-width: 180px; }
-        .col-name-cell { 
-            word-wrap: break-word; 
-            white-space: normal;
-            color: #E4E4E7;
-        }
-        .col-type { width: 110px; }
-        .col-url { width: auto; min-width: 400px; }
-        .col-url small { 
-            word-break: break-all;
-            white-space: normal;
-            display: block;
-            max-width: 100%;
-            overflow-wrap: break-word;
-        }
-        .col-allow { width: 130px; }
-        .col-actions { width: 90px; }
+/* ---- Modal ---- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 9, 16, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: fadeIn 150ms ease;
+}
+.modal-overlay.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-        .badge { 
-            display: inline-block; 
-            padding: 4px 10px; 
-            border-radius: 6px; 
-            font-size: 11px; 
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        .badge-direct { 
-            background: rgba(59, 130, 246, 0.1); 
-            color: #3B82F6;
-            border: 1px solid rgba(59, 130, 246, 0.2);
-        }
-        .badge-provider { 
-            background: rgba(168, 85, 247, 0.1); 
-            color: #A855F7;
-            border: 1px solid rgba(168, 85, 247, 0.2);
-        }
-        .badge-empty { 
-            background: rgba(113, 113, 122, 0.1); 
-            color: #71717A;
-            border: 1px solid rgba(113, 113, 122, 0.2);
-        }
+.modal-overlay .uman-modal {
+    background: var(--surface);
+    border: 1px solid var(--border-hi);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-2);
+    width: 100%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: scaleIn 180ms ease;
+}
+@keyframes scaleIn { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        .filter-input { 
-            width: 100%; 
-            padding: 8px 10px; 
-            border: 1px solid #27272A; 
-            border-radius: 6px; 
-            font-size: 12px; 
-            margin-top: 8px;
-            background: #18181B;
-            color: #E4E4E7;
-        }
-        .filter-input:focus { 
-            border-color: #3B82F6; 
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-        }
+.modal-overlay .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.modal-overlay .modal-header h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 600;
+}
+.close-btn {
+    font-size: 22px;
+    font-weight: 300;
+    color: var(--text-faint);
+    cursor: pointer;
+    border: none;
+    background: none;
+    transition: color var(--transition);
+    padding: 4px 8px;
+    border-radius: var(--radius);
+}
+.close-btn:hover { color: var(--text); background: var(--surface-2); }
 
-        .sort-link { 
-            color: #3B82F6; 
-            text-decoration: none; 
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .sort-link:hover { 
-            text-decoration: underline;
-            color: #60A5FA;
-        }
-        .sort-link.active { 
-            font-weight: 700;
-            color: #FFFFFF;
-        }
-        .sort-arrow { 
-            margin-left: 4px;
-        }
+.modal-overlay .modal-body { padding: 20px; }
+.modal-overlay .modal-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    background: var(--bg-elevated);
+}
 
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 9999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
-        }
-        .modal.show { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-        }
-        .modal-content { 
-            background: #1A1A2E; 
-            padding: 32px; 
-            border-radius: 16px; 
-            width: 90%; 
-            max-width: 700px; 
-            max-height: 90vh; 
-            overflow-y: auto;
-            border: 1px solid #27272A;
-        }
-        .modal-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 24px; 
-        }
-        .modal-header h2 { 
-            margin: 0; 
-            color: #FFFFFF;
-            font-size: 22px;
-            font-weight: 600;
-        }
-        .close-btn { 
-            font-size: 28px; 
-            font-weight: 300; 
-            color: #71717A; 
-            cursor: pointer; 
-            border: none; 
-            background: none;
-            transition: color 0.2s;
-        }
-        .close-btn:hover { 
-            color: #FFFFFF;
-        }
+/* ---- Form ---- */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.form-group { display: flex; flex-direction: column; }
+.form-group label {
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--text);
+    font-size: 13px;
+}
+.form-group input,
+.form-group select,
+.form-group input[list] {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    background: var(--bg-elevated);
+    color: var(--text);
+    transition: border-color var(--transition);
+    min-width: 100%;
+    resize: vertical;
+    min-height: 38px;
+    font-family: inherit;
+}
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-bg);
+}
+.form-group small {
+    margin-top: 4px;
+    color: var(--text-faint);
+    font-size: 12px;
+}
 
-        .form-row { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-            gap: 16px; 
-            margin-bottom: 16px; 
-        }
-        .form-group { 
-            display: flex; 
-            flex-direction: column; 
-        }
-        .form-group label { 
-            margin-bottom: 8px; 
-            font-weight: 500; 
-            color: #E4E4E7;
-            font-size: 14px;
-        }
-        .form-group input,
-        .form-group select,
-        .form-group input[list] {
-            padding: 12px 14px;
-            border: 1px solid #27272A;
-            border-radius: 8px;
-            font-size: 14px;
-            background: #18181B;
-            color: #E4E4E7;
-            transition: border-color 0.2s;
-            min-width: 100%;
-            resize: vertical;
-            min-height: 40px;
-        }
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: #3B82F6;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-        }
-        .form-group small {
-            margin-top: 6px;
-            color: #71717A;
-            font-size: 12px;
-        }
-        
-        /* Autocomplete styles */
-        .autocomplete-container {
-            position: relative;
-        }
-        .autocomplete-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: #18181B;
-            border: 1px solid #27272A;
-            border-radius: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-            margin-top: 4px;
-        }
-        .autocomplete-results.show {
-            display: block;
-        }
-        .autocomplete-item {
-            padding: 10px 14px;
-            cursor: pointer;
-            border-bottom: 1px solid #27272A;
-            color: #E4E4E7;
-            font-size: 13px;
-        }
-        .autocomplete-item:hover {
-            background: rgba(59, 130, 246, 0.1);
-        }
-        .autocomplete-item:last-child {
-            border-bottom: none;
-        }
-        .autocomplete-item strong {
-            color: #3B82F6;
-        }
-        .autocomplete-item span {
-            color: #71717A;
-            margin-left: 8px;
-        }
-        .autocomplete-loading {
-            padding: 10px 14px;
-            color: #71717A;
-            font-size: 13px;
-            text-align: center;
-        }
+/* ---- Autocomplete ---- */
+.autocomplete-container { position: relative; }
+.autocomplete-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--surface-2);
+    border: 1px solid var(--border-hi);
+    border-radius: var(--radius);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    margin-top: 4px;
+    box-shadow: var(--shadow-2);
+}
+.autocomplete-results.show { display: block; }
+.autocomplete-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-size: 13px;
+    transition: var(--transition);
+}
+.autocomplete-item:hover { background: var(--primary-bg); color: var(--primary-hov); }
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-item strong { color: var(--primary); }
+.autocomplete-item span { color: var(--text-faint); margin-left: 8px; }
+.autocomplete-loading {
+    padding: 10px 14px;
+    color: var(--text-faint);
+    font-size: 13px;
+    text-align: center;
+}
 
-        .message {
-            padding: 16px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .message.success {
-            background: rgba(34, 197, 94, 0.1);
-            color: #22C55E;
-            border: 1px solid rgba(34, 197, 94, 0.2);
-        }
-        .message.error {
-            background: rgba(239, 68, 68, 0.1);
-            color: #EF4444;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
+/* ---- Messages / toast ---- */
+.message {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    font-size: 13px;
+    border: 1px solid;
+}
+.message.success { background: var(--success-bg); color: var(--success); border-color: rgba(62, 207, 142, 0.25); }
+.message.error   { background: var(--danger-bg); color: var(--danger); border-color: rgba(239, 68, 68, 0.25); }
 
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #3B82F6, #2563EB);
-            color: white;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #2563EB, #1D4ED8);
-            transform: translateY(-1px);
-        }
-        .btn-success {
-            background: linear-gradient(135deg, #22C55E, #16A34A);
-            color: white;
-        }
-        .btn-success:hover {
-            background: linear-gradient(135deg, #16A34A, #15803D);
-            transform: translateY(-1px);
-        }
-        .btn-warning {
-            background: #27272A;
-            color: #A1A1AA;
-            border: 1px solid #3F3F46;
-        }
-        .btn-warning:hover {
-            background: #3F3F46;
-            color: #FFFFFF;
-        }
-        .btn-danger {
-            background: rgba(239, 68, 68, 0.1);
-            color: #EF4444;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            padding: 6px 12px;
-            font-size: 13px;
-        }
-        .btn-danger:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
-        .btn-warning.btn-sm {
-            padding: 6px 12px;
-            font-size: 13px;
-        }
-/* Подсветка редактируемой строки */
+/* ---- Row states ---- */
 tr.editing {
-    background: rgba(168, 85, 247, 0.15) !important;
-    border-left: 3px solid #A855F7;
+    background: var(--purple-bg) !important;
+    box-shadow: inset 3px 0 0 var(--purple);
     transition: all 0.2s;
 }
-
-/* Строка с накопленными изменениями */
 tr.pending-change {
-    background: rgba(59, 130, 246, 0.08) !important;
-    border-left: 3px solid #3B82F6;
+    background: var(--primary-bg) !important;
+    box-shadow: inset 3px 0 0 var(--primary);
 }
-
 tr.pending-change[data-pending="delete"] {
-    background: rgba(239, 68, 68, 0.1) !important;
-    border-left: 3px solid #EF4444;
+    background: var(--danger-bg) !important;
+    box-shadow: inset 3px 0 0 var(--danger);
 }
 
-/* === Расширяемое поле URL === */
+/* ---- Expandable URL textarea ---- */
 #form-url {
-    min-height: 40px;
+    min-height: 38px;
     height: auto;
     resize: vertical;
     overflow-y: hidden;
@@ -850,66 +838,50 @@ tr.pending-change[data-pending="delete"] {
     line-height: 1.4;
     transition: min-height 0.15s ease;
 }
+#form-url::placeholder { color: var(--text-faint); }
+#form-url:focus { min-height: 60px; }
 
-#form-url::placeholder {
-    color: #71717A;
-}
-
-#form-url:focus {
-    min-height: 60px;
-}
-
-/* Адаптив для мобильных */
+/* ---- Responsive ---- */
 @media (max-width: 768px) {
-    #form-url {
-        min-height: 50px;
-    }
+    .topbar { flex-direction: column; align-items: flex-start; }
+    .info-grid { flex-wrap: wrap; }
+    #form-url { min-height: 50px; }
 }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📺 Chanmap Editor</h1>
-            <div class="header-stats">
-                <div class="header-stat">
-                    <div class="header-stat-value"><?= count($chanmap) ?></div>
-                    <div class="header-stat-label">Всего</div>
-                </div>
-                <div class="header-stat">
-                    <div class="header-stat-value"><?= count(array_filter($chanmap, fn($c) => !empty($c['url']))) ?></div>
-                    <div class="header-stat-label">С URL</div>
-                </div>
-                <div class="header-stat">
-                    <div class="header-stat-value"><?= count(array_filter($chanmap, fn($c) => empty($c['url']) && !empty($c['id']))) ?></div>
-                    <div class="header-stat-label">TVClub</div>
-                </div>
-                <div class="header-stat">
-                    <div class="header-stat-value"><?= count(array_filter($chanmap, fn($c) => empty($c['url']) && empty($c['id']))) ?></div>
-                    <div class="header-stat-label">Пустые</div>
-                </div>
-                <div style="display: flex; gap: 10px; align-items: center; margin-left: 20px; padding-left: 20px; border-left: 1px solid #27272A;">
-                    <span id="pending-count" style="display: none; color: #EF4444; font-weight: bold; font-size: 12px;">
-                        ⚠️ <span id="pending-number">0</span>
-                    </span>
-                    <button id="save-btn" class="btn btn-success" style="display: none;" onclick="saveChanges()">💾</button>
-                    <button id="discard-btn" class="btn btn-warning" style="display: none;" onclick="discardChanges()">✖</button>
-                    <?php if (array_filter($filters)): ?>
-                        <button class="btn btn-warning" onclick="clearAllFilters()" title="Сбросить фильтры">🔄</button>
-                    <?php endif; ?>
-                    <button class="btn btn-primary" onclick="openAddModal()">+ Добавить</button>
-                </div>
+    <div class="topbar">
+        <div class="brand"><span class="brand-glyph">📺</span> Chanmap Editor</div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div class="info-grid">
+                <div class="info-item"><div class="val"><?= count($chanmap) ?></div><div class="lbl">Всего</div></div>
+                <div class="info-item"><div class="val"><?= count(array_filter($chanmap, fn($c) => !empty($c['url']))) ?></div><div class="lbl">С URL</div></div>
+                <div class="info-item"><div class="val"><?= count(array_filter($chanmap, fn($c) => empty($c['url']) && !empty($c['id']))) ?></div><div class="lbl">TVClub</div></div>
+                <div class="info-item"><div class="val"><?= count(array_filter($chanmap, fn($c) => empty($c['url']) && empty($c['id']))) ?></div><div class="lbl">Пустые</div></div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;margin-left:8px;padding-left:12px;border-left:1px solid var(--border);">
+                <span id="pending-count" style="display:none;color:var(--danger);font-weight:bold;font-size:12px;">
+                    ⚠️ <span id="pending-number">0</span>
+                </span>
+                <button id="save-btn" class="btn btn--success btn--sm" style="display:none;" onclick="saveChanges()">💾 Сохранить</button>
+                <button id="discard-btn" class="btn btn--sm" style="display:none;" onclick="discardChanges()">✖ Отмена</button>
+                <?php if (array_filter($filters)): ?>
+                    <button class="btn btn--sm" onclick="clearAllFilters()" title="Сбросить фильтры">🔄</button>
+                <?php endif; ?>
+                <button class="btn btn--primary" onclick="openAddModal()">+ Добавить</button>
             </div>
         </div>
+    </div>
+    <div class="container">
 
         <?php if ($message): ?>
             <div class="message <?= $message_type ?>"><?= htmlspecialchars($message) ?></div>
         <?php endif; ?>
 
         <!-- Таблица каналов -->
-        <div class="table-container">
-            <div class="table-wrapper">
-                <table>
+        <div class="card">
+            <div class="table-wrap">
+                <table class="data">
                 <thead>
                     <tr>
                         <th class="col-id">
@@ -989,9 +961,9 @@ tr.pending-change[data-pending="delete"] {
                                     <span class="badge badge-empty">Пустой</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="col-actions">
-                                <button type="button" class="btn btn-warning btn-sm" onclick='openEditModal("<?= htmlspecialchars($id) ?>", <?= json_encode($channel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>✏️</button>
-                                <button type="button" class="btn btn-danger" onclick="queueDeleteChannel('<?= htmlspecialchars($id) ?>')">🗑️</button>
+                            <td class="col-actions" style="display:flex;gap:4px;">
+                                <button type="button" class="btn btn--sm" onclick='openEditModal("<?= htmlspecialchars($id) ?>", <?= json_encode($channel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>✏️</button>
+                                <button type="button" class="btn btn--danger btn--sm" onclick="queueDeleteChannel('<?= htmlspecialchars($id) ?>')">🗑️</button>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -1001,13 +973,14 @@ tr.pending-change[data-pending="delete"] {
     </div>
 
     <!-- Модальное окно редактирования/добавления -->
-    <div id="edit-modal" class="modal">
-        <div class="modal-content">
+    <div id="edit-modal" class="modal-overlay">
+        <div class="uman-modal">
             <div class="modal-header">
                 <h2 id="modal-title">Редактирование канала</h2>
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
             <form onsubmit="handleFormSubmit(event)">
+              <div class="modal-body">
                 <input type="hidden" id="form-action" value="add">
                 <input type="hidden" id="form-channel-id" value="">
 
@@ -1016,7 +989,7 @@ tr.pending-change[data-pending="delete"] {
                         <label>ID канала *</label>
                         <input type="number" id="form-id-input" required oninput="handleIdInput(this.value)" autocomplete="off">
                         <div id="id-autocomplete" class="autocomplete-results"></div>
-                        <small>Введите ID (поиск после 2 цифр) или название (поиск после 3 букв)</small>
+                        <small>Введите ID (поиск после 2 цифр)</small>
                     </div>
                     <div class="form-group autocomplete-container">
                         <label>Название *</label>
@@ -1029,10 +1002,10 @@ tr.pending-change[data-pending="delete"] {
                 <div class="form-row">
                     <div class="form-group">
                         <label>URL потока</label>
-		    <textarea id="form-url" placeholder="http://..." rows="1" 
-	              style="width: 100%; padding: 12px 14px; border: 1px solid #27272A; 
-                     border-radius: 8px; font-size: 14px; background: #18181B; 
-                     color: #E4E4E7; min-height: 40px; resize: vertical;"></textarea>
+                        <textarea id="form-url" placeholder="http://..." rows="1"
+                              style="width:100%;padding:10px 12px;border:1px solid var(--border);
+                              border-radius:var(--radius);font-size:13px;background:var(--bg-elevated);
+                              color:var(--text);min-height:38px;resize:vertical;font-family:inherit;"></textarea>
                         <small>Если не указан — используется ID для tvclub</small>
                     </div>
                     <div class="form-group">
@@ -1049,19 +1022,18 @@ tr.pending-change[data-pending="delete"] {
                     </div>
                     <div class="form-group">
                         <label>User-Agent</label>
-                        <input list="user-agents-list" id="form-agent" placeholder="Выберите или введите свой" autocomplete="on" style="min-width: 100%; resize: vertical; min-height: 40px;">
-                        <datalist id="user-agents-list">
-                        </datalist>
+                        <input list="user-agents-list" id="form-agent" placeholder="Выберите или введите свой" autocomplete="on">
+                        <datalist id="user-agents-list"></datalist>
                     </div>
                 </div>
 
-<div class="form-row">
-    <div class="form-group">
-        <label>Referer</label>
-        <input type="url" id="form-referer" placeholder="https://example.com/">
-        <small>Заголовок Referer для запросов (опционально)</small>
-    </div>
-</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Referer</label>
+                        <input type="url" id="form-referer" placeholder="https://example.com/">
+                        <small>Заголовок Referer для запросов (опционально)</small>
+                    </div>
+                </div>
 
                 <div class="form-row">
                     <div class="form-group">
@@ -1073,11 +1045,11 @@ tr.pending-change[data-pending="delete"] {
                         <input type="text" id="form-disallow" placeholder="51.254.135.10">
                     </div>
                 </div>
-
-                <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
-                    <button type="button" class="btn btn-warning" onclick="closeModal()">Отмена</button>
-                    <button type="submit" class="btn btn-success">В очередь</button>
-                </div>
+              </div>
+              <div class="modal-footer">
+                    <button type="button" class="btn" onclick="closeModal()">Отмена</button>
+                    <button type="submit" class="btn btn--success">В очередь</button>
+              </div>
             </form>
         </div>
     </div>
@@ -1211,7 +1183,7 @@ tr.pending-change[data-pending="delete"] {
             document.getElementById('form-disallow').value = channelData.disallow || '';
 
             document.getElementById('modal-title').textContent = 'Редактирование канала ' + id;
-            document.getElementById('edit-modal').classList.add('show');
+            document.getElementById('edit-modal').classList.add('active');
             highlightRow(id);
             // Загружаем агенты если ещё не загружены
         if (document.getElementById('user-agents-list').children.length === 0) {
@@ -1236,7 +1208,7 @@ tr.pending-change[data-pending="delete"] {
             document.getElementById('form-disallow').value = '';
 
             document.getElementById('modal-title').textContent = 'Добавление канала';
-            document.getElementById('edit-modal').classList.add('show');
+            document.getElementById('edit-modal').classList.add('active');
 
             // Загружаем агенты если ещё не загружены
             if (document.getElementById('user-agents-list').children.length === 0) {
@@ -1246,7 +1218,7 @@ tr.pending-change[data-pending="delete"] {
 
         // Закрытие модального окна
         function closeModal() {
-            document.getElementById('edit-modal').classList.remove('show');
+            document.getElementById('edit-modal').classList.remove('active');
         }
 
         // Закрытие по клику вне модального окна
@@ -1450,8 +1422,7 @@ function highlightRow(id) {
 
 // Снятие подсветки при закрытии модального окна
 function closeModal() {
-    document.getElementById('edit-modal').classList.remove('show');
-    // Снимаем подсветку через небольшую задержку (после анимации)
+    document.getElementById('edit-modal').classList.remove('active');
     setTimeout(() => {
         document.querySelectorAll('tr.editing').forEach(row => {
             row.classList.remove('editing');
@@ -1601,7 +1572,7 @@ function initUrlAutoResize() {
     
     // При открытии модалки — подстраиваем под существующее значение
     const observer = new MutationObserver(function() {
-        if (document.getElementById('edit-modal').classList.contains('show')) {
+        if (document.getElementById('edit-modal').classList.contains('active')) {
             autoResizeTextarea(urlField);
         }
     });
