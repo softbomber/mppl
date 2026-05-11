@@ -80,6 +80,7 @@
         '</form>' +
         '<div class="auth-modal__forgot"><a href="restore.php" data-i18n="auth.forgot">Забыли пароль?</a></div>' +
         '<div class="auth-modal__social"><form method="POST" action="glogin.php" style="width:100%"><button type="submit"><img src="gologo.png" alt="Google"> Войти через Google</button></form></div>' +
+        '<div class="auth-modal__social auth-modal__social--tlg"><button type="button" id="auth-tlg-btn"><img src="png/telegram.png" alt="Telegram"> Войти через Telegram</button></div>' +
       '</div>';
 
     DOC.body.appendChild(ov);
@@ -94,6 +95,13 @@
       e.stopPropagation();
       submit();
     });
+
+    var tlgBtn = ov.querySelector('#auth-tlg-btn');
+    if (tlgBtn) {
+      tlgBtn.addEventListener('click', function () {
+        window.location.href = 'https://t.me/Mpolbot?start=auth';
+      });
+    }
 
     state.overlay = ov;
     if (I18N && typeof I18N.applyTo === 'function') I18N.applyTo(ov);
