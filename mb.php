@@ -310,6 +310,11 @@ window.umanExit = function() {
   }
   var infoBtn = dc.querySelector(".info-toggle");
   if (infoBtn) infoBtn.classList.remove("hidden");
+  /* Cleanup: remove uman modal & toast from body */
+  var umanModal = dc.getElementById("modal");
+  var umanToast = dc.getElementById("toastStack");
+  if (umanModal) { umanModal.classList.remove("active"); umanModal.remove(); }
+  if (umanToast) umanToast.remove();
   if (typeof MpplPager !== "undefined") MpplPager.setOrigin(null);
 };
 $("#paymentForm").validate({

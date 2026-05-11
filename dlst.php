@@ -13,191 +13,11 @@ while ($row = $result->fetch_assoc()) {
     $dealers[] = $row;
 }
 ?>
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<title>Dealers List</title>
+<div class="dlst-title">Dealers List</div>
 
-<style>
-    .tcell {
-        position: relative;
-    }
+<input type="text" id="searchUser" placeholder="Поиск по пользователю">
 
-    .password-container {
-        display: flex;
-        align-items: center;
-        position: relative;
-    }
-
-    .password-container input {
-        flex: 1;
-	width: 192px
-    }
-
-    .toggle-password, .save-password {
-        margin-left: -50px;
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 16px;
-    }
-
-    .toggle-password:hover, .save-password:hover {
-        color: #0056b3;
-    }
-
-    .save-password {
-        display: none;
-    }
-
-    tr {
-        position: relative;
-    }
-#dlrlist td:nth-child(4) {
-    text-align:right;
-    width:105px;
-    color: #e3ffb6
-}
-#dlrlist td:nth-child(8) {
-    text-align:right;
-    width:50px
-}
-.access-toggle{text-align:center}
-
-    .ellipsis-button {
-        display: none;
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 16px;
-        z-index: 200;
-    }
-
-    tr:hover .ellipsis-button {
-        display: block;
-    }
-
-    .drpdn-cntnt {
-        display: none;
-        position: absolute;
-        right:0;
-        top:100%;
-        background-color:#618fab;
-/*        min-width: 160px;
-        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);*/
-        z-index: 1;
-    }
-
-    .drpdn-cntnt a {
-        color:#ebf7ff;
-        padding:7px 13px;
-        text-decoration: none;
-        display: block;
-    }
-
-    /* Стиль для модальных окон */
-    #modal, #modal-limit {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        width: 300px;
-        transform: translate(-50%, -50%);
-        background: white;
-        border: 1px solid #ddd;
-        z-index: 1000;
-    }
-
-    #modal .close-modal, #modal-limit .close-modal {
-        position: absolute;
-        top: 5px;
-        right: 7px;
-        cursor: pointer;
-        font-weight: bold;
-        font-size: 23px;
-        color:#f40b21;
-    }
-
-    #modal .close-modal:hover, #modal-limit .close-modal:hover {
-	font-size:25px
-    }
-
-    .amount, .limit {
-        color: #e3ffb6;
-        text-align: right;
-    }
-
-    #modal h2, #modal-limit h2 {
-        padding: 7px 4px;
-        font-size: 13px;
-        background: #13212D;
-        color: #d1d1d1;
-        text-align: left;
-    }
-
-    #new-sum, #new-limit {
-        border: 1px solid #d5c9c9;
-        text-align: right;
-        width: 100%;
-        padding: 16px 0;
-        font-size: large;
-    }
-
-    .update-sum-btn {
-    margin-left: 5px;
-    border: none;
-    color: white;
-    padding: 5px 10px;
-    text-align: center;
-    text-decoration: none;
-    font-size: 12px;
-    cursor: pointer;
-    display: flex;
-    }
-
-    .update-sum-btn:hover {
-        background-color: #45a049;
-    }
-    .tcell {
-        position: relative;
-    }
-
-    .password-container {
-        display: flex;
-        align-items: center;
-        position: relative;
-    }
-
-    .password-container input {
-        flex: 1;
-    }
-
-/*    .toggle-password {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: #007bff;
-        font-size: 16px;
-    }*/
-#dlrlist th{background: #4d6b85}
-</style>
-</head>
-<body>
-
-<div>Dealers List</div>
-
-<input type="text" id="searchUser" placeholder="Поиск по пользователю" style="margin-bottom: 10px; padding: 5px; width: 200px;">
-
-<table id="dlrlist" style="color:#c7d6e3; font-family: 'Arial Unicode MS', 'Segoe UI Emoji', 'Noto Sans', sans-serif;">
+<table id="dlrlist">
     <thead>
         <tr>
             <th width=153>User</th>
@@ -207,7 +27,7 @@ while ($row = $result->fetch_assoc()) {
             <th width=105>Limit</th>
             <th width=240>Email</th>
             <th>Min Days</th>
-            <th align=center>Currency</th>
+            <th>Currency</th>
             <th>Rate</th>
             <th>Access</th>
             <th>Actions</th>
@@ -219,7 +39,7 @@ while ($row = $result->fetch_assoc()) {
             <td><?= $dealer['user'] ?></td>
             <td><?= $dealer['name'] ?></td>
             <td>
-                <div class="password-container">
+                <div class="dlst-pwd">
                     <input type="password" value="<?= $dealer['pwd'] ?>" readonly>
                     <button class="toggle-password">&#128065;&#8205</button>
                 </div>
@@ -253,7 +73,7 @@ while ($row = $result->fetch_assoc()) {
 </table>
 
 
-<div id="modal">
+<div id="modal" class="dlst-modal">
     <span class="close-modal">&times;</span>
     <h2>Checkpoint для <span id="modal-user-name"></span></h2>
     <input type="number" id="new-sum" placeholder="Введите сумму">
@@ -261,7 +81,7 @@ while ($row = $result->fetch_assoc()) {
 </div>
 
 
-<div id="modal-limit">
+<div id="modal-limit" class="dlst-modal">
     <span class="close-modal">&times;</span>
     <h2>Изменить лимит для <span id="modal-user-name-limit"></span></h2>
     <input type="number" id="new-limit" placeholder="Введите сумму">
@@ -285,7 +105,7 @@ while ($row = $result->fetch_assoc()) {
             modal.style.display = 'block';
         });
     });
-    document.querySelector('.close-modal').addEventListener('click', function() {
+    document.querySelector('#modal .close-modal').addEventListener('click', function() {
         document.getElementById('modal').style.display = 'none';
     });
     document.getElementById('new-sum').addEventListener('input', function() {
@@ -308,18 +128,16 @@ document.getElementById('searchUser').addEventListener('input', function() {
 
 document.querySelectorAll('.toggle-password').forEach(function(button) {
     button.addEventListener('click', function() {
-        let container = this.closest('.password-container');
+        let container = this.closest('.dlst-pwd');
         let passwordField = container.querySelector('input[type="password"], input[type="text"]');
         if (passwordField) {
             if (passwordField.type === 'password') {
                 passwordField.type = 'text';
-                this.innerHTML = '👁️';
+                this.innerHTML = '&#128065;';
             } else {
                 passwordField.type = 'password';
-                this.innerHTML = '👁️‍🗨️';
+                this.innerHTML = '&#128065;&#8205';
             }
-        } else {
-            console.log('Password input field not found');
         }
     });
 });
@@ -363,16 +181,14 @@ document.getElementById('new-sum').addEventListener('input', function() {
 document.getElementById('checkpoint').addEventListener('click', function() {
     let dealerId = document.getElementById('modal').dataset.dealerId;
     let newSum = parseFloat(document.getElementById('new-sum').value);
-//    let operation = confirm("Вы хотите добавить сумму или вычесть? (ОК = Добавить, Отмена = Вычесть)") ? 'add' : 'subtract';
 
     fetch('updsum.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `id=${dealerId}&sum=${newSum}` //&operation=${operation}
+        body: `id=${dealerId}&sum=${newSum}`
     }).then(response => response.json()).then(data => {
         if (data.success) {
             document.querySelector(`tr[data-id="${dealerId}"] .sum-input`).innerHTML = data.newSum;
-  //          document.querySelector(`tr[data-id="${dealerId}"] .limit`).innerText = data.newLimit;
             hMsg.dMsg('Cумма успешно обновлена');
             document.getElementById('modal').style.display = 'none';
         } else {
@@ -444,6 +260,3 @@ document.querySelectorAll('.access-toggle input[type="checkbox"]').forEach(funct
         });
 });
 </script>
-
-</body>
-</html>

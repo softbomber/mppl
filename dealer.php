@@ -87,7 +87,10 @@ if($res->num_rows == 1)
 <script src="js/ui/i18n/jquery.ui.datepicker-ru.js"></script>
 <link rel="stylesheet" type="text/css" href="css/proxima.css"/>
 <link rel="stylesheet" type="text/css" href="confirm.css?v=1"/>
+<link rel="stylesheet" type="text/css" href="css/app.css?v=3"/>
 <?php if($_SESSION['a']) echo '<script src="js/admin.js"></script>';?>
+<script src="js/net.js?v=1"   defer></script>
+<script src="js/reauth.js?v=1" defer></script>
 </head>
 <body>
 <input type="hidden" id="timeZoneOffsetInput" name="timeZoneOffsetInput">

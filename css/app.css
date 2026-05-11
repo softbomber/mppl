@@ -676,3 +676,188 @@
   top: 45%;
   left: 50%;
 }
+
+/* ============================================================================
+   uman.php modal-overlay — keep hidden even when uman <style> is removed
+   ============================================================================ */
+.modal-overlay { display: none; }
+.modal-overlay.active { display: flex; }
+
+/* ============================================================================
+   dlst.php — Dealer list (loaded via AJAX into #result)
+   ============================================================================ */
+.dlst-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #c7d6e3;
+  padding: 8px 0 12px;
+}
+#searchUser {
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  width: 220px;
+  background: #1a2d3d;
+  color: #c7d6e3;
+  border: 1px solid #3a5060;
+  border-radius: 4px;
+  font-size: 13px;
+  outline: none;
+}
+#searchUser:focus { border-color: #74a5d7; }
+
+#dlrlist {
+  color: #c7d6e3;
+  font-family: 'Source Sans 3', 'Arial Unicode MS', 'Segoe UI Emoji', 'Noto Sans', sans-serif;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+#dlrlist th {
+  background: #4d6b85;
+  padding: 6px 8px;
+  text-align: left;
+  font-size: 12px;
+  white-space: nowrap;
+}
+#dlrlist td {
+  padding: 4px 8px;
+  border-bottom: 1px solid #1e3040;
+  vertical-align: middle;
+}
+#dlrlist tr:hover { background: rgba(116, 165, 215, 0.08); }
+#dlrlist td:nth-child(4) { text-align: right; width: 105px; color: #e3ffb6; }
+#dlrlist td:nth-child(8) { text-align: right; width: 50px; }
+
+/* password */
+.dlst-pwd { display: flex; align-items: center; gap: 4px; }
+.dlst-pwd input {
+  flex: 1;
+  width: 120px;
+  background: transparent;
+  color: #c7d6e3;
+  border: none;
+  font-size: 12px;
+  padding: 2px 0;
+}
+.toggle-password, .save-password {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: #8aa8c0;
+  padding: 2px;
+}
+.toggle-password:hover, .save-password:hover { color: #74a5d7; }
+.save-password { display: none; }
+
+/* amount / limit */
+.amount, .limit { color: #e3ffb6; text-align: right; }
+.update-sum-btn {
+  display: inline-block;
+  margin-top: 2px;
+  border: none;
+  color: #c7d6e3;
+  background: #3a5a72;
+  padding: 3px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+.update-sum-btn:hover { background: #4d7a95; }
+
+/* access toggle */
+.access-toggle { text-align: center; cursor: pointer; white-space: nowrap; font-size: 12px; }
+
+/* actions dropdown */
+.tcell { position: relative; }
+.ellipsis-button {
+  display: none;
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #8aa8c0;
+  z-index: 200;
+}
+#dlrlist tr:hover .ellipsis-button { display: block; }
+.drpdn-cntnt {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: #3a5a72;
+  border-radius: 4px;
+  z-index: 210;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.drpdn-cntnt a {
+  color: #ebf7ff;
+  padding: 7px 14px;
+  text-decoration: none;
+  display: block;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.drpdn-cntnt a:hover { background: #4d7a95; }
+
+/* dlst modals (checkpoint / limit) */
+.dlst-modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  transform: translate(-50%, -50%);
+  background: #1a2d3d;
+  border: 1px solid #3a5060;
+  border-radius: 6px;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.dlst-modal .close-modal {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 20px;
+  color: #ff6b6b;
+  line-height: 1;
+}
+.dlst-modal .close-modal:hover { color: #ff4444; }
+.dlst-modal h2 {
+  padding: 8px 10px;
+  font-size: 13px;
+  background: #13212D;
+  color: #d1d1d1;
+  text-align: left;
+  margin: 0;
+  border-radius: 6px 6px 0 0;
+}
+.dlst-modal input[type="number"] {
+  border: 1px solid #3a5060;
+  text-align: right;
+  width: 100%;
+  padding: 12px 8px;
+  font-size: 16px;
+  background: #0e1c28;
+  color: #e3ffb6;
+  box-sizing: border-box;
+  outline: none;
+}
+.dlst-modal input[type="number"]:focus { border-color: #74a5d7; }
+.dlst-modal button:not(.close-modal) {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  color: #fff;
+  background: #4d7a95;
+  font-size: 13px;
+  cursor: pointer;
+}
+.dlst-modal button:not(.close-modal):hover { background: #5a8fac; }
+.dlst-modal button:not(.close-modal):disabled { opacity: 0.5; cursor: default; }
