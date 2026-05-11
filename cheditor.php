@@ -13,59 +13,360 @@ if($_SESSION['a'] != 1)
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
-        body { height: 100vh; overflow: hidden; background-color: #f8f9fa; }
-        .app-container { height: calc(100vh - 56px); }
-        
-        .col-scroll {
-            height: 100%; overflow-y: auto;
-            border-right: 1px solid #dee2e6; background-color: #fff;
-            display: flex; flex-direction: column;
-            padding-bottom: 80px;
-        }
+/* ============================================================================
+   Дизайн-система: тёмная тема (как в uman.php)
+   ========================================================================== */
+:root {
+    --bg:           #0a0e16;
+    --bg-elevated:  #0f1520;
+    --surface:      #131a26;
+    --surface-2:    #1a2333;
+    --surface-hi:   #22304a;
+    --border:       #243043;
+    --border-hi:    #324562;
+    --text:         #e6edf3;
+    --text-dim:     #8b96a8;
+    --text-faint:   #5b6678;
+    --primary:      #4d8eff;
+    --primary-hov:  #6ba1ff;
+    --primary-bg:   rgba(77, 142, 255, 0.12);
+    --success:      #3ecf8e;
+    --success-bg:   rgba(62, 207, 142, 0.12);
+    --warning:      #f5a623;
+    --warning-bg:   rgba(245, 166, 35, 0.12);
+    --danger:       #ef4444;
+    --danger-bg:    rgba(239, 68, 68, 0.12);
+    --radius:       10px;
+    --radius-lg:    14px;
+    --radius-pill:  999px;
+    --shadow-1:     0 1px 2px rgba(0,0,0,.3), 0 4px 12px rgba(0,0,0,.2);
+    --shadow-2:     0 10px 30px rgba(0,0,0,.45);
+    --transition:   150ms ease;
+    --font:         -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono:         "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
 
-        .sticky-head {
-            position: sticky; top: 0; z-index: 10;
-            background: #fff; border-bottom: 1px solid #dee2e6; padding: 10px;
-        }
+/* Base */
+body {
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg) !important;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+}
+.app-container { height: calc(100vh - 56px); }
 
-        .w-20 { flex: 0 0 20%; max-width: 20%; }
-        .w-40 { flex: 0 0 40%; max-width: 40%; }
+.col-scroll {
+    height: 100%; overflow-y: auto;
+    border-right: 1px solid var(--border);
+    background: var(--surface) !important;
+    display: flex; flex-direction: column;
+    padding-bottom: 80px;
+}
+.col-scroll::-webkit-scrollbar { width: 8px; }
+.col-scroll::-webkit-scrollbar-track { background: var(--bg-elevated); }
+.col-scroll::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; }
 
-        /* Группы */
-        .group-item { cursor: pointer; user-select: none; }
-        .group-item.active { background-color: #0d6efd; color: white; border-color: #0d6efd; }
-        
-        .group-edit-btn { opacity: 0.5; cursor: pointer; transition: 0.2s; }
-        .group-edit-btn:hover { opacity: 1; color: #ffc107 !important; }
-        .active .group-edit-btn { color: white !important; }
+/* Убираем bootstrap bg-light */
+.col-scroll.bg-light { background: var(--bg-elevated) !important; }
 
-        /* Drag & Drop */
-        .draggable-item { cursor: grab; background: #fff; border: 1px solid #eee; transition: background-color 0.1s; }
-        .draggable-item:active { cursor: grabbing; }
-        .draggable-item.dragging { opacity: 0.5; background-color: #cfe2ff !important; border: 2px dashed #0d6efd; }
-        
-        .group-draggable { cursor: grab; }
-        .group-draggable:active { cursor: grabbing; }
-        .group-draggable.dragging { opacity: 0.5; background-color: #e9ecef !important; }
+.sticky-head {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg-elevated) !important;
+    border-bottom: 1px solid var(--border);
+    padding: 12px;
+}
 
-        .in-group-highlight { background-color: #d1e7dd !important; } 
-        .selected-highlight { background-color: #cfe2ff !important; } 
+.w-20 { flex: 0 0 20%; max-width: 20%; }
+.w-40 { flex: 0 0 40%; max-width: 40%; }
 
-        /* Выделение для сортировки/вставки */
-        .sort-selected { background-color: #fff3cd !important; border-color: #ffecb5 !important; }
-        /* Маркер позиции вставки (когда кликнули) */
-        .insert-target { border-left: 5px solid #198754 !important; }
+/* Navbar overrides (bootstrap) */
+.navbar {
+    background: rgba(10, 14, 22, 0.85) !important;
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--border);
+    color: var(--text) !important;
+}
+.navbar-brand {
+    color: var(--text) !important;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.navbar-brand i { color: var(--primary); }
 
-        #unsavedAlert {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            z-index: 2000; display: none; min-width: 400px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-        }
+/* Headings */
+h1, h2, h3, h4, h5, h6 { color: var(--text); }
+.fw-bold { color: var(--text); }
+.text-muted { color: var(--text-dim) !important; }
+.text-white { color: var(--text) !important; }
+
+/* Form controls (bootstrap overrides) */
+.form-control, .form-select {
+    background: var(--bg-elevated) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    border-radius: var(--radius);
+    transition: var(--transition);
+}
+.form-control:focus, .form-select:focus {
+    background: var(--bg-elevated) !important;
+    border-color: var(--primary) !important;
+    color: var(--text) !important;
+    box-shadow: 0 0 0 2px var(--primary-bg);
+}
+.form-control::placeholder { color: var(--text-faint); }
+.form-control-sm { font-size: 12px; }
+.input-group-text {
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-dim) !important;
+}
+.input-group-text.bg-white { background: var(--surface-2) !important; }
+.input-group-text.bg-warning { color: var(--warning) !important; background: var(--warning-bg) !important; border-color: var(--warning) !important; }
+
+/* Buttons (bootstrap overrides) */
+.btn {
+    font-family: inherit;
+    border-radius: var(--radius);
+    transition: var(--transition);
+    font-weight: 500;
+}
+.btn-primary {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #fff !important;
+}
+.btn-primary:hover {
+    background: var(--primary-hov) !important;
+    border-color: var(--primary-hov) !important;
+}
+.btn-success {
+    background: var(--success) !important;
+    border-color: var(--success) !important;
+    color: #07140d !important;
+    font-weight: 600;
+}
+.btn-success:hover { filter: brightness(1.1); }
+.btn-danger {
+    background: var(--danger) !important;
+    border-color: var(--danger) !important;
+    color: #fff !important;
+}
+.btn-outline-primary {
+    background: transparent !important;
+    color: var(--primary) !important;
+    border: 1px solid var(--primary) !important;
+}
+.btn-outline-primary:hover {
+    background: var(--primary) !important;
+    color: #fff !important;
+}
+.btn-outline-primary:disabled {
+    background: transparent !important;
+    color: var(--text-faint) !important;
+    border-color: var(--border) !important;
+    opacity: 0.5;
+}
+.btn-outline-secondary {
+    background: transparent !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+}
+.btn-outline-secondary:hover, .btn-outline-secondary.active, .btn-check:checked + .btn-outline-secondary {
+    background: var(--primary) !important;
+    color: #fff !important;
+    border-color: var(--primary) !important;
+}
+.btn-outline-dark {
+    background: transparent !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+}
+.btn-outline-dark:hover, .btn-outline-dark:disabled {
+    background: var(--surface-2) !important;
+}
+.btn-outline-dark:disabled {
+    color: var(--text-faint) !important;
+    border-color: var(--border) !important;
+}
+.btn-outline-danger {
+    background: transparent !important;
+    color: var(--danger) !important;
+    border: 1px solid var(--danger) !important;
+}
+.btn-outline-danger:hover {
+    background: var(--danger) !important;
+    color: #fff !important;
+}
+.btn-outline-light {
+    background: transparent !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border-hi) !important;
+}
+.btn-outline-light:hover {
+    background: var(--surface-2) !important;
+    border-color: var(--border-hi) !important;
+}
+
+/* Card (bootstrap override) */
+.card {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-lg);
+    color: var(--text);
+}
+.card-body { color: var(--text); }
+
+/* List group (bootstrap override) */
+.list-group {
+    background: transparent;
+}
+.list-group-item {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    font-size: 13px;
+    transition: var(--transition);
+}
+.list-group-item-action:hover, .list-group-item-action:focus {
+    background: var(--bg-elevated) !important;
+    color: var(--text) !important;
+}
+
+/* Groups (left column) */
+.group-item { cursor: pointer; user-select: none; }
+.group-item.active {
+    background: var(--primary-bg) !important;
+    color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    box-shadow: inset 3px 0 0 var(--primary);
+}
+
+.group-edit-btn {
+    opacity: 0.5; cursor: pointer; transition: 0.2s;
+    color: var(--text-dim) !important;
+}
+.group-edit-btn:hover { opacity: 1; color: var(--warning) !important; }
+.active .group-edit-btn { color: var(--primary) !important; }
+
+/* Drag & Drop */
+.draggable-item {
+    cursor: grab;
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    transition: background-color 0.1s;
+}
+.draggable-item:active { cursor: grabbing; }
+.draggable-item.dragging {
+    opacity: 0.5;
+    background: var(--primary-bg) !important;
+    border: 2px dashed var(--primary) !important;
+}
+
+.group-draggable { cursor: grab; }
+.group-draggable:active { cursor: grabbing; }
+.group-draggable.dragging {
+    opacity: 0.5;
+    background: var(--surface-2) !important;
+}
+
+.in-group-highlight { background: var(--success-bg) !important; border-color: var(--success) !important; }
+.selected-highlight { background: var(--primary-bg) !important; border-color: var(--primary) !important; }
+
+/* Выделение для сортировки/вставки */
+.sort-selected {
+    background: var(--warning-bg) !important;
+    border-color: var(--warning) !important;
+}
+
+/* Маркер позиции вставки */
+.insert-target { box-shadow: inset 5px 0 0 var(--success) !important; }
+
+/* Unsaved alert */
+#unsavedAlert {
+    position: fixed; bottom: 30px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000; display: none; min-width: 400px;
+    background: var(--surface) !important;
+    border: 1px solid var(--warning) !important;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-2);
+}
+#unsavedAlert .card-body {
+    background: var(--warning-bg) !important;
+    color: var(--text);
+}
+#unsavedAlert .fw-bold { color: var(--warning); }
+#unsavedAlert .text-warning { color: var(--warning) !important; }
+
+/* Modal (bootstrap override) */
+.modal-content {
+    background: var(--surface) !important;
+    border: 1px solid var(--border-hi) !important;
+    border-radius: var(--radius-lg);
+    color: var(--text);
+    box-shadow: var(--shadow-2);
+}
+.modal-header {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+}
+.modal-title { color: var(--text); font-weight: 600; }
+.modal-body { color: var(--text); padding: 20px; }
+.modal-footer {
+    border-top: 1px solid var(--border);
+    padding: 12px 20px;
+    background: var(--bg-elevated);
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+}
+.btn-close {
+    filter: invert(1) grayscale(1) brightness(2);
+    opacity: 0.6;
+}
+.btn-close:hover { opacity: 1; }
+
+/* Badges */
+.badge {
+    font-weight: 600;
+    border-radius: var(--radius-pill);
+    padding: 3px 9px;
+}
+.badge.bg-secondary { background: var(--surface-2) !important; color: var(--text-dim); }
+
+/* Dropdown (bootstrap override) */
+.dropdown-menu {
+    background: var(--surface-2) !important;
+    border: 1px solid var(--border-hi) !important;
+    box-shadow: var(--shadow-2);
+}
+.dropdown-item {
+    color: var(--text) !important;
+}
+.dropdown-item:hover, .dropdown-item:focus {
+    background: var(--primary-bg) !important;
+    color: var(--primary-hov) !important;
+}
+
+/* Form text */
+.form-text { color: var(--text-dim) !important; font-size: 11px; }
+
+/* Bootstrap bg-opacity overrides */
+.bg-warning.bg-opacity-10,
+.bg-warning.bg-opacity-25 {
+    background: var(--warning-bg) !important;
+    color: var(--warning);
+}
     </style>
 </head>
 <body class="d-flex flex-column">
 
-    <nav class="navbar navbar-dark bg-dark px-3 py-2 flex-shrink-0">
+    <nav class="navbar px-3 py-2 flex-shrink-0">
         <span class="navbar-brand mb-0 h1"><i class="bi bi-broadcast"></i> IPTV Editor</span>
         <div class="d-flex align-items-center">
             <label class="text-white me-2">Playlist ID:</label>
