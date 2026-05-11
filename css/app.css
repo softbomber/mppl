@@ -221,7 +221,8 @@
 
 
 /* ============================================================================
-   Net offline modal + restored toast (BEM: .net-modal, .net-toast)
+   Net offline modal + restored toast
+   Стиль как у .mdl (Регистрация Аккаунта): overlay + t_subst header + signin body
    ============================================================================ */
 .net-modal {
   position: fixed;
@@ -230,30 +231,41 @@
   display: none;
   align-items: center;
   justify-content: center;
-  background: rgba(8, 14, 20, 0.78);
-  backdrop-filter: blur(2px);
+  background-color: rgb(38 38 38 / 36%);
 }
 .net-modal.is-active { display: flex; }
 
 .net-modal__box {
   min-width: 280px;
-  max-width: min(90vw, 420px);
-  padding: 22px 22px 18px;
-  background: var(--app-bg-panel);
-  color: var(--app-fg);
-  border: 1px solid var(--app-accent-2);
-  border-radius: var(--app-radius);
-  box-shadow: var(--app-shadow);
+  max-width: min(90vw, 352px);
+  box-shadow: 0px 0px 6px 0px rgba(119,119,119,.47);
+  overflow: hidden;
+}
+.net-modal__header {
+  display: flex;
+  justify-content: flex-end;
+  background: #465b6e;
+  padding: 6px 7px 6px;
+}
+.net-modal__header-title {
+  color: #f9f9f9;
+  font-size: 13px;
+  flex: 1;
+}
+.net-modal__body {
+  background: #f9faff;
+  padding: 20px 16px;
   text-align: center;
 }
 .net-modal__title {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
+  color: #32577e;
   margin-bottom: 8px;
 }
 .net-modal__msg {
   font-size: 13px;
-  color: var(--app-fg-muted);
+  color: #5a6a7e;
   line-height: 1.4;
   margin-bottom: 14px;
 }
@@ -261,8 +273,8 @@
   width: 28px;
   height: 28px;
   margin: 0 auto 12px;
-  border: 3px solid rgba(255, 255, 255, 0.15);
-  border-top-color: var(--app-accent);
+  border: 3px solid #acc4ef;
+  border-top-color: #74a5d7;
   border-radius: 50%;
   animation: net-spin 0.9s linear infinite;
 }
@@ -271,14 +283,15 @@
 .net-modal__btn {
   cursor: pointer;
   border: 0;
-  padding: 8px 16px;
-  border-radius: 999px;
-  background: var(--app-accent);
-  color: #0c1a26;
+  padding: 7px 20px;
+  border-radius: 2px;
+  background: #74a5d7;
+  color: #f0f8ff;
   font-weight: 600;
   font-size: 13px;
+  width: 100%;
 }
-.net-modal__btn:hover { filter: brightness(1.06); }
+.net-modal__btn:hover { background: #374450; }
 
 .net-toast {
   position: fixed;
@@ -293,7 +306,7 @@
   display: none;
   align-items: center;
   gap: 8px;
-  box-shadow: var(--app-shadow);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.25);
 }
 .net-toast.is-active { display: inline-flex; }
 .net-toast__dot {
@@ -304,7 +317,7 @@
 
 
 /* ============================================================================
-   Reauth modal (BEM: .auth-modal)
+   Reauth modal — стиль как login.php
    ============================================================================ */
 .auth-modal {
   position: fixed;
@@ -313,78 +326,125 @@
   display: none;
   align-items: center;
   justify-content: center;
-  background: rgba(8, 14, 20, 0.82);
-  backdrop-filter: blur(2px);
+  background: url('/image.png') center/cover;
 }
 .auth-modal.is-active { display: flex; }
 
 .auth-modal__box {
-  width: min(92vw, 360px);
-  padding: 22px 22px 18px;
-  background: var(--app-bg-panel);
-  color: var(--app-fg);
-  border: 1px solid var(--app-accent-2);
-  border-radius: var(--app-radius);
-  box-shadow: var(--app-shadow);
+  width: min(92vw, 310px);
+  background: #13212D;
+  border-radius: 13px;
+  padding: 0 0 30px;
+  text-align: center;
+}
+.auth-modal__logo {
+  padding: 18px 12px 8px;
+  text-align: center;
+}
+.auth-modal__logo h2 {
+  font-size: 20px;
+  color: #dfe8f9;
+  margin: 0;
+}
+.auth-modal__logo-sub {
+  font-size: 11px;
+  color: #86a1bd;
+  margin-top: 2px;
 }
 .auth-modal__title {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 100;
+  padding: 10px 8px;
+  color: #dfe8f9;
+  text-align: center;
 }
 .auth-modal__msg {
   font-size: 13px;
-  color: var(--app-fg-muted);
-  margin-bottom: 14px;
+  color: #86a1bd;
+  margin: 0 22px 10px;
+}
+.auth-modal__form {
+  padding: 0 22px;
 }
 .auth-modal__field {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 10px;
+  height: 42px;
+  text-align: center;
+  margin-bottom: 0;
 }
 .auth-modal__field label {
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--app-fg-muted);
+  display: none;
 }
 .auth-modal__field input {
-  font: inherit;
+  border: 1px solid #15324b;
+  padding: 6px 14px 5px 40px;
+  height: 19px;
+  width: 64%;
   font-size: 14px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--app-accent-2);
-  background: rgba(0, 0, 0, 0.25);
-  color: var(--app-fg);
+  color: #ecfff9;
+  border-radius: 3px;
+  background: #121d27 url('/i.png') no-repeat;
   outline: none;
 }
+.auth-modal__field input[name="login"] { background-position: 5px 6px; }
+.auth-modal__field input[name="password"] { background-position: 4px -24px; }
 .auth-modal__field input:focus {
-  border-color: var(--app-accent);
-  box-shadow: 0 0 0 3px rgba(95, 169, 217, 0.18);
+  border-color: #74a5d7;
 }
 .auth-modal__error {
   font-size: 12px;
   color: #ff8a8a;
-  margin-bottom: 8px;
+  margin: 4px 22px 8px;
+  text-align: center;
 }
 .auth-modal__actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 8px;
+  margin: 12px 22px 0;
 }
 .auth-modal__submit {
   cursor: pointer;
   border: 0;
-  padding: 8px 18px;
-  border-radius: 999px;
-  background: var(--app-accent);
-  color: #0c1a26;
-  font-weight: 700;
-  font-size: 13px;
+  padding: 7px 20px;
+  border-radius: 2px;
+  background: #74a5d7;
+  color: #f0f8ff;
+  font-weight: 600;
+  font-size: 14px;
+  width: 100%;
 }
+.auth-modal__submit:hover { background: #374450; }
 .auth-modal__submit:disabled { opacity: 0.6; cursor: progress; }
 .auth-modal.is-busy { pointer-events: none; }
+.auth-modal__forgot {
+  margin-top: 10px;
+}
+.auth-modal__forgot a {
+  color: #6bc498;
+  text-decoration: none;
+  font-size: 13px;
+}
+.auth-modal__social {
+  display: flex;
+  justify-content: center;
+  margin: 4px 22px;
+}
+.auth-modal__social button {
+  display: flex;
+  align-items: center;
+  border: 0;
+  border-radius: 2px;
+  padding: 4px;
+  cursor: pointer;
+  background-color: #74a5d7;
+  width: 100%;
+  justify-content: center;
+  color: #f0f8ff;
+  font-size: 14px;
+}
+.auth-modal__social button:hover { background: #374450; }
+.auth-modal__social img {
+  width: 23px;
+  height: 22px;
+  margin-right: 5px;
+}
 
 
 /* ============================================================================

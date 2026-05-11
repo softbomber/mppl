@@ -42,10 +42,13 @@
     ov.setAttribute('aria-live', 'assertive');
     ov.innerHTML =
       '<div class="net-modal__box">' +
-        '<div class="net-modal__title" data-i18n="net.offline_title">Нет соединения с сетью</div>' +
-        '<div class="net-modal__msg"   data-i18n="net.offline_msg">Проверьте подключение. Мы автоматически продолжим, как только связь восстановится.</div>' +
-        '<div class="net-modal__spinner" aria-hidden="true"></div>' +
-        '<button type="button" class="net-modal__btn" data-net-retry data-i18n="net.retry">Проверить ещё раз</button>' +
+        '<div class="net-modal__header"><span class="net-modal__header-title" data-i18n="net.offline_header">Соединение</span></div>' +
+        '<div class="net-modal__body">' +
+          '<div class="net-modal__title" data-i18n="net.offline_title">Нет соединения с сетью</div>' +
+          '<div class="net-modal__msg"   data-i18n="net.offline_msg">Проверьте подключение. Мы автоматически продолжим, как только связь восстановится.</div>' +
+          '<div class="net-modal__spinner" aria-hidden="true"></div>' +
+          '<button type="button" class="net-modal__btn" data-net-retry data-i18n="net.retry">Проверить ещё раз</button>' +
+        '</div>' +
       '</div>';
     DOC.body.appendChild(ov);
 
