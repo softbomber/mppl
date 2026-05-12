@@ -3,10 +3,10 @@
  * Email verification endpoint.
  *
  * Handles:
- *  - GET  ?token=...           — auto-verify via link click
- *  - POST code=... &dealer=... — manual code entry
- *  - POST action=resend &dealer=... &email=... — resend to a new email (attempt 2)
- *  - POST action=cancel &dealer=... — user cancels, delete account if unverified
+ *  - GET  ?token=...              — auto-verify via link click
+ *  - POST code=...                — manual code entry (code is globally unique)
+ *  - POST action=resend &email=... — resend to a new email (attempt 2)
+ *  - POST action=cancel            — user cancels, delete account if unverified
  */
 include_once("config.php");
 require_once(__DIR__ . '/email_verify.php');
@@ -25,38 +25,40 @@ if (isset($_GET['token'])) {
         $success  = true;
         $dealerId = $row['dealer_id'];
     } else {
-        // Token failed — try to extract dealer_id so the code form works
-        $dealerId = getDealerByToken($link, $_GET['token']);
         $error = "Ссылка недействительна. Введите код из письма вручную.";
     }
 }
 
 // ---- Manual code submit ----
 if (isset($_POST['code']) && !isset($_POST['action'])) {
-    $code     = trim($_POST['code']);
-    $dealerId = (int)($_POST['dealer'] ?? 0);
+    $code = trim($_POST['code']);
 
-    $row = verifyEmailByCode($link, $code, $dealerId);
+    $row = verifyEmailByCode($link, $code);
     if ($row) {
         $success  = true;
         $dealerId = $row['dealer_id'];
     } else {
-        $attempt = getVerificationAttempt($link, $dealerId);
-        if ($attempt >= 2) {
-            // 2nd failed attempt — delete account
-            deleteUnverifiedDealer($link, $dealerId);
-            $deleted = true;
-            $error   = "Email не подтверждён дважды. Аккаунт удалён. Пожалуйста, зарегистрируйтесь заново.";
+        // Try to find dealer by this code (even used) to track attempts
+        $dealerId = getDealerByCode($link, $code);
+        if ($dealerId > 0) {
+            $attempt = getVerificationAttempt($link, $dealerId);
+            if ($attempt >= 2) {
+                deleteUnverifiedDealer($link, $dealerId);
+                $deleted = true;
+                $error   = "Email не подтверждён дважды. Аккаунт удалён. Пожалуйста, зарегистрируйтесь заново.";
+            } else {
+                $error = "Неверный код. Проверьте правильность ввода или запросите новый код.";
+                $showResendForm = true;
+            }
         } else {
-            $error = "Неверный код. Проверьте правильность ввода или запросите новый код.";
-            $showResendForm = true;
+            $error = "Неверный код. Проверьте правильность ввода.";
         }
     }
 }
 
 // ---- Resend with new email ----
 if (isset($_POST['action']) && $_POST['action'] === 'resend') {
-    $dealerId = (int)($_POST['dealer'] ?? 0);
+    $dealerId = (int)($_POST['dealer_id'] ?? 0);
     $newEmail = trim($_POST['email'] ?? '');
 
     if ($dealerId <= 0 || !filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
@@ -71,7 +73,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'resend') {
             $deleted = true;
             $error   = "Превышено количество попыток. Аккаунт удалён.";
         } else {
-            // Update email in dealers
             $stmt = $link->prepare("UPDATE dealers SET eml = ? WHERE id = ? AND email_verified = 0");
             $stmt->bind_param('si', $newEmail, $dealerId);
             $stmt->execute();
@@ -86,7 +87,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'resend') {
 
 // ---- Cancel registration ----
 if (isset($_POST['action']) && $_POST['action'] === 'cancel') {
-    $dealerId = (int)($_POST['dealer'] ?? 0);
+    $dealerId = (int)($_POST['dealer_id'] ?? 0);
     if ($dealerId > 0) {
         deleteUnverifiedDealer($link, $dealerId);
         $deleted = true;
@@ -184,27 +185,28 @@ body { background: #0a0e16; color: #c9d1d9; font-family: 'Source Sans 3', sans-s
 
         <!-- Code entry form -->
         <form method="POST" action="verify_email.php">
-            <input type="hidden" name="dealer" value="<?= (int)($dealerId ?? ($_GET['dealer'] ?? ($_POST['dealer'] ?? 0))) ?>">
             <input type="text" name="code" placeholder="000000" maxlength="6" pattern="[0-9]{6}" required autofocus>
             <button type="submit" class="btn btn-primary">Подтвердить код</button>
         </form>
 
-        <?php if ($showResendForm || isset($_GET['dealer'])): ?>
+        <?php if ($showResendForm && $dealerId > 0): ?>
         <div class="divider">— или укажите другой email —</div>
         <form method="POST" action="verify_email.php">
             <input type="hidden" name="action" value="resend">
-            <input type="hidden" name="dealer" value="<?= (int)($dealerId ?? ($_GET['dealer'] ?? ($_POST['dealer'] ?? 0))) ?>">
+            <input type="hidden" name="dealer_id" value="<?= (int)$dealerId ?>">
             <input type="email" name="email" placeholder="Новый email" required>
             <button type="submit" class="btn btn-secondary">Отправить код на новый email</button>
         </form>
         <?php endif; ?>
 
+        <?php if ($dealerId > 0): ?>
         <div class="divider">—</div>
         <form method="POST" action="verify_email.php">
             <input type="hidden" name="action" value="cancel">
-            <input type="hidden" name="dealer" value="<?= (int)($dealerId ?? ($_GET['dealer'] ?? ($_POST['dealer'] ?? 0))) ?>">
+            <input type="hidden" name="dealer_id" value="<?= (int)$dealerId ?>">
             <button type="submit" class="btn btn-danger" onclick="return confirm('Аккаунт будет удалён. Продолжить?')">Отменить регистрацию</button>
         </form>
+        <?php endif; ?>
     <?php endif; ?>
 </div>
 </body>

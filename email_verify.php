@@ -21,7 +21,7 @@ require_once(__DIR__ . '/env_loader.php');
  */
 function sendVerificationEmail(mysqli $link, int $dealerId, string $email, int $attempt = 1)
 {
-    $code  = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+    $code  = generateUniqueCode($link);
     $token = bin2hex(random_bytes(32));
 
     // Invalidate previous codes for this dealer
@@ -70,6 +70,27 @@ function sendVerificationEmail(mysqli $link, int $dealerId, string $email, int $
 }
 
 /**
+ * Generate a unique 6-digit code (no active duplicates).
+ */
+function generateUniqueCode(mysqli $link)
+{
+    for ($i = 0; $i < 10; $i++) {
+        $code = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+        $stmt = $link->prepare(
+            "SELECT id FROM email_verifications WHERE code = ? AND used = 0 LIMIT 1"
+        );
+        if (!$stmt) { return $code; }
+        $stmt->bind_param('s', $code);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $exists = ($result->num_rows > 0);
+        $stmt->close();
+        if (!$exists) { return $code; }
+    }
+    return $code;
+}
+
+/**
  * Verify by token (link click).
  * @return array|false
  */
@@ -94,36 +115,19 @@ function verifyEmailByToken(mysqli $link, string $token)
 }
 
 /**
- * Look up dealer_id by token without verifying (for form fallback).
- */
-function getDealerByToken(mysqli $link, string $token)
-{
-    $stmt = $link->prepare(
-        "SELECT dealer_id FROM email_verifications WHERE token = ? ORDER BY id DESC LIMIT 1"
-    );
-    if (!$stmt) { return 0; }
-    $stmt->bind_param('s', $token);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = ($result->num_rows > 0) ? $result->fetch_assoc() : false;
-    $stmt->close();
-    return $row ? (int)$row['dealer_id'] : 0;
-}
-
-/**
- * Verify by code + dealer_id (manual entry).
+ * Verify by code only (manual entry). Code is globally unique among active records.
  * @return array|false
  */
-function verifyEmailByCode(mysqli $link, string $code, int $dealerId)
+function verifyEmailByCode(mysqli $link, string $code)
 {
     $stmt = $link->prepare(
         "SELECT id, dealer_id, email, code, token, attempt
          FROM email_verifications
-         WHERE code = ? AND dealer_id = ? AND used = 0
+         WHERE code = ? AND used = 0
          ORDER BY id DESC LIMIT 1"
     );
     if (!$stmt) { return false; }
-    $stmt->bind_param('si', $code, $dealerId);
+    $stmt->bind_param('s', $code);
     $stmt->execute();
     $result = $stmt->get_result();
     $row = ($result->num_rows > 0) ? $result->fetch_assoc() : false;
@@ -132,6 +136,23 @@ function verifyEmailByCode(mysqli $link, string $code, int $dealerId)
         markVerified($link, $row['id'], $row['dealer_id']);
     }
     return $row;
+}
+
+/**
+ * Look up dealer_id by code (any record, even used) for attempt tracking.
+ */
+function getDealerByCode(mysqli $link, string $code)
+{
+    $stmt = $link->prepare(
+        "SELECT dealer_id FROM email_verifications WHERE code = ? ORDER BY id DESC LIMIT 1"
+    );
+    if (!$stmt) { return 0; }
+    $stmt->bind_param('s', $code);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = ($result->num_rows > 0) ? $result->fetch_assoc() : false;
+    $stmt->close();
+    return $row ? (int)$row['dealer_id'] : 0;
 }
 
 function markVerified(mysqli $link, int $verificationId, int $dealerId)

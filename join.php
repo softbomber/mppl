@@ -37,7 +37,7 @@ if(!empty($email)) {
         // Send verification email instead of logging in directly
         require_once(__DIR__ . '/email_verify.php');
         sendVerificationEmail($link, (int)$row['id'], $email, 1);
-        header("Location: verify_email.php?dealer=" . (int)$row['id']);
+        header("Location: verify_email.php");
         exit;
     }
 
