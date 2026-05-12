@@ -25,7 +25,9 @@ if (isset($_GET['token'])) {
         $success  = true;
         $dealerId = $row['dealer_id'];
     } else {
-        $error = "Ссылка недействительна или истёк срок действия.";
+        // Token failed — try to extract dealer_id so the code form works
+        $dealerId = getDealerByToken($link, $_GET['token']);
+        $error = "Ссылка недействительна. Введите код из письма вручную.";
     }
 }
 

@@ -78,9 +78,10 @@ function verifyEmailByToken(mysqli $link, string $token)
     $stmt = $link->prepare(
         "SELECT id, dealer_id, email, code, token, attempt
          FROM email_verifications
-         WHERE token = ? AND used = 0 AND expires_at > NOW()
-         LIMIT 1"
+         WHERE token = ? AND used = 0
+         ORDER BY id DESC LIMIT 1"
     );
+    if (!$stmt) { return false; }
     $stmt->bind_param('s', $token);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -93,6 +94,23 @@ function verifyEmailByToken(mysqli $link, string $token)
 }
 
 /**
+ * Look up dealer_id by token without verifying (for form fallback).
+ */
+function getDealerByToken(mysqli $link, string $token)
+{
+    $stmt = $link->prepare(
+        "SELECT dealer_id FROM email_verifications WHERE token = ? ORDER BY id DESC LIMIT 1"
+    );
+    if (!$stmt) { return 0; }
+    $stmt->bind_param('s', $token);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = ($result->num_rows > 0) ? $result->fetch_assoc() : false;
+    $stmt->close();
+    return $row ? (int)$row['dealer_id'] : 0;
+}
+
+/**
  * Verify by code + dealer_id (manual entry).
  * @return array|false
  */
@@ -101,9 +119,10 @@ function verifyEmailByCode(mysqli $link, string $code, int $dealerId)
     $stmt = $link->prepare(
         "SELECT id, dealer_id, email, code, token, attempt
          FROM email_verifications
-         WHERE code = ? AND dealer_id = ? AND used = 0 AND expires_at > NOW()
+         WHERE code = ? AND dealer_id = ? AND used = 0
          ORDER BY id DESC LIMIT 1"
     );
+    if (!$stmt) { return false; }
     $stmt->bind_param('si', $code, $dealerId);
     $stmt->execute();
     $result = $stmt->get_result();
