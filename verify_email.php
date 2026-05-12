@@ -20,7 +20,7 @@ $dealerId = null;
 
 // ---- Link click: GET ?token=... ----
 if (isset($_GET['token'])) {
-    $row = verifyEmailCode($link, $_GET['token']);
+    $row = verifyEmailByToken($link, $_GET['token']);
     if ($row) {
         $success  = true;
         $dealerId = $row['dealer_id'];
@@ -34,7 +34,7 @@ if (isset($_POST['code']) && !isset($_POST['action'])) {
     $code     = trim($_POST['code']);
     $dealerId = (int)($_POST['dealer'] ?? 0);
 
-    $row = verifyEmailCode($link, $code);
+    $row = verifyEmailByCode($link, $code, $dealerId);
     if ($row) {
         $success  = true;
         $dealerId = $row['dealer_id'];
