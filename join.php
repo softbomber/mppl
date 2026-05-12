@@ -32,7 +32,16 @@ if(!empty($email)) {
     if(empty($messages)) 
     {
     $row = newDealer($login,$pass,$email,$_SERVER['REMOTE_ADDR']);
-     
+
+    if (isset($row['id']) && $row['id'] > 0 && !empty($email)) {
+        // Send verification email instead of logging in directly
+        require_once(__DIR__ . '/email_verify.php');
+        sendVerificationEmail($link, (int)$row['id'], $email, 1);
+        header("Location: verify_email.php?dealer=" . (int)$row['id']);
+        exit;
+    }
+
+    // Fallback: if no email provided (e.g. social login) — log in directly
     $a=$d=0;  
     if(isset($row['a']))
     {    $a=$row['a'];
@@ -45,23 +54,7 @@ if(!empty($email)) {
         setcookie("hsh", $hash, time()+86400);}
   ini_set('session.cookie_lifetime', 86400);
   ini_set('session.gc_maxlifetime', 86400);
-  //cleanMemberSession($row["user"],$d,$a,$row['hash'],$row['dealer']);
         cleanMemberSession($row["user"],$d,$a,$row['hash'],$row['dealer'],$row['currency'],$row['rate'],$row['postpaid']);
-$name_from = "POSTBOT";
-$email_from = "noreply@mpol.co";
-$data_charset = "UTF-8";
-$send_charset = "windows-1251";
-$subject = "Добро пожаловать на Metropoliten";
-$body = "Добро пожаловать на Metropoliten<br>Спасибо за выбор нашего сервиса!<br>Данные вашего аккаунта<br>Логин: ".$_POST["login"].'<br>Пароль: '.$_POST["pass"]."<br>С уважением администрация Metropoliten";
-send_mime_mail($name_from, // имя отправителя
-               $email_from, // email отправителя
-               $login, // имя получателя
-               $email, // email получателя
-               $data_charset, // кодировка переданных данных
-               $send_charset, // кодировка письма
-               $subject, // тема письма
-               $body,
-               'html');
      header("Location: dealer.php");
    }
  //}
