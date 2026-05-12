@@ -126,7 +126,11 @@ if ($success && $dealerId) {
             $row['id'], $row['currency'] ?? 0, $row['rate'] ?? 0, $row['postpaid'] ?? 0
         );
 
-        header("Location: dealer.php");
+        if (isMobileDevice()) {
+            header("Location: mb.php");
+        } else {
+            header("Location: dealer.php");
+        }
         exit;
     }
     $stmt->close();
