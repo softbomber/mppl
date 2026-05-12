@@ -19,11 +19,10 @@ require_once(__DIR__ . '/env_loader.php');
  *
  * @return array{code:string, token:string}
  */
-function sendVerificationEmail(mysqli $link, int $dealerId, string $email, int $attempt = 1): array
+function sendVerificationEmail(mysqli $link, int $dealerId, string $email, int $attempt = 1)
 {
     $code  = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
     $token = bin2hex(random_bytes(32));
-    $expiresAt = date('Y-m-d H:i:s', time() + 3600); // 1 hour
 
     // Invalidate previous codes for this dealer
     $stmt = $link->prepare("UPDATE email_verifications SET used = 1 WHERE dealer_id = ? AND used = 0");
@@ -31,12 +30,12 @@ function sendVerificationEmail(mysqli $link, int $dealerId, string $email, int $
     $stmt->execute();
     $stmt->close();
 
-    // Insert new verification record
+    // Insert new verification record — use MySQL NOW() for timezone consistency
     $stmt = $link->prepare(
         "INSERT INTO email_verifications (dealer_id, email, code, token, attempt, expires_at)
-         VALUES (?, ?, ?, ?, ?, ?)"
+         VALUES (?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR))"
     );
-    $stmt->bind_param('isssis', $dealerId, $email, $code, $token, $attempt, $expiresAt);
+    $stmt->bind_param('isssi', $dealerId, $email, $code, $token, $attempt);
     $stmt->execute();
     $stmt->close();
 
@@ -71,64 +70,68 @@ function sendVerificationEmail(mysqli $link, int $dealerId, string $email, int $
 }
 
 /**
- * Verify a code or token. Returns the verification row on success, false on failure.
- *
+ * Verify by token (link click).
  * @return array|false
  */
-function verifyEmailCode(mysqli $link, string $codeOrToken): array|false
+function verifyEmailByToken(mysqli $link, string $token)
 {
-    // Try by token first (link click)
     $stmt = $link->prepare(
         "SELECT id, dealer_id, email, code, token, attempt
          FROM email_verifications
          WHERE token = ? AND used = 0 AND expires_at > NOW()
          LIMIT 1"
     );
-    $stmt->bind_param('s', $codeOrToken);
+    $stmt->bind_param('s', $token);
     $stmt->execute();
     $result = $stmt->get_result();
-
-    if ($result->num_rows === 0) {
-        $stmt->close();
-        // Try by code (manual entry) — get the latest unused
-        $stmt = $link->prepare(
-            "SELECT id, dealer_id, email, code, token, attempt
-             FROM email_verifications
-             WHERE code = ? AND used = 0 AND expires_at > NOW()
-             ORDER BY id DESC LIMIT 1"
-        );
-        $stmt->bind_param('s', $codeOrToken);
-        $stmt->execute();
-        $result = $stmt->get_result();
+    $row = ($result->num_rows > 0) ? $result->fetch_assoc() : false;
+    $stmt->close();
+    if ($row) {
+        markVerified($link, $row['id'], $row['dealer_id']);
     }
-
-    if ($result->num_rows === 0) {
-        $stmt->close();
-        return false;
-    }
-
-    $row = $result->fetch_assoc();
-    $stmt->close();
-
-    // Mark as used
-    $stmt = $link->prepare("UPDATE email_verifications SET used = 1 WHERE id = ?");
-    $stmt->bind_param('i', $row['id']);
-    $stmt->execute();
-    $stmt->close();
-
-    // Mark dealer as verified
-    $stmt = $link->prepare("UPDATE dealers SET email_verified = 1 WHERE id = ?");
-    $stmt->bind_param('i', $row['dealer_id']);
-    $stmt->execute();
-    $stmt->close();
-
     return $row;
+}
+
+/**
+ * Verify by code + dealer_id (manual entry).
+ * @return array|false
+ */
+function verifyEmailByCode(mysqli $link, string $code, int $dealerId)
+{
+    $stmt = $link->prepare(
+        "SELECT id, dealer_id, email, code, token, attempt
+         FROM email_verifications
+         WHERE code = ? AND dealer_id = ? AND used = 0 AND expires_at > NOW()
+         ORDER BY id DESC LIMIT 1"
+    );
+    $stmt->bind_param('si', $code, $dealerId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = ($result->num_rows > 0) ? $result->fetch_assoc() : false;
+    $stmt->close();
+    if ($row) {
+        markVerified($link, $row['id'], $row['dealer_id']);
+    }
+    return $row;
+}
+
+function markVerified(mysqli $link, int $verificationId, int $dealerId)
+{
+    $stmt = $link->prepare("UPDATE email_verifications SET used = 1 WHERE id = ?");
+    $stmt->bind_param('i', $verificationId);
+    $stmt->execute();
+    $stmt->close();
+
+    $stmt = $link->prepare("UPDATE dealers SET email_verified = 1 WHERE id = ?");
+    $stmt->bind_param('i', $dealerId);
+    $stmt->execute();
+    $stmt->close();
 }
 
 /**
  * Get the current verification attempt number for a dealer.
  */
-function getVerificationAttempt(mysqli $link, int $dealerId): int
+function getVerificationAttempt(mysqli $link, int $dealerId)
 {
     $stmt = $link->prepare(
         "SELECT MAX(attempt) as max_attempt FROM email_verifications WHERE dealer_id = ?"
@@ -145,7 +148,7 @@ function getVerificationAttempt(mysqli $link, int $dealerId): int
  * Delete a dealer account and all related verification records.
  * Called when the 2nd email verification attempt fails.
  */
-function deleteUnverifiedDealer(mysqli $link, int $dealerId): void
+function deleteUnverifiedDealer(mysqli $link, int $dealerId)
 {
     $stmt = $link->prepare("DELETE FROM email_verifications WHERE dealer_id = ?");
     $stmt->bind_param('i', $dealerId);
