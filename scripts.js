@@ -529,7 +529,7 @@ if(p==0) $(uinfo).html($(r).filter('.box'));
 }
 function loglist(p){$(txtHint).html("");$(uinfo).html('');$.post("undo.php",{list:1,page:p},function(r){$(result).html(r);});}
 function racc(){$.post("pbuy.php",{racc:1},function(r){if(r){$("#deposit").text(Number(r.s).toFixed(2));if(r.i!=null)$("#intrst").text(r.i+"%");}else hMsg.dMsg("Произошла ошибка!");});}
-setInterval(function(){$.post("pbuy.php",{racc:1},function(r){if(r){var nv=Number(r.s).toFixed(2);if($("#deposit").text()!==nv){$("#deposit").text(nv);if(r.i!=null)$("#intrst").text(r.i+"%");}}});},30000);
+(function(){if(typeof EventSource==='undefined')return;var es=new EventSource("balance_stream.php");es.onmessage=function(e){try{var r=JSON.parse(e.data);var nv=Number(r.s).toFixed(2);if($("#deposit").text()!==nv){$("#deposit").text(nv);}if(r.i!=null)$("#intrst").text(r.i+"%");}catch(ex){}};es.onerror=function(){es.close();};})();
 function utj(t){var dn=new Date(t*1000);return addnull(dn.getDate(),dn.getMonth()+1,dn.getFullYear(),dn.getHours(),dn.getMinutes())}
 function gck(cnm){var r=dc.cookie.match('(^|;) ?'+cnm+'=([^;]*)(;|$)');if(!r)return null;else return(unescape(r[2]))}
 function phms(me){var maskList=$.masksSort($.masksLoad("phone-codes.json"),['#'],/[0-9]|#/,"mask");
