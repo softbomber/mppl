@@ -17,7 +17,7 @@ include_once("dealer_common.php");
 <script src="jquery.inputmask.js"></script>
 <script src="jquery.bin-first.js"></script>
 <script src="jquery.inputmask-multi.js"></script>
-<script src="scripts.js?v=17"></script>
+<script src="scripts.js?v=18"></script>
 <script src="humanmsg.js"></script>
 <script src="js/jquery-ui.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=PT+Mono&amp;family=Source+Sans+3&amp;display=swap" rel="stylesheet">
