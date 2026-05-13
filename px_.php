@@ -48,6 +48,9 @@ if (isset($_POST["l"]) || (isset($_POST["l"]) && isset($_POST["p"]))) {
         ];
     }
 
+    // Нормализация телефона для поиска (убираем всё кроме цифр)
+    $phoneSearch = preg_replace('/\D/', '', $user);
+
     // Логика поиска
     if ($searchType == '1' || $searchType == '2') { // ВСЁ или ЛОГИН
         // Точный поиск по логину
@@ -70,9 +73,9 @@ if (isset($_POST["l"]) || (isset($_POST["l"]) && isset($_POST["p"]))) {
     }
 
     if ($searchType == '1' || $searchType == '3') { // ВСЁ или Т.НОМЕР
-        // Точный поиск по телефону
-        $qu = "SELECT user, phone, email FROM accounts WHERE phone = '$user' AND deleted='0'";
-        if ($adm != '1') $qu .= " AND dealer='$dealer'";
+        // Точный поиск по телефону (сравниваем только цифры)
+        $qu = "SELECT user, phone, email FROM accounts WHERE REPLACE(REPLACE(REPLACE(REPLACE(phone,'+',''),' ',''),'-',''),'(','') = '$phoneSearch' AND deleted='0'";
+        if ($adm != '1' && $adm != '2') $qu .= " AND dealer='$dealer'";
         $res = $link->query($qu) or die("sql error: " . $link->error_list);
         while ($row = $res->fetch_assoc()) {
             addResult($results, $row, 'phone');
@@ -80,8 +83,8 @@ if (isset($_POST["l"]) || (isset($_POST["l"]) && isset($_POST["p"]))) {
 
         // Частичный поиск, если точный не дал результатов
         if (empty($results) || $searchType == '1') {
-            $qu = "SELECT user, phone, email FROM accounts WHERE phone LIKE '%$user%' AND deleted='0'";
-            if ($adm != '1') $qu .= " AND dealer='$dealer'";
+            $qu = "SELECT user, phone, email FROM accounts WHERE REPLACE(REPLACE(REPLACE(REPLACE(phone,'+',''),' ',''),'-',''),'(','') LIKE '%$phoneSearch%' AND deleted='0'";
+            if ($adm != '1' && $adm != '2') $qu .= " AND dealer='$dealer'";
             $res = $link->query($qu) or die("sql error: " . $link->error_list);
             while ($row = $res->fetch_assoc()) {
                 addResult($results, $row, 'phone');
@@ -92,7 +95,7 @@ if (isset($_POST["l"]) || (isset($_POST["l"]) && isset($_POST["p"]))) {
     if ($searchType == '1' || $searchType == '4') { // ВСЁ или EMAIL
         // Точный поиск по email
         $qu = "SELECT user, phone, email FROM accounts WHERE email = '$user' AND deleted='0'";
-        if ($adm != '1') $qu .= " AND dealer='$dealer'";
+        if ($adm != '1' && $adm != '2') $qu .= " AND dealer='$dealer'";
         $res = $link->query($qu) or die("sql error: " . $link->error_list);
         while ($row = $res->fetch_assoc()) {
             addResult($results, $row, 'email');
@@ -101,7 +104,7 @@ if (isset($_POST["l"]) || (isset($_POST["l"]) && isset($_POST["p"]))) {
         // Частичный поиск, если точный не дал результатов
         if (empty($results) || $searchType == '1') {
             $qu = "SELECT user, phone, email FROM accounts WHERE email LIKE '%$user%' AND deleted='0'";
-            if ($adm != '1') $qu .= " AND dealer='$dealer'";
+            if ($adm != '1' && $adm != '2') $qu .= " AND dealer='$dealer'";
             $res = $link->query($qu) or die("sql error: " . $link->error_list);
             while ($row = $res->fetch_assoc()) {
                 addResult($results, $row, 'email');

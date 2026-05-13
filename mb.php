@@ -19,7 +19,7 @@ include_once("dealer_common.php");
 <script src="jquery.inputmask.js"></script>
 <script src="jquery.bin-first.js"></script>
 <script src="jquery.inputmask-multi.js"></script>
-<script src="guser.js?v=28"></script>
+<script src="guser.js?v=29"></script>
     <?php if(isset($_SESSION['a']) && $_SESSION['a'] == 1) {echo '<script src="adaptive_admin.js?v=12'; echo "></script>";}?>
 <script src="humanmsg.js"></script>
 <script src="js/jquery-ui.min.js"></script>
