@@ -1,0 +1,14 @@
+[Unit]
+Description=WebSocket balance push server
+After=mysql.service network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/ws_server
+ExecStart=/var/www/ws_server/ws_balance
+EnvironmentFile=/var/www/.env
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
