@@ -8,8 +8,13 @@ $redis_port = (int)(getenv('REDIS_PORT') ?: 6379);
 $redis_pass = getenv('REDIS_PASS') ?: '';
 
 
+function tgApiBase(): string {
+    $proxy = getenv('TG_PROXY');
+    return $proxy ? rtrim($proxy, '/') : 'https://api.telegram.org';
+}
+
 function tgSend(string $token, string $chatId, string $text): array {
-    $url = "https://api.telegram.org/bot{$token}/sendMessage";
+    $url = tgApiBase() . "/bot{$token}/sendMessage";
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_POST           => true,
@@ -2593,7 +2598,7 @@ class TelegramBot {
 
     public function __construct($token) {
         $this->token = $token;
-        $this->apiUrl = "https://api.telegram.org/bot$token/";
+        $this->apiUrl = tgApiBase() . "/bot$token/";
     }
 
     public function sendMessage($chatId, $text, $replyMarkup = null) {
