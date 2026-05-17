@@ -19,7 +19,7 @@ include_once("dealer_common.php");
 <script src="jquery.inputmask.js"></script>
 <script src="jquery.bin-first.js"></script>
 <script src="jquery.inputmask-multi.js"></script>
-<script src="guser.js?v=30"></script>
+<script src="guser.js?v=31"></script>
     <?php if(isset($_SESSION['a']) && $_SESSION['a'] == 1) {echo '<script src="adaptive_admin.js?v=12'; echo "></script>";}?>
 <script src="humanmsg.js"></script>
 <script src="js/jquery-ui.min.js"></script>
@@ -37,6 +37,9 @@ include_once("dealer_common.php");
 <link rel="stylesheet" type="text/css" href="confirm.css?v=1"/>
 <link rel="stylesheet" type="text/css" href="css/app.css?v=3"/>
 <?php if($_SESSION['a']) echo '<script src="js/admin.js"></script>';?>
+<?php $wsUrl = getenv('WS_URL'); if ($wsUrl): ?>
+<script>window.__WS_URL="<?=htmlspecialchars($wsUrl)?>";window.__DID=<?=(int)$dId?>;</script>
+<?php endif; ?>
 </head>
 <body>
 <input type="hidden" id="timeZoneOffsetInput" name="timeZoneOffsetInput">
