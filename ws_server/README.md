@@ -12,12 +12,11 @@ make
 
 ## Run
 
-```bash
-# Environment variables (all optional, defaults shown):
-#   WS_PORT=9800   DB_HOST=127.0.0.1   DB_USER=root
-#   DB_PASS=       DB_NAME=mpol         POLL_SEC=5
+The server reads `DB_USER`, `DB_PASS`, `DB_NAME`, `WS_PORT`, `POLL_SEC` from `/var/www/.env` automatically. Environment variables override `.env` values.
 
-./ws_balance
+```bash
+./ws_balance          # daemonizes, logs to /var/log/ws_balance.log
+                      # PID written to /var/run/ws_balance.pid
 ```
 
 ## Deploy as systemd service
