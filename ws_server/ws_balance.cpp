@@ -12,10 +12,9 @@
  *       -lmysqlclient -lpthread -lssl -lcrypto
  *
  * Run:
- *   ./ws_balance                        # defaults
- *   WS_PORT=9800 DB_HOST=127.0.0.1 DB_USER=root DB_PASS=xxx DB_NAME=mpol ./ws_balance
+ *   ./ws_balance      # reads /var/www/.env, daemonizes, logs to /var/log/ws_balance.log
  *
- * Environment variables (all optional, sane defaults):
+ * Settings (read from /var/www/.env, env vars override):
  *   WS_PORT   – listen port          (default 9800)
  *   DB_HOST   – MySQL host           (default 127.0.0.1)
  *   DB_USER   – MySQL user           (default root)
@@ -71,9 +70,52 @@ static std::string base64_encode(const unsigned char *in, size_t len) {
 
 /* ───────── helpers ───────── */
 
+static std::unordered_map<std::string, std::string> g_env_file;
+
+static void load_env_file(const char *path) {
+    FILE *f = fopen(path, "r");
+    if (!f) return;
+    char line[4096];
+    while (fgets(line, sizeof(line), f)) {
+        // skip comments and empty lines
+        char *p = line;
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p == '#' || *p == '\n' || *p == '\0') continue;
+        char *eq = strchr(p, '=');
+        if (!eq) continue;
+        std::string key(p, eq - p);
+        // trim key
+        while (!key.empty() && (key.back() == ' ' || key.back() == '\t'))
+            key.pop_back();
+        char *val = eq + 1;
+        // trim leading spaces/quotes from value
+        while (*val == ' ' || *val == '\t') ++val;
+        std::string value(val);
+        // trim trailing newline/spaces/quotes
+        while (!value.empty() && (value.back() == '\n' || value.back() == '\r'
+               || value.back() == ' ' || value.back() == '\t'))
+            value.pop_back();
+        // strip surrounding quotes
+        if (value.size() >= 2 &&
+            ((value.front() == '"' && value.back() == '"') ||
+             (value.front() == '\'' && value.back() == '\''))) {
+            value = value.substr(1, value.size() - 2);
+        }
+        if (!key.empty())
+            g_env_file[key] = value;
+    }
+    fclose(f);
+}
+
 static std::string env(const char *key, const char *def) {
+    // 1) real environment variable takes priority
     const char *v = std::getenv(key);
-    return (v && v[0]) ? v : def;
+    if (v && v[0]) return v;
+    // 2) value from .env file
+    auto it = g_env_file.find(key);
+    if (it != g_env_file.end() && !it->second.empty()) return it->second;
+    // 3) default
+    return def;
 }
 
 static void set_nonblock(int fd) {
@@ -413,6 +455,37 @@ static void poller_thread(const std::string &db_host,
     if (conn) mysql_close(conn);
 }
 
+/* ───────── daemonize ───────── */
+
+static const char *LOG_PATH = "/var/log/ws_balance.log";
+static const char *PID_PATH = "/var/run/ws_balance.pid";
+
+static void daemonize() {
+    pid_t pid = fork();
+    if (pid < 0) { perror("[ws] fork"); exit(1); }
+    if (pid > 0) {
+        // parent — write child PID and exit
+        FILE *pf = fopen(PID_PATH, "w");
+        if (pf) { fprintf(pf, "%d\n", pid); fclose(pf); }
+        _exit(0);
+    }
+
+    // child — new session
+    if (setsid() < 0) { perror("[ws] setsid"); exit(1); }
+
+    // redirect stdout/stderr to log file
+    int logfd = open(LOG_PATH, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if (logfd >= 0) {
+        dup2(logfd, STDOUT_FILENO);
+        dup2(logfd, STDERR_FILENO);
+        close(logfd);
+    }
+
+    // close stdin
+    int devnull = open("/dev/null", O_RDONLY);
+    if (devnull >= 0) { dup2(devnull, STDIN_FILENO); close(devnull); }
+}
+
 /* ───────── main ───────── */
 
 int main() {
@@ -422,12 +495,18 @@ int main() {
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
 
+    // Load .env from /var/www/.env
+    load_env_file("/var/www/.env");
+
     int port = std::atoi(env("WS_PORT", "9800").c_str());
     std::string db_host = env("DB_HOST", "127.0.0.1");
     std::string db_user = env("DB_USER", "root");
     std::string db_pass = env("DB_PASS", "");
     std::string db_name = env("DB_NAME", "mpol");
     int poll_sec = std::atoi(env("POLL_SEC", "5").c_str());
+
+    // Daemonize
+    daemonize();
 
     // TCP listen socket
     int srv = socket(AF_INET, SOCK_STREAM, 0);
