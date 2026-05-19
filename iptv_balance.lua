@@ -106,6 +106,24 @@ local function normalize_base(base)
     return base:match("^https?://") and base:gsub("/$", "") or "http://" .. base:gsub("/$", "")
 end
 
+-- Валидация URL: проверяет что хост содержит только ASCII-символы
+-- Ловит ошибки типа кириллической 'с' вместо латинской 'c' в доменах
+local function validate_source_url(url)
+    if not url or url == "" then return false end
+    -- Извлекаем хост из URL (между :// и следующим /)
+    local host = url:match("^https?://([^/:]+)")
+    if not host then return false end
+    -- Хост должен содержать только ASCII: буквы, цифры, точки, дефисы
+    if host:match("[^%w%.%-]") then
+        return false
+    end
+    -- Хост должен содержать хотя бы одну точку (domain.tld или IP a.b.c.d)
+    if not host:match("%.") then
+        return false
+    end
+    return true
+end
+
 local function string_split(str, delim)
     local result = {}
     for match in (str .. delim):gmatch("(.-)" .. delim) do table.insert(result, match) end
@@ -530,6 +548,14 @@ local slot_allocated = false
                 -- В Redis при этом НИЧЕГО не пишется, слот остается свободным.
                 if not source_url then
                     ngx.log(ngx.INFO, "[SLOT_SKIP] Provider ", provider.name, " cannot play channel ", channel)
+                    goto continue_slot_search
+                end
+
+                -- Валидация URL: если origin невалидный (кириллица, спецсимволы) — НЕ выделяем слот
+                if not validate_source_url(source_url) then
+                    ngx.log(ngx.ERR, "[SLOT_SKIP] Invalid source_url for provider=", provider.name,
+                            " channel=", channel, " url=", source_url,
+                            " — check origin in credentials (non-ASCII chars?)")
                     goto continue_slot_search
                 end
 
