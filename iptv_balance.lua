@@ -236,10 +236,17 @@ local function resolve_elbrus(channel_path, token, origin)
         return nil
     end
     if not origin or origin == "" then
-        origin = "cdn.balelbrus.com"
+        origin = "https://cdn.balelbrus.com"
     end
+    -- origin может быть: "https://cdn.balelbrus.com", "http://93.113.203.191", "cdn.balelbrus.com", "93.113.203.191"
+    -- Если origin уже содержит протокол — используем как есть, иначе добавляем http://
+    local origin_with_scheme = origin
+    if not origin:match("^https?://") then
+        origin_with_scheme = "http://" .. origin
+    end
+    origin_with_scheme = origin_with_scheme:gsub("/$", "")
     channel_path = channel_path:gsub("^/+", ""):gsub("/+$", "")
-    local url = string.format("http://%s/%s/index.m3u8?token=%s", origin, channel_path, token)
+    local url = string.format("%s/%s/index.m3u8?token=%s", origin_with_scheme, channel_path, token)
     ngx.log(ngx.INFO, "[ELBRUS] Resolved URL: ", url)
     return url
 end
@@ -280,7 +287,7 @@ local function has_other_sessions_on_channel(red, channel, exclude_session_id)
 end
 
 -- === GET CDN IP FOR SLOT (with allowed_cdns support) ===
-local function get_cdn_ip_for_slot(provider_name, slot_idx, allowed_cdns, red)
+local function get_cdn_ip_for_slot(provider_name, slot_idx, allowed_cdns, red, exclude_cdn)
     -- Читаем cdn_config из Redis
     local cdn_config_json = red:get("config:cdn_json")
     if not cdn_config_json or cdn_config_json == ngx.null then
@@ -325,6 +332,22 @@ local function get_cdn_ip_for_slot(provider_name, slot_idx, allowed_cdns, red)
         ngx.log(ngx.ERR, "[CDN_SELECT] No available CDN for provider=", provider_name,
                " slot=", slot_idx)
         return nil
+    end
+
+    -- Если указан exclude_cdn — исключаем его из списка (для CDN reassignment)
+    if exclude_cdn then
+        local filtered = {}
+        for _, cdn_ip in ipairs(available_cdns) do
+            if cdn_ip ~= exclude_cdn then
+                table.insert(filtered, cdn_ip)
+            end
+        end
+        -- Если после исключения остались CDN — используем их, иначе оставляем все
+        if #filtered > 0 then
+            available_cdns = filtered
+        else
+            ngx.log(ngx.WARN, "[CDN_SELECT] Only one CDN available, cannot exclude ", exclude_cdn)
+        end
     end
 
     -- Weighted random pool (как в оригинальном бэкапе)
@@ -382,7 +405,8 @@ local function get_cdn_ip_for_slot(provider_name, slot_idx, allowed_cdns, red)
 
     ngx.log(ngx.ERR, "[CDN_SELECT] provider=", provider_name, " slot=", slot_idx,
            " selected_cdn=", selected_ip, " (weighted_pool=", #weighted_pool,
-           " available=", #available_cdns, "/", #all_cdns, ")")
+           " available=", #available_cdns, "/", #all_cdns,
+           (exclude_cdn and (" exclude=" .. exclude_cdn) or ""), ")")
 
     return selected_ip
 end
@@ -1798,24 +1822,36 @@ if alloc_json and alloc_json ~= ngx.null then
                     " → allocating NEW slot")
         else
             local was_live_active = (res_alloc.is_live == true)
+            local old_cdn = res_alloc.cdn_ip
             allocation = res_alloc
             allocation.is_live = true  
             if allocation.is_archive == nil then
                 allocation.is_archive = false  
             end
+
+            -- CDN reassignment: выбираем другой CDN при переиспользовании аллокации
+            local new_cdn = get_cdn_ip_for_slot(res_alloc.provider, res_alloc.slot, {}, red, old_cdn)
+            if new_cdn then
+                allocation.cdn_ip = new_cdn
+                ngx.log(ngx.ERR, "[ALLOC_REUSE] CDN reassigned: old=", old_cdn, " new=", new_cdn)
+            else
+                ngx.log(ngx.WARN, "[ALLOC_REUSE] CDN reassignment failed, keeping old CDN=", old_cdn)
+            end
             
             ngx.log(ngx.ERR, "[ALLOC_REUSE] LIVE REUSE: channel=", channel,
                     " provider=", tostring(res_alloc.provider),
                     " slot=", tostring(res_alloc.slot),
-                    " cdn=", tostring(res_alloc.cdn_ip),
+                    " cdn=", tostring(allocation.cdn_ip),
+                    " old_cdn=", old_cdn,
                     " is_live=", tostring(allocation.is_live),
                     " is_archive=", tostring(allocation.is_archive),
                     " pid=", ngx.worker.pid())
 
             red:hset("channel_allocations", alloc_stored_key, cjson.encode(allocation))
-            ngx.log(ngx.ERR, "[LIVE] Reusing existing slot: provider=", res_alloc.provider, " slot=", res_alloc.slot, " CDN=", res_alloc.cdn_ip)
-            if not was_live_active then
-                ngx.log(ngx.ERR, "[LIVE] Waking up sleeping proxy for channel=", channel, " (Inherited from Archive)")
+            ngx.log(ngx.ERR, "[LIVE] Reusing existing slot: provider=", res_alloc.provider, " slot=", res_alloc.slot, " CDN=", allocation.cdn_ip)
+            if not was_live_active or allocation.cdn_ip ~= old_cdn then
+                ngx.log(ngx.ERR, "[LIVE] Signaling CDN for channel=", channel,
+                        (not was_live_active and " (Inherited from Archive)" or " (CDN reassigned)"))
                 signal_cdn(allocation, "no_hash", channel, red)
             end
         end
