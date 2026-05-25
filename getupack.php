@@ -62,11 +62,11 @@ if($_POST['page']==0)
 	{
     $res=$link->query("SELECT accounts.id FROM pdates JOIN accounts ON pdates.user_id = accounts.id WHERE accounts.dealer =".$dealer." AND pdates.dend >= NOW()");
     $active=$res->num_rows;
-	echo '<TABLE border="0" class="box" style="padding:0 15px 0">';
-	echo '<tr><td>Общее кол-во:</td><td>'.$num.'</td></tr>';
-	echo '<tr><td>Aктивных:</td><td>'.$active.'</td></tr>';
-	echo "<tr><td>Не активных:</td><td><b>".($num-$active)."</b></td></tr>";
-	echo "</table>";
+	echo '<div class="box ut-wrap"><div class="ut-info-grid">';
+	echo '<div class="ut-info-item"><span class="ut-info-lbl">Общее кол-во</span><span class="ut-info-val">'.$num.'</span></div>';
+	echo '<div class="ut-info-item"><span class="ut-info-lbl">Активных</span><span class="ut-info-val">'.$active.'</span></div>';
+	echo '<div class="ut-info-item"><span class="ut-info-lbl">Не активных</span><span class="ut-info-val">'.($num-$active).'</span></div>';
+	echo '</div></div>';
    }
 //	}
 $q="SELECT id, user, pwd, dscr, phone,  DATE_FORMAT(dreg,'%d.%m.%y') as dreg,UNIX_TIMESTAMP(dreg) as sdreg, email, paused,pdate,(iptvactdate+(iptvmonths*2592000)) as iptvenddate,iptvusr,sndnote FROM accounts WHERE dealer='$dealer' and deleted='0' ORDER BY 
@@ -82,7 +82,8 @@ for ($i=0;$i<$count;$i++)
 	$res=$link->query("SELECT pdates.dend FROM pdates WHERE user_id='$usrlid' AND pdates.dend >= NOW() LIMIT 1");
    	$haveactivedt[$i]=$res->fetch_assoc();
 	}
-echo '<div id=lst class="fin">';
+echo '<div id=lst class="ut-wrap">';
+echo '<div class="ut-card"><div class="ut-table-wrap">';
 /*if($num_pages>1)
 {
 echo '<div align=center><table class=nb><td>';
@@ -108,12 +109,12 @@ echo '$("#"+id).html(vv);},rules:{psw:{vNm:1,required:1,minlength:4,maxlength:33
 }*/
 
 ?>
-<table border="0" cellpadding="0" cellspacing="0" width="100%" id=usrLst>
-    <tr class="t_header">
-        <th width="35" align="center">#</th>
-        <th width="20" align="center"></th>
+<table class="ut-data" id="usrLst">
+    <thead><tr>
+        <th style="width:35px" class="text-center">#</th>
+        <th style="width:20px"></th>
         <?php
-        $sortClass = ($desc === "DESC") ? "class='clslr'" : "class='clsl'";
+        $sortClass = ($desc === "DESC") ? "ut-sortable ut-sort-desc" : "ut-sortable ut-sort-asc";
         $sortToggle = ($desc === "DESC") ? 1 : 0;
         
         $headers = [
@@ -125,15 +126,18 @@ echo '$("#"+id).html(vv);},rules:{psw:{vNm:1,required:1,minlength:4,maxlength:33
         ];
 
         foreach ($headers as $header) {
-            echo '<th width="' . $header['width'] . '" align="center"';
+            echo '<th style="width:' . $header['width'] . 'px"';
             if (isset($header['sort'])) {
+                echo ' class="ut-sortable' . ($srt == $header['sort'] ? ($desc === 'DESC' ? ' ut-sort-desc' : ' ut-sort-asc') : '') . '"';
                 echo ' onclick="userlist(0,' . $header['sort'] . ',' . $sortToggle . ')"';
-                if ($srt == $header['sort']) echo $sortClass;
             }
-            echo '>' . $header['text'] . '<el class="' . ($srt == ($header['sort'] ?? 0) ? 'sar ' : '') . '"></el></th>';
+            echo '>' . $header['text'];
+            if (isset($header['sort']) && $srt == $header['sort']) echo '<span class="ut-sort-arrow"></span>';
+            echo '</th>';
         }
         ?>
-    </tr>
+    </tr></thead>
+    <tbody>
 
     <?php
     for ($i = 0; $i < $count; $i++) {
@@ -169,13 +173,15 @@ echo '$("#"+id).html(vv);},rules:{psw:{vNm:1,required:1,minlength:4,maxlength:33
 	echo '<td>' . restSpaces($comment) . '</td>';
         echo '<td align="center">' . $usrlst[$i]['dreg'] . '</td></tr>';
     }
-echo "</table>";
+echo "</tbody></table>";
+echo '</div>'; // ut-table-wrap
     $link->close();
 if($num_pages>1)
-{echo '<div align=center><table class=nb><td>';
+{echo '<div class="ut-pager">';
 echo NavPan($p, $num_pages,"userlist");
-echo '</td></table></div>';}
-echo '</div>';
+echo '</div>';}
+echo '</div>'; // ut-card
+echo '</div>'; // ut-wrap
 exit();
 }
 //------------ end of list  ------

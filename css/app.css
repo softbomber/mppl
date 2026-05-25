@@ -960,3 +960,382 @@
 }
 .dlst-modal button:not(.close-modal):hover { background: #5a8fac; }
 .dlst-modal button:not(.close-modal):disabled { opacity: 0.5; cursor: default; }
+
+/* ============================================================================
+   Uman-style table redesign (СПИСОК АККАУНТОВ, ИСТОРИЯ ОПЕРАЦИЙ)
+   Dark theme matching uman.php design system.
+   Scoped to .ut-wrap to avoid conflicts with legacy styles.
+   ============================================================================ */
+.ut-wrap {
+  --ut-bg: #0a0e16;
+  --ut-surface: #131a26;
+  --ut-surface-2: #1a2333;
+  --ut-surface-hi: #22304a;
+  --ut-bg-elev: #0f1520;
+  --ut-border: #243043;
+  --ut-border-hi: #324562;
+  --ut-text: #e6edf3;
+  --ut-text-dim: #8b96a8;
+  --ut-text-faint: #5b6678;
+  --ut-primary: #4d8eff;
+  --ut-primary-hov: #6ba1ff;
+  --ut-primary-bg: rgba(77,142,255,.12);
+  --ut-success: #3ecf8e;
+  --ut-success-bg: rgba(62,207,142,.12);
+  --ut-warning: #f5a623;
+  --ut-warning-bg: rgba(245,166,35,.12);
+  --ut-danger: #ef4444;
+  --ut-danger-bg: rgba(239,68,68,.12);
+  --ut-radius: 10px;
+  --ut-radius-lg: 14px;
+  --ut-pill: 999px;
+  --ut-shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 12px rgba(0,0,0,.2);
+  --ut-ease: 150ms ease;
+  --ut-mono: "SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Inter",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color: var(--ut-text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* -- Card ----------------------------------------------------------------- */
+.ut-card {
+  background: var(--ut-surface);
+  border: 1px solid var(--ut-border);
+  border-radius: var(--ut-radius-lg);
+  box-shadow: var(--ut-shadow);
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+/* -- View header ---------------------------------------------------------- */
+.ut-view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--ut-border);
+}
+.ut-view-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ut-text);
+}
+.ut-view-title .glyph { font-size: 17px; }
+
+/* -- Info cards grid ------------------------------------------------------ */
+.ut-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  padding: 14px 16px;
+}
+.ut-info-item {
+  background: var(--ut-bg-elev);
+  border: 1px solid var(--ut-border);
+  border-radius: var(--ut-radius);
+  padding: 12px 14px;
+}
+.ut-info-lbl {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--ut-text-dim);
+  margin-bottom: 4px;
+}
+.ut-info-val {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ut-text);
+}
+
+/* -- Table wrapper -------------------------------------------------------- */
+.ut-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* -- Data table ----------------------------------------------------------- */
+table.ut-data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  color: var(--ut-text);
+}
+table.ut-data th,
+table.ut-data td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--ut-border);
+  vertical-align: middle;
+}
+table.ut-data thead th {
+  background: var(--ut-bg-elev);
+  color: var(--ut-text-dim);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-weight: 600;
+  user-select: none;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  white-space: nowrap;
+}
+table.ut-data thead th.ut-sortable {
+  cursor: pointer;
+  transition: color var(--ut-ease);
+}
+table.ut-data thead th.ut-sortable:hover { color: var(--ut-text); }
+table.ut-data tbody tr {
+  transition: background var(--ut-ease);
+}
+table.ut-data tbody tr:hover {
+  background: var(--ut-surface-2);
+}
+
+/* -- Date divider row ----------------------------------------------------- */
+table.ut-data tr.ut-date-row td {
+  padding: 8px 14px;
+  background: var(--ut-surface-hi);
+  color: var(--ut-text);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .03em;
+  border-bottom: 1px solid var(--ut-border);
+}
+
+/* -- Sort arrow ----------------------------------------------------------- */
+.ut-sort-arrow { display: inline-block; width: 10px; opacity: .4; margin-left: 2px; }
+.ut-sort-asc .ut-sort-arrow::after { content: '\25B2'; opacity: 1; }
+.ut-sort-desc .ut-sort-arrow::after { content: '\25BC'; opacity: 1; }
+
+/* -- Login link ----------------------------------------------------------- */
+.ut-wrap .ut-login,
+.ut-wrap .login {
+  color: var(--ut-primary-hov);
+  cursor: pointer;
+  text-decoration: none;
+  transition: color var(--ut-ease);
+}
+.ut-wrap .ut-login:hover,
+.ut-wrap .login:hover { color: #fff; }
+
+/* -- Package / action text ------------------------------------------------ */
+.ut-pkg { color: var(--ut-primary); font-weight: 500; }
+
+/* -- Amount colors -------------------------------------------------------- */
+.ut-plus,
+.ut-wrap .bl {
+  color: var(--ut-success) !important;
+  text-align: right;
+  font-family: var(--ut-mono);
+  font-weight: 500;
+}
+.ut-minus,
+.ut-wrap .sum {
+  color: var(--ut-danger) !important;
+  text-align: right;
+  font-family: var(--ut-mono);
+  font-weight: 500;
+}
+
+/* -- Cancelled label ------------------------------------------------------ */
+.ut-cancelled { color: var(--ut-danger); font-weight: 600; font-size: 11px; }
+
+/* -- Badges --------------------------------------------------------------- */
+.ut-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--ut-pill);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.ut-badge--active  { background: var(--ut-success-bg); color: var(--ut-success); }
+.ut-badge--paused  { background: var(--ut-warning-bg); color: var(--ut-warning); }
+.ut-badge--iptv    { background: var(--ut-primary-bg); color: var(--ut-primary-hov); }
+.ut-badge--inactive { background: var(--ut-surface-2); color: var(--ut-text-faint); }
+
+/* -- Pagination ----------------------------------------------------------- */
+.ut-pager {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 14px 16px;
+  gap: 4px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--ut-border);
+}
+.ut-pager a,
+.ut-pager span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: var(--ut-radius);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ut-text-dim);
+  background: transparent;
+  border: 1px solid var(--ut-border);
+  text-decoration: none;
+  transition: background var(--ut-ease), color var(--ut-ease), border-color var(--ut-ease);
+  cursor: pointer;
+}
+.ut-pager a:hover {
+  background: var(--ut-surface-2);
+  border-color: var(--ut-border-hi);
+  color: var(--ut-text);
+}
+.ut-pager .nbA {
+  background: var(--ut-primary) !important;
+  border-color: var(--ut-primary) !important;
+  color: #fff !important;
+  cursor: default;
+}
+
+/* -- Override legacy row colors inside .ut-wrap --------------------------- */
+.ut-wrap .rw1, .ut-wrap .rw2,
+.ut-wrap .rd1, .ut-wrap .rd2,
+.ut-wrap .ra3, .ut-wrap .ra4,
+.ut-wrap .psd1, .ut-wrap .psd2 {
+  background: transparent;
+  height: auto;
+  color: var(--ut-text);
+}
+.ut-wrap .ra3, .ut-wrap .ra4 { background: var(--ut-success-bg); color: var(--ut-success); }
+.ut-wrap .rd1, .ut-wrap .rd2 { color: var(--ut-text-dim); }
+.ut-wrap .psd1, .ut-wrap .psd2 { color: var(--ut-warning); }
+
+/* -- Override legacy element classes -------------------------------------- */
+.ut-wrap .pn  { color: var(--ut-primary); }
+.ut-wrap .yel { color: var(--ut-primary); }
+.ut-wrap .red { color: var(--ut-danger); }
+.ut-wrap .grn { color: var(--ut-success); }
+.ut-wrap .ps  { color: var(--ut-warning); }
+
+/* -- Override .dh date header --------------------------------------------- */
+.ut-wrap .dh {
+  background: var(--ut-surface-hi) !important;
+  color: var(--ut-text) !important;
+  padding: 8px 14px !important;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .03em;
+  text-align: center;
+}
+
+/* -- Override legacy .nb pagination --------------------------------------- */
+.ut-wrap .nb {
+  background: transparent !important;
+  padding: 0;
+  width: auto;
+}
+.ut-wrap .nb a {
+  color: var(--ut-text-dim);
+  background: transparent;
+  border: 1px solid var(--ut-border);
+  border-radius: var(--ut-radius);
+  padding: 5px 11px;
+  transition: background var(--ut-ease), color var(--ut-ease);
+}
+.ut-wrap .nb a:hover {
+  background: var(--ut-surface-2);
+  border-color: var(--ut-border-hi);
+  color: var(--ut-text);
+}
+.ut-wrap .nb .nbA {
+  background: var(--ut-primary);
+  border-color: var(--ut-primary);
+  color: #fff;
+  padding: 0 8px;
+}
+.ut-wrap .nb span {
+  color: var(--ut-text-dim);
+}
+
+/* -- Override .box info panel --------------------------------------------- */
+.ut-wrap.box,
+.ut-wrap .box {
+  background: transparent;
+  color: var(--ut-text);
+  padding: 0;
+  margin: 0;
+}
+
+/* -- Override .fin list container ----------------------------------------- */
+.ut-wrap .fin,
+.ut-wrap.fin {
+  background: transparent;
+  color: var(--ut-text);
+  border-bottom: none;
+  padding: 0;
+  line-height: 1.5;
+  overflow: visible;
+  max-height: none;
+  min-height: 0;
+}
+
+/* -- Sort header indicators ----------------------------------------------- */
+.ut-wrap .clslr,
+.ut-wrap .clsl {
+  background: transparent;
+  border: none;
+  color: var(--ut-primary);
+}
+.ut-wrap .sar { color: var(--ut-primary); }
+
+/* -- Delete icon ---------------------------------------------------------- */
+.ut-wrap .ui-icon-trash {
+  opacity: .5;
+  transition: opacity var(--ut-ease);
+}
+.ut-wrap .ui-icon-trash:hover { opacity: 1; }
+
+/* -- IPTV / Share markers ------------------------------------------------- */
+.ut-wrap .iptvm {
+  background: var(--ut-primary-bg);
+  color: var(--ut-primary-hov);
+  border-radius: 3px;
+  padding: 0 3px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.ut-wrap .sharem {
+  background: var(--ut-success-bg);
+  color: var(--ut-success);
+  border-radius: 3px;
+  padding: 0 3px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* -- Status container ----------------------------------------------------- */
+.ut-wrap .tdcontainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ut-wrap .sata, .ut-wrap .iptva { font-size: 10px; font-weight: 600; }
+.ut-wrap .worda { color: var(--ut-success); font-size: 11px; }
+.ut-wrap .wordp { color: var(--ut-warning); font-size: 11px; }
+
+/* -- Responsive ----------------------------------------------------------- */
+@media (max-width: 640px) {
+  table.ut-data th,
+  table.ut-data td { padding: 7px 8px; font-size: 12px; }
+  .ut-info-grid { grid-template-columns: 1fr 1fr; padding: 10px; }
+  .ut-view-header { padding: 12px 14px; }
+}
