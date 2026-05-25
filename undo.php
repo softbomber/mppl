@@ -264,24 +264,26 @@ if (isset($_POST['list'])) {
         $lst[$i] = $res->fetch_assoc();
     }
 
-    if ($num_pages > 1) {
-        echo '<div align=center><table class=nb><td>';
-        echo NavPan($p, $num_pages, "loglist", 0);
-        echo '</td></table></div>';
-    }
-
     $res = $link->query("SELECT postpaid FROM dealers WHERE id = '$dealer'");
     $dpp = $res->num_rows === 1 ? $res->fetch_assoc()['postpaid'] : 0;
+    echo '<div class="ut-wrap"><div class="ut-card">';
+    if ($num_pages > 1) {
+        echo '<div class="ut-pager">';
+        echo NavPan($p, $num_pages, "loglist", 0);
+        echo '</div>';
+    }
     ?>
-<table border="0" cellpadding="0" cellspacing="0" style="margin:auto;width:100%">
-    <tr class="t_header">
-        <td width="40" align="center">Время</td>
-        <td width="110" align="center">ЛОГИН</td>
-        <td width="470" align="center">ДЕЙСТВИЕ</td>
-        <td width="80" align="center">ОСТАТОК до</td>
-        <td width="80" align="right">СУММА</td>
-        <td width="80" align="right">ОСТАТОК</td>
-    </tr>
+<div class="ut-table-wrap">
+<table class="ut-data">
+    <thead><tr>
+        <th style="width:60px">Время</th>
+        <th style="width:110px">ЛОГИН</th>
+        <th>ДЕЙСТВИЕ</th>
+        <th style="width:90px">ОСТАТОК до</th>
+        <th style="width:90px">СУММА</th>
+        <th style="width:90px">ОСТАТОК</th>
+    </tr></thead>
+    <tbody>
 <?php
 $current_date = '';
 for ($i = 0; $i < $cnt; $i++) {
@@ -291,7 +293,7 @@ for ($i = 0; $i < $cnt; $i++) {
 
     if ($current_date !== $date) {
         $current_date = $date;
-        echo "<tr><td colspan='6' class=dh>{$date}</td></tr>";
+        echo "<tr class='ut-date-row'><td colspan='6'>{$date}</td></tr>";
     }
 
     echo "<tr class='{$row_class}'>";
@@ -352,13 +354,15 @@ for ($i = 0; $i < $cnt; $i++) {
     }
     echo "</tr>";
 }
-echo "</table>";
+echo "</tbody></table>";
+echo '</div>'; // ut-table-wrap
 
     if ($num_pages > 1) {
-        echo '<div align=center><table class=nb><td>';
+        echo '<div class="ut-pager">';
         echo NavPan($p, $num_pages, "loglist", 0);
-        echo '</td></table></div>';
+        echo '</div>';
     }
+    echo '</div></div>'; // ut-card, ut-wrap
     exit();
 }
 
@@ -391,14 +395,17 @@ $res=$link->query("SELECT bphistory.bpid, bphistory.`sum`, UNIX_TIMESTAMP(`dend`
     {
         $lst[$i] = $res->fetch_assoc();
     }
+    echo '<div class="ut-wrap"><div class="ut-card">';
     if($num_pages>1)
-    {   echo '<div align=center><table class=nb><td>';
+    {   echo '<div class="ut-pager">';
         echo NavPan($p, $num_pages,"userslog",$uid);
-        echo '</td></table></div>';
+        echo '</div>';
     }
     ?>
-    <TABLE border=0 cellpadding=0 cellspacing=0>
-    <tr class=t_header><td width=125 align=center><b>Дата</b></td><td width=850 align=center><b>Действие</b></td></tr>
+    <div class="ut-table-wrap">
+    <table class="ut-data">
+    <thead><tr><th style="width:125px">Дата</th><th>Действие</th></tr></thead>
+    <tbody>
     <?php
     for ($i=0;$i<$cnt;$i++)
     {
@@ -457,12 +464,15 @@ $res=$link->query("SELECT bphistory.bpid, bphistory.`sum`, UNIX_TIMESTAMP(`dend`
       echo '</el></td></tr>';
       }
 
+  echo '</tbody></table>';
+  echo '</div>'; // ut-table-wrap
   if($num_pages>1)
-    {	echo '</table>';
-        echo	'<div align=center><table class=nb><td>';
+    {
+        echo '<div class="ut-pager">';
         echo NavPan($p, $num_pages,"userslog",$uid);
-        echo	'</td><table></div>';
+        echo '</div>';
     }
+  echo '</div></div>'; // ut-card, ut-wrap
 }
 
 $link->close();
