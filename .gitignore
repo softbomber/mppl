@@ -1,18 +1,38 @@
-# Runtime logs (do not commit)
-*.log
+```
+# Build artifacts
+build/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
 
-# OS / editor
-.DS_Store
-Thumbs.db
+# Compiled objects and executables
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+ts2hls_proxy
+
+# HLS output files
+output/
+
+# Temporary files
+*.tmp
 *.swp
-*.swo
 *~
 
-# Local secrets / config overrides
+# Logs
+*.log
+
+# Environment files
 .env
 .env.local
-config.local.php
+*.env.*
 
-# IDE
-.idea/
-.vscode/
+# OS generated files
+.DS_Store
+Thumbs.db
+```
