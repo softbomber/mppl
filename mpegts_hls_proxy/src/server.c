@@ -322,25 +322,39 @@ static void handle_connection(conn_t *c, dispatcher_t *d) {
             goto done;
         }
     } else {
-        /* When fixed_input is set, we still redirect to upstream_host:port
-         * but the worker uses fixed_input as its source. This allows the
-         * upstream server to serve the playlist while we proxy the TS stream. */
-        const char *fmt = d->cfg->upstream_path_fmt
-                        ? d->cfg->upstream_path_fmt
-                        : "/%s/playlist.m3u8";
-        char path[512];
-        if (snprintf(path, sizeof(path), fmt, channel) >= (int)sizeof(path)) {
-            send_simple(c->fd, 500, "URL too long");
-            free(channel);
-            goto done;
-        }
-        if (snprintf(target, sizeof(target),
-                     "http://%s:%d%s",
-                     d->cfg->upstream_host, d->cfg->upstream_port,
-                     path) >= (int)sizeof(target)) {
-            send_simple(c->fd, 500, "URL too long");
-            free(channel);
-            goto done;
+        /* When fixed_input is set, the worker fetches from fixed_input,
+         * so we should redirect to the local playlist or serve it directly.
+         * Redirecting to upstream_host:port would be wrong since that server
+         * doesn't have the stream. */
+        if (d->cfg->fixed_input) {
+            /* Redirect to local playlist path */
+            if (snprintf(target, sizeof(target),
+                         "/%s/%s", channel,
+                         d->cfg->proxy_template.playlist_name
+                             ? d->cfg->proxy_template.playlist_name
+                             : "stream.m3u8") >= (int)sizeof(target)) {
+                send_simple(c->fd, 500, "URL too long");
+                free(channel);
+                goto done;
+            }
+        } else {
+            const char *fmt = d->cfg->upstream_path_fmt
+                            ? d->cfg->upstream_path_fmt
+                            : "/%s/playlist.m3u8";
+            char path[512];
+            if (snprintf(path, sizeof(path), fmt, channel) >= (int)sizeof(path)) {
+                send_simple(c->fd, 500, "URL too long");
+                free(channel);
+                goto done;
+            }
+            if (snprintf(target, sizeof(target),
+                         "http://%s:%d%s",
+                         d->cfg->upstream_host, d->cfg->upstream_port,
+                         path) >= (int)sizeof(target)) {
+                send_simple(c->fd, 500, "URL too long");
+                free(channel);
+                goto done;
+            }
         }
     }
     LOGI("http: redirect %s -> %s", channel, target);
