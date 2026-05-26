@@ -2,6 +2,7 @@
 #define MPEGTS_HLS_PROXY_URL_H
 
 #include <stddef.h>
+#include <sys/types.h>
 
 /*
  * Minimal HTTP/1.0 client used as a stand-in for libavformat's tcp.c +
