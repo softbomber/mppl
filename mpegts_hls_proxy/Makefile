@@ -1,9 +1,10 @@
 CC      ?= cc
-CFLAGS  ?= -O2 -std=c99 -Wall -Wextra -Wpedantic -D_POSIX_C_SOURCE=200809L
+CFLAGS  ?= -O2 -std=c99 -Wall -Wextra -Wpedantic -D_POSIX_C_SOURCE=200809L -pthread
 LDFLAGS ?=
-LDLIBS  ?= -lm
+LDLIBS  ?= -lm -pthread
 
-SRCS := src/main.c src/source.c src/url.c src/ts.c src/hls.c src/log.c
+SRCS := src/main.c src/source.c src/url.c src/ts.c src/hls.c src/log.c \
+        src/proxy.c src/server.c
 OBJS := $(SRCS:.c=.o)
 BIN  := mpegts_hls_proxy
 

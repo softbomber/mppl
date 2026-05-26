@@ -26,6 +26,17 @@ Produces `./mpegts_hls_proxy`.
 
 ## Usage
 
+The binary has **two run modes** picked from the CLI flags:
+
+* **Direct proxy** — `-i <src> -o <dir>` runs a single proxy session against
+  one input and exits when the source EOFs (or on `SIGTERM`).
+* **HTTP front-end** — `--listen-port <P>` opens a listening socket and
+  dispatches every incoming HLS request to a per-channel worker that runs
+  the same proxy pipeline under the hood. See
+  [HTTP front-end mode](#http-front-end-mode) below.
+
+### Direct proxy
+
 ```sh
 ./mpegts_hls_proxy \
     -i http://example.com/live/stream.ts \
@@ -100,6 +111,90 @@ the playlist contains its first playable segment, e.g.:
 
 That value is the lower bound on time-to-first-frame: every additional
 second is on the client / network side.
+
+## HTTP front-end mode
+
+Instead of being pinned to one input, the proxy can act as a small HTTP
+dispatcher: it listens on a port, reads the channel name from the first
+segment of every request URI, lazily spawns one worker per channel that
+pulls the corresponding upstream stream into `<out_root>/<channel>/`,
+and replies to the client with `HTTP/1.1 302 Found` pointing at the
+upstream URL (or, with `--serve-local`, at the locally-generated
+playlist).
+
+### Example
+
+```sh
+./mpegts_hls_proxy \
+    --listen-port 8222 \
+    --upstream-host 83.136.233.101 \
+    --upstream-port 8123 \
+    --out-root /var/www \
+    --hls-time 4 --initial-hls-time 1.5 \
+    --window 4 --delete-old \
+    -L
+```
+
+A client request:
+
+```
+GET /mpolhd/index.m3u8 HTTP/1.1
+Host: 83.136.233.101:8222
+```
+
+is handled as follows:
+
+1. `mpolhd` is extracted from the path (the first `/`-separated segment).
+2. If no worker exists for that channel yet, one is spawned. It runs
+   `proxy_run` with
+   * `input   = http://83.136.233.101:8123/mpolhd/playlist.m3u8`
+   * `out_dir = /var/www/mpolhd`
+   …and starts producing `stream.m3u8` + segments there.
+3. The client gets back:
+
+   ```
+   HTTP/1.1 302 Found
+   Location: http://83.136.233.101:8123/mpolhd/playlist.m3u8
+   ```
+
+The first request "primes" the channel; subsequent requests for
+`/mpolhd/...` find the worker already running and only do the 302
+redirect.
+
+With `--serve-local --local-url-fmt "http://my.host/hls/%s/stream.m3u8"`
+the response instead points at the playlist that this proxy is writing
+into `<out_root>/<channel>/`.
+
+### HTTP front-end flags
+
+| Flag                       | Meaning                                                              |
+|----------------------------|----------------------------------------------------------------------|
+| `--listen-host HOST`       | bind address (default `0.0.0.0`)                                     |
+| `--listen-port PORT`       | bind port — presence of this flag selects server mode                |
+| `--upstream-host HOST`     | upstream IP / hostname (required in server mode)                     |
+| `--upstream-port PORT`     | upstream port (required in server mode)                              |
+| `--upstream-path FMT`      | `printf` format with one `%s` for channel; default `/%s/playlist.m3u8` |
+| `--out-root DIR`           | per-channel `out_dir`s go inside this directory (required)           |
+| `--serve-local`            | respond with the local playlist URL instead of a 302 upstream         |
+| `--local-url-fmt FMT`      | `printf` format with one `%s`, used together with `--serve-local`    |
+
+All of the proxy / latency / daemon flags above (`--hls-time`,
+`--window`, `--low-latency`, `-D`, `--pid-file`, …) apply too — they are
+used as the defaults for every channel worker.
+
+### Channel-name validation
+
+Channel names are limited to `[A-Za-z0-9._-]`, 1–64 characters, and the
+literals `.` / `..` are rejected, so a malicious client cannot escape
+`out_root` with a path-traversal URI.
+
+### Concurrency model
+
+Each channel runs in its own detached `pthread`. The dispatcher keeps a
+mutex-protected linked list of `{name, thread, stop_flag}` to deduplicate
+spawn requests. On `SIGTERM` the listener stops accepting and signals
+every worker's stop flag; each `proxy_run` then closes its current
+segment cleanly before returning.
 
 ## Mapping to FFmpeg's code
 
