@@ -25,6 +25,7 @@ struct hls_writer {
     FILE        *cur_fp;
     char        *cur_path;
     char        *cur_name;
+    char        *cur_iobuf;         /* setvbuf-owned buffer for cur_fp        */
     uint64_t     cur_first_pcr;     /* PCR (27 MHz) of first packet in cur seg */
     uint64_t     cur_last_pcr;
     int          cur_has_pcr;
@@ -35,6 +36,15 @@ struct hls_writer {
     int            nb_segments;
 
     double         max_duration;    /* highest duration seen — drives TARGETDURATION */
+
+    int             playable;       /* 1 after the first playlist with a seg */
+    struct timespec first_publish;  /* CLOCK_MONOTONIC when `playable` flipped */
+
+    /* Cached PSI to write at the head of each new segment. */
+    uint8_t         pat_pkt[188];
+    uint8_t         pmt_pkt[188];
+    int             have_pat_pkt;
+    int             have_pmt_pkt;
 };
 
 static char *xstrdup(const char *s) {
@@ -67,9 +77,15 @@ hls_writer_t *hls_writer_create(const hls_config_t *cfg) {
     w->cfg.out_dir        = xstrdup(cfg->out_dir);
     w->cfg.playlist_name  = xstrdup(cfg->playlist_name);
     w->cfg.segment_prefix = xstrdup(cfg->segment_prefix ? cfg->segment_prefix : "seg");
-    w->cfg.target_seconds = cfg->target_seconds > 0 ? cfg->target_seconds : 6.0;
-    w->cfg.window_size    = cfg->window_size;
-    w->cfg.delete_old     = cfg->delete_old;
+    w->cfg.target_seconds         = cfg->target_seconds > 0 ? cfg->target_seconds : 6.0;
+    w->cfg.initial_target_seconds = cfg->initial_target_seconds > 0
+                                  ? cfg->initial_target_seconds
+                                  : w->cfg.target_seconds;
+    w->cfg.window_size            = cfg->window_size;
+    w->cfg.delete_old             = cfg->delete_old;
+    w->cfg.file_buffer_bytes      = cfg->file_buffer_bytes > 0
+                                  ? cfg->file_buffer_bytes
+                                  : 256 * 1024;
     if (!w->cfg.out_dir || !w->cfg.playlist_name || !w->cfg.segment_prefix) {
         free(w->cfg.out_dir); free(w->cfg.playlist_name); free(w->cfg.segment_prefix);
         free(w);
@@ -180,10 +196,17 @@ static int close_current(hls_writer_t *w) {
 
     free(w->cur_path);
     w->cur_path = NULL;
+    free(w->cur_iobuf);
+    w->cur_iobuf = NULL;
     w->cur_has_pcr = 0;
 
     evict_old(w);
-    return write_playlist(w, 0);
+    int rc = write_playlist(w, 0);
+    if (rc == 0 && !w->playable && w->nb_segments > 0) {
+        w->playable = 1;
+        clock_gettime(CLOCK_MONOTONIC, &w->first_publish);
+    }
+    return rc;
 }
 
 static int open_new(hls_writer_t *w) {
@@ -198,20 +221,52 @@ static int open_new(hls_writer_t *w) {
         LOGE("fopen(%s): %s", path, strerror(errno));
         return -1;
     }
+    /* Large fully-buffered I/O — minimises the number of write(2)
+     * syscalls per segment while still letting us flush on close. */
+    char *iobuf = malloc((size_t)w->cfg.file_buffer_bytes);
+    if (iobuf) {
+        setvbuf(fp, iobuf, _IOFBF, (size_t)w->cfg.file_buffer_bytes);
+    }
     w->cur_fp = fp;
     w->cur_name = xstrdup(name);
     w->cur_path = xstrdup(path);
+    w->cur_iobuf = iobuf;
     w->cur_has_pcr = 0;
     w->next_seq++;
     LOGI("opened segment %s", name);
+
+    /* Inject cached PSI so every segment starts with a fresh PAT/PMT —
+     * the player can begin decoding from any segment without waiting
+     * for the next natural PSI cycle in the source mux. */
+    if (w->have_pat_pkt) {
+        if (fwrite(w->pat_pkt, 1, 188, fp) != 188) {
+            LOGE("fwrite PAT: %s", strerror(errno));
+            return -1;
+        }
+    }
+    if (w->have_pmt_pkt) {
+        if (fwrite(w->pmt_pkt, 1, 188, fp) != 188) {
+            LOGE("fwrite PMT: %s", strerror(errno));
+            return -1;
+        }
+    }
     return 0;
+}
+
+void hls_writer_cache_psi(hls_writer_t *w, const uint8_t *pat, const uint8_t *pmt) {
+    if (!w) return;
+    if (pat) { memcpy(w->pat_pkt, pat, 188); w->have_pat_pkt = 1; }
+    if (pmt) { memcpy(w->pmt_pkt, pmt, 188); w->have_pmt_pkt = 1; }
 }
 
 int hls_writer_maybe_rotate(hls_writer_t *w, uint64_t pcr_27mhz) {
     if (!w->cur_fp) return 0;
     if (!w->cur_has_pcr) return 0;
     double elapsed = pcr_to_seconds_delta(w->cur_first_pcr, pcr_27mhz);
-    if (elapsed + 1e-6 < w->cfg.target_seconds) return 0;
+    double target = w->nb_segments == 0
+                  ? w->cfg.initial_target_seconds
+                  : w->cfg.target_seconds;
+    if (elapsed + 1e-6 < target) return 0;
     if (close_current(w) != 0) return -1;
     return open_new(w);
 }
@@ -239,11 +294,18 @@ int hls_writer_finish(hls_writer_t *w) {
     return write_playlist(w, 1);
 }
 
+int hls_writer_playable(const hls_writer_t *w, struct timespec *out_when) {
+    if (!w || !w->playable) return 0;
+    if (out_when) *out_when = w->first_publish;
+    return 1;
+}
+
 void hls_writer_destroy(hls_writer_t *w) {
     if (!w) return;
     if (w->cur_fp) fclose(w->cur_fp);
     free(w->cur_path);
     free(w->cur_name);
+    free(w->cur_iobuf);
     hls_segment_t *s = w->head;
     while (s) {
         hls_segment_t *n = s->next;

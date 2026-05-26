@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -98,6 +99,18 @@ static int tcp_connect(const char *host, int port) {
                 src = &((struct sockaddr_in6 *)ai->ai_addr)->sin6_addr;
             if (src) inet_ntop(ai->ai_family, src, ipbuf, sizeof(ipbuf));
             LOGI("connected to %s:%d (%s)", host, port, ipbuf);
+            /*
+             * Tune the socket for first-byte latency: a large receive
+             * buffer absorbs a TCP burst without making us return to
+             * recv() many times, TCP_NODELAY ensures our outgoing GET
+             * leaves immediately, and SO_KEEPALIVE keeps dead-peer
+             * detection on for long-running live feeds.
+             */
+            int rcv = 1 << 20;       /* 1 MiB */
+            (void)setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &rcv, sizeof(rcv));
+            int one = 1;
+            (void)setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+            (void)setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &one, sizeof(one));
             break;
         }
         close(fd);
