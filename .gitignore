@@ -1,18 +1,64 @@
-# Runtime logs (do not commit)
-*.log
+```
+# Build artifacts
+*.o
+*.obj
+*.out
+build/
+dist/
 
-# OS / editor
-.DS_Store
-Thumbs.db
+# Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+target/
+.gradle/
+
+# Editor/IDE files
+.vscode/
+.idea/
 *.swp
 *.swo
-*~
+*.tmp
 
-# Local secrets / config overrides
+# System files
+.DS_Store
+Thumbs.db
 .env
 .env.local
-config.local.php
+*.env.*
 
-# IDE
-.idea/
-.vscode/
+# Logs
+*.log
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+```

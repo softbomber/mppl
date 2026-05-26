@@ -38,6 +38,10 @@ typedef struct {
                                       "http://my.host/hls/%s/stream.m3u8".
                                       NULL falls back to a relative path.    */
 
+    const char *fixed_input;       /* Fixed input URL for all channels (e.g. http://217.174.229.136:8000/play/a07b).
+                                      If set, workers use this URL instead of
+                                      constructing one from upstream_host/port/path. */
+
     proxy_config_t proxy_template; /* per-channel defaults; input & out_dir
                                       are filled in by the dispatcher        */
 } server_config_t;

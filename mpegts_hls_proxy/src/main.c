@@ -170,6 +170,7 @@ int main(int argc, char **argv) {
     const char *out_root       = NULL;
     int         serve_local    = 0;
     const char *local_url_fmt  = NULL;
+    const char *fixed_input    = NULL;  /* Fixed input URL for all channels in server mode */
 
     static struct option long_opts[] = {
         {"input",            required_argument, 0, 'i'},
@@ -202,7 +203,10 @@ int main(int argc, char **argv) {
     int c;
     while ((c = getopt_long(argc, argv, "i:o:n:p:t:w:dLDvh", long_opts, NULL)) != -1) {
         switch (c) {
-            case 'i': input = optarg; break;
+            case 'i': 
+                input = optarg; 
+                fixed_input = optarg;  /* Also store as fixed_input for server mode */
+                break;
             case 'o': out_dir = optarg; break;
             case 'n': playlist = optarg; break;
             case 'p': prefix = optarg; break;
@@ -295,6 +299,7 @@ int main(int argc, char **argv) {
             .out_root          = out_root,
             .serve_local       = serve_local,
             .local_url_fmt     = local_url_fmt,
+            .fixed_input       = fixed_input,   /* Fixed input URL for all channels */
             .proxy_template    = {
                 .input            = NULL,        /* filled per-channel */
                 .out_dir          = NULL,        /* filled per-channel */

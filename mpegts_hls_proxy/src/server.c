@@ -18,6 +18,7 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 /*
@@ -108,12 +109,20 @@ static int ensure_channel(dispatcher_t *d, const char *name) {
     /* Build the per-channel proxy config off the template. */
     proxy_config_t tmpl = d->cfg->proxy_template;
 
-    /* Substitute %s in upstream_path_fmt with the channel name. */
-    const char *fmt = d->cfg->upstream_path_fmt
-                    ? d->cfg->upstream_path_fmt
-                    : "/%s/playlist.m3u8";
     char input_url[1024];
-    {
+    
+    /* If fixed_input is set, use it as the input URL for all channels.
+     * Otherwise, construct the URL from upstream_host/port/path_fmt. */
+    if (d->cfg->fixed_input) {
+        if (snprintf(input_url, sizeof(input_url), "%s", d->cfg->fixed_input) >= (int)sizeof(input_url)) {
+            pthread_mutex_unlock(&d->lock);
+            return -1;
+        }
+    } else {
+        /* Substitute %s in upstream_path_fmt with the channel name. */
+        const char *fmt = d->cfg->upstream_path_fmt
+                        ? d->cfg->upstream_path_fmt
+                        : "/%s/playlist.m3u8";
         char path[512];
         if (snprintf(path, sizeof(path), fmt, name) >= (int)sizeof(path)) {
             pthread_mutex_unlock(&d->lock);
@@ -313,6 +322,9 @@ static void handle_connection(conn_t *c, dispatcher_t *d) {
             goto done;
         }
     } else {
+        /* When fixed_input is set, we still redirect to upstream_host:port
+         * but the worker uses fixed_input as its source. This allows the
+         * upstream server to serve the playlist while we proxy the TS stream. */
         const char *fmt = d->cfg->upstream_path_fmt
                         ? d->cfg->upstream_path_fmt
                         : "/%s/playlist.m3u8";
