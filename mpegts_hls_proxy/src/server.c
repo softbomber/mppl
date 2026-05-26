@@ -248,6 +248,33 @@ static void send_simple(int fd, int status, const char *text) {
     if (n > 0) write_all(fd, hdr, (size_t)n);
 }
 
+/* Send an M3U8 playlist body with a redirect URL inside.
+ * This is used when fixed_input is set: we return a valid M3U8
+ * that points the client to the upstream server's playlist. */
+static void send_m3u8_redirect(int fd, const char *location) {
+    char body[2048];
+    int n = snprintf(body, sizeof(body),
+                     "#EXTM3U\n"
+                     "#EXT-X-VERSION:3\n"
+                     "#EXT-X-STREAM-INF:BANDWIDTH=20000000\n"
+                     "%s\n",
+                     location);
+    if (n <= 0 || n >= (int)sizeof(body)) return;
+    
+    char hdr[256];
+    int hlen = snprintf(hdr, sizeof(hdr),
+                     "HTTP/1.1 200 OK\r\n"
+                     "Server: mpegts_hls_proxy\r\n"
+                     "Content-Type: application/vnd.apple.mpegurl\r\n"
+                     "Content-Length: %d\r\n"
+                     "Connection: close\r\n\r\n",
+                     n);
+    if (hlen > 0) {
+        write_all(fd, hdr, (size_t)hlen);
+        write_all(fd, body, (size_t)n);
+    }
+}
+
 static void send_redirect(int fd, const char *location) {
     char hdr[2048];
     int n = snprintf(hdr, sizeof(hdr),
@@ -322,43 +349,35 @@ static void handle_connection(conn_t *c, dispatcher_t *d) {
             goto done;
         }
     } else {
-        /* When fixed_input is set, the worker fetches from fixed_input,
-         * so we should redirect to the local playlist or serve it directly.
-         * Redirecting to upstream_host:port would be wrong since that server
-         * doesn't have the stream. */
-        if (d->cfg->fixed_input) {
-            /* Redirect to local playlist path */
-            if (snprintf(target, sizeof(target),
-                         "/%s/%s", channel,
-                         d->cfg->proxy_template.playlist_name
-                             ? d->cfg->proxy_template.playlist_name
-                             : "stream.m3u8") >= (int)sizeof(target)) {
-                send_simple(c->fd, 500, "URL too long");
-                free(channel);
-                goto done;
-            }
-        } else {
-            const char *fmt = d->cfg->upstream_path_fmt
-                            ? d->cfg->upstream_path_fmt
-                            : "/%s/playlist.m3u8";
-            char path[512];
-            if (snprintf(path, sizeof(path), fmt, channel) >= (int)sizeof(path)) {
-                send_simple(c->fd, 500, "URL too long");
-                free(channel);
-                goto done;
-            }
-            if (snprintf(target, sizeof(target),
-                         "http://%s:%d%s",
-                         d->cfg->upstream_host, d->cfg->upstream_port,
-                         path) >= (int)sizeof(target)) {
-                send_simple(c->fd, 500, "URL too long");
-                free(channel);
-                goto done;
-            }
+        /* Always redirect to upstream_host:port so the client fetches
+         * the playlist from there. The worker will still fetch from
+         * fixed_input if it's set, or from upstream_host:port otherwise. */
+        const char *fmt = d->cfg->upstream_path_fmt
+                        ? d->cfg->upstream_path_fmt
+                        : "/%s/playlist.m3u8";
+        char path[512];
+        if (snprintf(path, sizeof(path), fmt, channel) >= (int)sizeof(path)) {
+            send_simple(c->fd, 500, "URL too long");
+            free(channel);
+            goto done;
+        }
+        if (snprintf(target, sizeof(target),
+                     "http://%s:%d%s",
+                     d->cfg->upstream_host, d->cfg->upstream_port,
+                     path) >= (int)sizeof(target)) {
+            send_simple(c->fd, 500, "URL too long");
+            free(channel);
+            goto done;
         }
     }
     LOGI("http: redirect %s -> %s", channel, target);
-    send_redirect(c->fd, target);
+    /* When fixed_input is set, send an M3U8 body with the redirect URL.
+     * Otherwise, send a standard HTTP 302 redirect. */
+    if (d->cfg->fixed_input) {
+        send_m3u8_redirect(c->fd, target);
+    } else {
+        send_redirect(c->fd, target);
+    }
     free(channel);
 
 done:
