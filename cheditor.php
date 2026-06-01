@@ -13,91 +13,302 @@ if($_SESSION['a'] != 1)
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
-        body { height: 100vh; overflow: hidden; background-color: #f8f9fa; }
-        .app-container { height: calc(100vh - 56px); }
-        
-        .col-scroll {
-            height: 100%; overflow-y: auto;
-            border-right: 1px solid #dee2e6; background-color: #fff;
-            display: flex; flex-direction: column;
-            padding-bottom: 80px;
-        }
+/* === Design system (aligned with uman.php) === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100vh; overflow: hidden; }
+:root {
+    --bg:           #0a0e16;
+    --bg-elevated:  #0f1520;
+    --surface:      #131a26;
+    --surface-2:    #1a2333;
+    --surface-hi:   #22304a;
+    --border:       #243043;
+    --border-hi:    #324562;
+    --text:         #e6edf3;
+    --text-dim:     #8b96a8;
+    --text-faint:   #5b6678;
+    --primary:      #4d8eff;
+    --primary-hov:  #6ba1ff;
+    --primary-bg:   rgba(77, 142, 255, 0.12);
+    --success:      #3ecf8e;
+    --success-bg:   rgba(62, 207, 142, 0.12);
+    --warning:      #f5a623;
+    --warning-bg:   rgba(245, 166, 35, 0.12);
+    --danger:       #ef4444;
+    --danger-bg:    rgba(239, 68, 68, 0.12);
+    --radius:       10px;
+    --radius-lg:    14px;
+    --radius-pill:  999px;
+    --shadow-1:     0 1px 2px rgba(0,0,0,.3), 0 4px 12px rgba(0,0,0,.2);
+    --shadow-2:     0 10px 30px rgba(0,0,0,.45);
+    --transition:   150ms ease;
+    --font:         -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono:         "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
 
-        .sticky-head {
-            position: sticky; top: 0; z-index: 10;
-            background: #fff; border-bottom: 1px solid #dee2e6; padding: 10px;
-        }
+/* ---- Top bar ---- */
+.topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10, 14, 22, 0.85);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+}
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text); font-size: 15px; }
+.brand-glyph { color: var(--primary); }
 
-        .w-20 { flex: 0 0 20%; max-width: 20%; }
-        .w-40 { flex: 0 0 40%; max-width: 40%; }
+/* ---- Buttons ---- */
+.btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--surface); color: var(--text); font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: var(--transition); font-family: inherit; white-space: nowrap;
+}
+.btn:hover { background: var(--surface-2); border-color: var(--border-hi); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn--primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.btn--primary:hover { background: var(--primary-hov); border-color: var(--primary-hov); }
+.btn--success { background: var(--success); border-color: var(--success); color: #07140d; font-weight: 600; }
+.btn--success:hover { filter: brightness(1.1); }
+.btn--danger  { background: var(--danger); border-color: var(--danger); color: #fff; }
+.btn--danger:hover  { filter: brightness(1.1); }
+.btn--ghost { background: transparent; border-color: transparent; }
+.btn--sm { padding: 4px 8px; font-size: 11px; }
 
-        /* Группы */
-        .group-item { cursor: pointer; user-select: none; }
-        .group-item.active { background-color: #0d6efd; color: white; border-color: #0d6efd; }
-        
-        .group-edit-btn { opacity: 0.5; cursor: pointer; transition: 0.2s; }
-        .group-edit-btn:hover { opacity: 1; color: #ffc107 !important; }
-        .active .group-edit-btn { color: white !important; }
+/* ---- Inputs ---- */
+.input, select {
+    padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--bg-elevated); color: var(--text); font-size: 13px;
+    font-family: inherit; outline: none; transition: border-color var(--transition);
+}
+.input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-bg); }
+.input::placeholder { color: var(--text-faint); }
+.input--sm { padding: 4px 8px; font-size: 12px; }
 
-        /* Drag & Drop */
-        .draggable-item { cursor: grab; background: #fff; border: 1px solid #eee; transition: background-color 0.1s; }
-        .draggable-item:active { cursor: grabbing; }
-        .draggable-item.dragging { opacity: 0.5; background-color: #cfe2ff !important; border: 2px dashed #0d6efd; }
-        
-        .group-draggable { cursor: grab; }
-        .group-draggable:active { cursor: grabbing; }
-        .group-draggable.dragging { opacity: 0.5; background-color: #e9ecef !important; }
+/* ---- App 3-col layout ---- */
+.app-container { display: flex; flex: 1; overflow: hidden; }
+.col-panel {
+    display: flex; flex-direction: column; overflow: hidden;
+    border-right: 1px solid var(--border); background: var(--surface);
+}
+.col-panel:last-child { border-right: none; }
+.col-20 { flex: 0 0 20%; max-width: 20%; }
+.col-40 { flex: 0 0 40%; max-width: 40%; }
 
-        .in-group-highlight { background-color: #d1e7dd !important; } 
-        .selected-highlight { background-color: #cfe2ff !important; } 
+.panel-head {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg-elevated); border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+    flex-shrink: 0;
+}
+.panel-head h6 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); margin-bottom: 8px; }
+.panel-body { flex: 1; overflow-y: auto; padding-bottom: 80px; }
 
-        /* Выделение для сортировки/вставки */
-        .sort-selected { background-color: #fff3cd !important; border-color: #ffecb5 !important; }
-        /* Маркер позиции вставки (когда кликнули) */
-        .insert-target { border-left: 5px solid #198754 !important; }
+/* ---- Groups list ---- */
+.group-item {
+    padding: 8px 12px; cursor: pointer; user-select: none;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border); transition: var(--transition);
+    color: var(--text);
+}
+.group-item:hover { background: var(--bg-elevated); }
+.group-item.active { background: var(--primary); color: #fff; }
+.group-item .group-edit-btn { opacity: 0.4; cursor: pointer; transition: 0.2s; font-size: 13px; }
+.group-item .group-edit-btn:hover { opacity: 1; color: var(--warning); }
+.group-item.active .group-edit-btn { color: #fff; opacity: 0.7; }
+.group-item.active .group-edit-btn:hover { opacity: 1; }
+.group-badge {
+    font-size: 10px; font-weight: 600; padding: 2px 7px;
+    border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text-dim);
+}
+.group-item.active .group-badge { background: rgba(255,255,255,0.2); color: #fff; }
 
-        #unsavedAlert {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            z-index: 2000; display: none; min-width: 400px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-        }
+/* ---- Drag & drop ---- */
+.draggable-item {
+    cursor: grab; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 4px; transition: background-color 0.1s;
+}
+.draggable-item:active { cursor: grabbing; }
+.draggable-item.dragging { opacity: 0.5; background: var(--primary-bg) !important; border: 2px dashed var(--primary); }
+.group-draggable { cursor: grab; }
+.group-draggable:active { cursor: grabbing; }
+.group-draggable.dragging { opacity: 0.5; background: var(--surface-hi) !important; }
+
+.in-group-highlight { background: var(--success-bg) !important; }
+.selected-highlight { background: var(--primary-bg) !important; }
+.sort-selected { background: var(--warning-bg) !important; border-color: rgba(245,166,35,0.3) !important; }
+.insert-target { border-left: 4px solid var(--success) !important; }
+
+/* ---- Channel card (middle column) ---- */
+.ch-card {
+    padding: 6px 10px; display: flex; justify-content: space-between; align-items: center;
+}
+.ch-card .ch-info { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; pointer-events: none; }
+.ch-card .ch-info strong { color: var(--text); font-size: 13px; }
+.ch-card .ch-info small { color: var(--text-faint); font-size: 11px; }
+.ch-card .ch-remove { padding: 2px 6px; color: var(--danger); cursor: pointer; background: none; border: none; font-size: 14px; }
+.ch-card .ch-remove:hover { color: #ff7070; }
+
+/* ---- Source channel items (right column) ---- */
+.src-item {
+    padding: 8px 12px; display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--border); transition: var(--transition);
+}
+.src-item:hover { background: var(--bg-elevated); }
+.src-item .src-check { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+.src-item .src-info { flex: 1; min-width: 0; }
+.src-item .src-info .src-name { font-weight: 600; color: var(--text); font-size: 13px; }
+.src-item .src-info .src-meta { font-size: 11px; color: var(--text-faint); }
+.src-item .src-actions { display: flex; gap: 4px; }
+.src-item .src-actions button { background: none; border: none; cursor: pointer; padding: 2px 4px; font-size: 14px; }
+.src-item .src-actions .edit-btn { color: var(--primary); }
+.src-item .src-actions .edit-btn:hover { color: var(--primary-hov); }
+.src-item .src-actions .del-btn { color: var(--danger); }
+.src-item .src-actions .del-btn:hover { color: #ff7070; }
+
+/* ---- Sort toggle ---- */
+.sort-toggle { display: flex; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-pill); padding: 2px; }
+.sort-toggle label { padding: 3px 10px; font-size: 11px; border-radius: var(--radius-pill); cursor: pointer; color: var(--text-dim); transition: var(--transition); }
+.sort-toggle input { display: none; }
+.sort-toggle input:checked + label { background: var(--primary); color: #fff; }
+
+/* ---- Unsaved alert ---- */
+#unsavedAlert {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    z-index: 2000; display: none; min-width: 400px;
+    background: var(--surface-2); border: 1px solid var(--warning);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-2);
+    padding: 10px 16px;
+}
+.unsaved-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.unsaved-inner .unsaved-text { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--warning); font-size: 13px; }
+.unsaved-inner .unsaved-actions { display: flex; gap: 6px; }
+
+/* ---- Modal ---- */
+.modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(5, 9, 16, 0.7); backdrop-filter: blur(4px);
+    z-index: 9999; display: none; align-items: center; justify-content: center; padding: 16px;
+}
+.modal-overlay.active { display: flex; }
+.uman-modal {
+    background: var(--surface); border: 1px solid var(--border-hi);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-2);
+    width: 100%; max-width: 440px; overflow: hidden;
+    animation: scaleIn 180ms ease;
+}
+@keyframes scaleIn { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.uman-modal .modal-header {
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    font-weight: 600; color: var(--text);
+}
+.uman-modal .modal-header .close-btn {
+    background: none; border: none; color: var(--text-faint); font-size: 20px;
+    cursor: pointer; padding: 4px 8px; border-radius: var(--radius);
+}
+.uman-modal .modal-header .close-btn:hover { color: var(--text); background: var(--surface-2); }
+.uman-modal .modal-body { padding: 16px 20px; }
+.uman-modal .modal-footer {
+    padding: 12px 20px; border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; gap: 8px; background: var(--bg-elevated);
+}
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--text-dim); margin-bottom: 4px; }
+.form-group .input { width: 100%; }
+.form-group .form-hint { font-size: 11px; color: var(--text-faint); margin-top: 3px; }
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ---- Free IDs dropdown ---- */
+.free-ids-dropdown { position: relative; display: inline-block; }
+.free-ids-list {
+    position: absolute; top: 100%; right: 0; z-index: 100;
+    background: var(--surface-2); border: 1px solid var(--border-hi); border-radius: var(--radius);
+    max-height: 200px; overflow-y: auto; min-width: 120px; display: none;
+    box-shadow: var(--shadow-2); margin-top: 4px;
+}
+.free-ids-list.show { display: block; }
+.free-ids-list .fid-item {
+    padding: 6px 12px; cursor: pointer; font-size: 13px; color: var(--text);
+    border-bottom: 1px solid var(--border); transition: var(--transition);
+}
+.free-ids-list .fid-item:hover { background: var(--primary-bg); color: var(--primary-hov); }
+.free-ids-list .fid-item:last-child { border-bottom: none; }
+.free-ids-list .fid-info { padding: 8px 12px; color: var(--text-faint); font-size: 12px; }
+
+/* ---- Move panel ---- */
+.move-panel {
+    display: none; align-items: center; gap: 6px; margin-top: 8px;
+    padding: 6px 8px; background: var(--warning-bg); border-radius: var(--radius); border: 1px solid rgba(245,166,35,0.2);
+}
+.move-panel.visible { display: flex; }
+.move-panel span { font-size: 12px; color: var(--warning); font-weight: 500; }
+.move-panel .input { width: 60px; }
+
+/* ---- Scrollbar ---- */
+.panel-body::-webkit-scrollbar { width: 6px; }
+.panel-body::-webkit-scrollbar-track { background: transparent; }
+.panel-body::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
+.panel-body::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+
+@media (max-width: 768px) {
+    .app-container { flex-direction: column; }
+    .col-20, .col-40 { flex: 1; max-width: 100%; }
+}
     </style>
 </head>
 <body class="d-flex flex-column">
 
-    <nav class="navbar navbar-dark bg-dark px-3 py-2 flex-shrink-0">
-        <span class="navbar-brand mb-0 h1"><i class="bi bi-broadcast"></i> IPTV Editor</span>
-        <div class="d-flex align-items-center">
-            <label class="text-white me-2">Playlist ID:</label>
-            <div class="input-group input-group-sm" style="width: 200px;">
-                <select id="playlistSelect" class="form-select"></select>
-                <button class="btn btn-outline-light" type="button" onclick="app.addNewPlaylistId()" title="Создать новый">+</button>
-            </div>
+    <div class="topbar">
+        <div class="brand">
+            <span class="brand-glyph"><i class="bi bi-broadcast"></i></span>
+            <span>IPTV Editor</span>
         </div>
-    </nav>
-
-    <div id="unsavedAlert" class="card border-warning">
-        <div class="card-body bg-warning bg-opacity-25 d-flex align-items-center justify-content-between py-2 px-3">
-            <div class="d-flex align-items-center">
-                <i class="bi bi-pencil-fill text-warning me-2"></i>
-                <span class="fw-bold">Есть несохраненные изменения!</span>
-            </div>
-            <div>
-                <button class="btn btn-sm btn-success fw-bold me-1" onclick="app.saveChanges()">Сохранить</button>
-                <button class="btn btn-sm btn-outline-dark" onclick="app.revertChanges()">Отмена</button>
+        <div class="d-flex align-items-center gap-2">
+            <label style="color: var(--text-dim); font-size: 13px;">Playlist ID:</label>
+            <div class="input-group" style="width: 200px;">
+                <select id="playlistSelect" class="input input--sm" style="flex:1;"></select>
+                <button class="btn btn--sm btn--ghost" type="button" onclick="app.addNewPlaylistId()" title="Создать новый" style="color: var(--primary);"><i class="bi bi-plus-lg"></i></button>
             </div>
         </div>
     </div>
 
-    <div class="container-fluid p-0 app-container">
-        <div class="row g-0 h-100">
-            
-            <div class="col-scroll w-20">
-                <div class="sticky-head">
-                    <h6 class="fw-bold">Группы</h6>
-                    <button id="btnCreateGroup" class="btn btn-sm btn-outline-primary w-100 mb-2" onclick="app.createGroupLocal()" disabled>
-                        <i class="bi bi-plus-lg"></i> Новая группа
-                    </button>
+    <div id="unsavedAlert">
+        <div class="unsaved-inner">
+            <div class="unsaved-text">
+                <i class="bi bi-pencil-fill"></i>
+                <span>Есть несохраненные изменения!</span>
+            </div>
+            <div class="unsaved-actions">
+                <button class="btn btn--success btn--sm" onclick="app.saveChanges()">Сохранить</button>
+                <button class="btn btn--sm" style="background: var(--surface-2);" onclick="app.revertChanges()">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        
+        <!-- Left Column: Groups -->
+        <div class="col-panel col-20">
+            <div class="panel-head">
+                <h6>Группы</h6>
+                <button id="btnCreateGroup" class="btn btn--sm btn--primary w-100 mb-2" onclick="app.createGroupLocal()" disabled>
+                    <i class="bi bi-plus-lg"></i> Новая группа
+                </button>
                     <input type="text" id="groupSearch" class="form-control form-control-sm" placeholder="Фильтр...">
                 </div>
                 <div id="groupsList" class="list-group list-group-flush flex-grow-1"></div>
