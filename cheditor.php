@@ -110,9 +110,6 @@ if($_SESSION['a'] != 1)
                             <h6 class="fw-bold mb-0" id="activeGroupName">Группа не выбрана</h6>
                             <small class="text-muted" id="activeGroupCount"></small>
                         </div>
-                        <button id="btnDeleteGroup" class="btn btn-sm btn-outline-danger d-none" onclick="app.deleteGroupLocal()">
-                            <i class="bi bi-trash"></i> Удалить
-                        </button>
                     </div>
 
                     <div class="d-flex gap-2 mb-2">
@@ -123,6 +120,18 @@ if($_SESSION['a'] != 1)
                         </div>
                     </div>
                     
+                    <!-- Панель действий для выбранной группы/каналов -->
+                    <div id="groupActionsPanel" class="d-none mb-2">
+                        <div class="btn-group w-100" role="group">
+                            <button id="btnDeleteSelectedChannels" class="btn btn-sm btn-outline-danger d-none" onclick="app.deleteSelectedChannelsLocal()" title="Удалить выделенные каналы из группы">
+                                <i class="bi bi-trash"></i> Удалить каналы (<span id="selectedChannelsCount">0</span>)
+                            </button>
+                            <button id="btnDeleteCurrentGroup" class="btn btn-sm btn-outline-danger d-none" onclick="app.deleteGroupLocal()" title="Удалить текущую группу">
+                                <i class="bi bi-trash"></i> Удалить группу
+                            </button>
+                        </div>
+                    </div>
+
                     <div id="manualMovePanel" class="input-group input-group-sm d-none">
                         <span class="input-group-text bg-warning bg-opacity-10">Move selected (<b id="sortSelCount">0</b>) to:</span>
                         <input type="number" id="moveToPosInput" class="form-control" placeholder="№" onkeydown="if(event.key==='Enter') app.moveSelectedChannelsByInput()">
@@ -386,7 +395,16 @@ setPlaylist: async function(id) {
             deleteGroupLocal: function() {
                 const count = this.state.selectedGroupIndices.size;
                 if (count === 0) return;
-                if (!confirm(`Удалить выбранные группы (${count} шт)?`)) return;
+                
+                // Если выбрана только одна группа, показываем её имя в подтверждении
+                let confirmMsg;
+                if (count === 1 && this.state.currentGroup) {
+                    confirmMsg = `Удалить группу "${this.state.currentGroup.name}"?`;
+                } else {
+                    confirmMsg = `Удалить выбранные группы (${count} шт)?`;
+                }
+                
+                if (!confirm(confirmMsg)) return;
 
                 const indicesToDelete = Array.from(this.state.selectedGroupIndices).sort((a, b) => b - a);
                 indicesToDelete.forEach(idx => this.state.groups.splice(idx, 1));
@@ -538,27 +556,42 @@ setPlaylist: async function(id) {
                 const container = document.getElementById('activeGroupContent');
                 const title = document.getElementById('activeGroupName');
                 const countInfo = document.getElementById('activeGroupCount');
-                const btnDel = document.getElementById('btnDeleteGroup');
+                const groupActionsPanel = document.getElementById('groupActionsPanel');
+                const btnDeleteSelectedChannels = document.getElementById('btnDeleteSelectedChannels');
+                const btnDeleteCurrentGroup = document.getElementById('btnDeleteCurrentGroup');
+                const selectedChannelsCountSpan = document.getElementById('selectedChannelsCount');
                 const movePanel = document.getElementById('manualMovePanel');
                 const sortSelCount = document.getElementById('sortSelCount');
                 const searchVal = document.getElementById('activeGroupSearch').value.toLowerCase();
                 const insertInput = document.getElementById('insertPosInput');
 
                 const selCount = this.state.selectedGroupIndices.size;
+                const activeSelCount = this.state.activeGroupSelection.size;
+
+                // Скрываем панель действий по умолчанию
+                groupActionsPanel.classList.add('d-none');
+                btnDeleteSelectedChannels.classList.add('d-none');
+                btnDeleteCurrentGroup.classList.add('d-none');
 
                 if (!this.state.currentGroup && selCount === 0) {
                     title.textContent = "Выберите группу"; countInfo.textContent = "";
-                    btnDel.classList.add('d-none');
                     movePanel.classList.add('d-none');
                     container.innerHTML = '<div class="text-center text-muted mt-5">Выберите группу слева</div>';
                     return;
                 }
 
-                btnDel.classList.remove('d-none');
                 if (selCount > 1) {
+                    // Выбрано несколько групп в левой колонке
                     title.innerHTML = `Выбрано групп: ${selCount} <br><small class="text-muted fw-normal fs-6">Просмотр: ${this.state.currentGroup ? this.state.currentGroup.name : '...'}</small>`;
-                } else {
+                    btnDeleteCurrentGroup.classList.remove('d-none');
+                    groupActionsPanel.classList.remove('d-none');
+                } else if (this.state.currentGroup) {
                     title.textContent = this.state.currentGroup.name;
+                    // Показываем кнопку удаления группы, если ничего не выделено в средней колонке
+                    if (activeSelCount === 0) {
+                        btnDeleteCurrentGroup.classList.remove('d-none');
+                        groupActionsPanel.classList.remove('d-none');
+                    }
                 }
 
                 if (!this.state.currentGroup) { container.innerHTML = ''; return; }
@@ -567,9 +600,13 @@ setPlaylist: async function(id) {
                 countInfo.textContent = `${ids.length} к.`;
                 container.innerHTML = '';
 
-                if (this.state.activeGroupSelection.size > 0) {
+                if (activeSelCount > 0) {
                     movePanel.classList.remove('d-none');
-                    sortSelCount.textContent = this.state.activeGroupSelection.size;
+                    sortSelCount.textContent = activeSelCount;
+                    // Показываем кнопку удаления выделенных каналов
+                    btnDeleteSelectedChannels.classList.remove('d-none');
+                    selectedChannelsCountSpan.textContent = activeSelCount;
+                    groupActionsPanel.classList.remove('d-none');
                 } else {
                     movePanel.classList.add('d-none');
                 }
@@ -691,7 +728,35 @@ setPlaylist: async function(id) {
             },
 
             removeChannelLocal: function(index) {
-                this.state.currentGroup.channel_ids.splice(index, 1);
+                // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Используем актуальные индексы из DOM после Drag&Drop
+                // Индекс из замыкания может быть устаревшим, поэтому берем данные из state
+                if (this.state.activeGroupSelection.size > 0) {
+                    // Если есть выделенные каналы - удаляем их
+                    const indicesToDelete = Array.from(this.state.activeGroupSelection).sort((a, b) => b - a);
+                    indicesToDelete.forEach(idx => {
+                        this.state.currentGroup.channel_ids.splice(idx, 1);
+                    });
+                } else {
+                    // Удаляем один канал по индексу из замыкания (актуален на момент рендера)
+                    this.state.currentGroup.channel_ids.splice(index, 1);
+                }
+                
+                this.state.activeGroupSelection.clear();
+                this.renderUI();
+                this.setDirty(true);
+            },
+
+            deleteSelectedChannelsLocal: function() {
+                const count = this.state.activeGroupSelection.size;
+                if (count === 0 || !this.state.currentGroup) return;
+                
+                if (!confirm(`Удалить ${count} выделенный(ых) канал(ов) из группы?`)) return;
+                
+                const indicesToDelete = Array.from(this.state.activeGroupSelection).sort((a, b) => b - a);
+                indicesToDelete.forEach(idx => {
+                    this.state.currentGroup.channel_ids.splice(idx, 1);
+                });
+                
                 this.state.activeGroupSelection.clear();
                 this.renderUI();
                 this.setDirty(true);
