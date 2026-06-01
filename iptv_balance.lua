@@ -476,6 +476,19 @@ local function select_cdn_slot(red, channel, client_ua) -- ДОБАВЛЕН ПА
     for _, provider in ipairs(providers) do
         local usage_key = provider.name .. ":usage"
         local len = red:llen(usage_key)
+
+        -- Авто-инициализация: если usage-список пуст или короче чем tokens/bases
+        local items = provider.cfg.tokens or provider.cfg.bases or {}
+        local expected_len = #items
+        if expected_len > 0 and len < expected_len then
+            for j = len, expected_len - 1 do
+                red:rpush(usage_key, "0")
+            end
+            ngx.log(ngx.ERR, "[SLOT_INIT] Auto-initialized ", usage_key,
+                    ": was=", len, " now=", expected_len)
+            len = expected_len
+        end
+
         if len > 0 then
             -- === NEW: Smart slot selection with cooldown ===
             local now = ngx.time()
