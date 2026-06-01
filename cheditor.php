@@ -271,19 +271,17 @@ body {
 }
     </style>
 </head>
-<body class="d-flex flex-column">
+<body>
 
     <div class="topbar">
         <div class="brand">
             <span class="brand-glyph"><i class="bi bi-broadcast"></i></span>
             <span>IPTV Editor</span>
         </div>
-        <div class="d-flex align-items-center gap-2">
+        <div style="display: flex; align-items: center; gap: 8px;">
             <label style="color: var(--text-dim); font-size: 13px;">Playlist ID:</label>
-            <div class="input-group" style="width: 200px;">
-                <select id="playlistSelect" class="input input--sm" style="flex:1;"></select>
-                <button class="btn btn--sm btn--ghost" type="button" onclick="app.addNewPlaylistId()" title="Создать новый" style="color: var(--primary);"><i class="bi bi-plus-lg"></i></button>
-            </div>
+            <select id="playlistSelect" class="input input--sm" style="width: 200px;"></select>
+            <button class="btn btn--sm btn--ghost" type="button" onclick="app.addNewPlaylistId()" title="Создать новый" style="color: var(--primary);"><i class="bi bi-plus-lg"></i></button>
         </div>
     </div>
 
@@ -306,86 +304,85 @@ body {
         <div class="col-panel col-20">
             <div class="panel-head">
                 <h6>Группы</h6>
-                <button id="btnCreateGroup" class="btn btn--sm btn--primary w-100 mb-2" onclick="app.createGroupLocal()" disabled>
+                <button id="btnCreateGroup" class="btn btn--sm btn--primary" style="width: 100%; margin-bottom: 8px;" onclick="app.createGroupLocal()" disabled>
                     <i class="bi bi-plus-lg"></i> Новая группа
                 </button>
-                    <input type="text" id="groupSearch" class="form-control form-control-sm" placeholder="Фильтр...">
-                </div>
-                <div id="groupsList" class="list-group list-group-flush flex-grow-1"></div>
+                <input type="text" id="groupSearch" class="input input--sm" placeholder="Фильтр..." style="width: 100%;">
             </div>
+            <div class="panel-body" id="groupsList"></div>
+        </div>
 
-            <div class="col-scroll w-40 bg-light">
-                <div class="sticky-head">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="col-panel col-40">
+            <div class="panel-head">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <div>
-                            <h6 class="fw-bold mb-0" id="activeGroupName">Группа не выбрана</h6>
-                            <small class="text-muted" id="activeGroupCount"></small>
+                            <h6 style="margin: 0; font-weight: 600;" id="activeGroupName">Группа не выбрана</h6>
+                            <small style="color: var(--text-faint);" id="activeGroupCount"></small>
                         </div>
                     </div>
 
-                    <div class="d-flex gap-2 mb-2">
-                        <input type="text" id="activeGroupSearch" class="form-control form-control-sm" placeholder="Найти в группе..." oninput="app.renderActiveGroup()">
-                        <div class="input-group input-group-sm" style="width: 160px;" title="Куда вставлять новые каналы">
-                            <span class="input-group-text bg-white">Вставка:</span>
-                            <input type="number" id="insertPosInput" class="form-control text-center fw-bold" placeholder="Конец" oninput="app.updateButtons()">
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <input type="text" id="activeGroupSearch" class="input input--sm" placeholder="Найти в группе..." oninput="app.renderActiveGroup()">
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="font-size: 11px; color: var(--text-dim);">Вставка:</span>
+                            <input type="number" id="insertPosInput" class="input input--sm" style="width: 60px;" placeholder="Конец" oninput="app.updateButtons()">
                         </div>
                     </div>
                     
                     <!-- Панель действий для выбранной группы/каналов -->
-                    <div id="groupActionsPanel" class="d-none mb-2">
-                        <div class="btn-group w-100" role="group">
-                            <button id="btnDeleteSelectedChannels" class="btn btn-sm btn-outline-danger d-none" onclick="app.deleteSelectedChannelsLocal()" title="Удалить выделенные каналы из группы">
+                    <div id="groupActionsPanel" style="display: none; margin-bottom: 8px;">
+                        
+                            <button id="btnDeleteSelectedChannels" class="btn btn--sm btn--danger" style="display: none; width: 100%;" onclick="app.deleteSelectedChannelsLocal()" title="Удалить выделенные каналы из группы">
                                 <i class="bi bi-trash"></i> Удалить каналы (<span id="selectedChannelsCount">0</span>)
                             </button>
-                            <button id="btnDeleteCurrentGroup" class="btn btn-sm btn-outline-danger d-none" onclick="app.deleteGroupLocal()" title="Удалить текущую группу">
+                            <button id="btnDeleteCurrentGroup" class="btn btn--sm btn--danger" style="display: none; width: 100%;" onclick="app.deleteGroupLocal()" title="Удалить текущую группу">
                                 <i class="bi bi-trash"></i> Удалить группу
                             </button>
-                        </div>
                     </div>
 
-                    <div id="manualMovePanel" class="input-group input-group-sm d-none">
-                        <span class="input-group-text bg-warning bg-opacity-10">Move selected (<b id="sortSelCount">0</b>) to:</span>
-                        <input type="number" id="moveToPosInput" class="form-control" placeholder="№" onkeydown="if(event.key==='Enter') app.moveSelectedChannelsByInput()">
-                        <button class="btn btn-outline-secondary" onclick="app.moveSelectedChannelsByInput()">OK</button>
-                        <button class="btn btn-outline-danger" onclick="app.clearSortSelection()"><i class="bi bi-x-lg"></i></button>
+                <div id="manualMovePanel" class="move-panel">
+                        <span>Move selected (<b id="sortSelCount">0</b>) to:</span>
+                        <input type="number" id="moveToPosInput" class="input input--sm" style="width: 60px;" placeholder="№" onkeydown="if(event.key==='Enter') app.moveSelectedChannelsByInput()">
+                        <button class="btn btn--sm" style="background: var(--surface-2);" onclick="app.moveSelectedChannelsByInput()">OK</button>
+                        <button class="btn btn--sm btn--ghost" style="color: var(--danger);" onclick="app.clearSortSelection()"><i class="bi bi-x-lg"></i></button>
                     </div>
                 </div>
 
-                <div id="activeGroupContent" class="p-2 flex-grow-1">
-                    <div class="text-center text-muted mt-5">Выберите группу слева</div>
+                <div id="activeGroupContent" class="panel-body">
+                    <div style="text-align: center; color: var(--text-faint); margin-top: 40px;">Выберите группу слева</div>
                 </div>
-            </div>
+        </div>
 
-            <div class="col-scroll w-40">
-                <div class="sticky-head">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="fw-bold mb-0">Источник</h6>
-                        <div class="btn-group btn-group-sm">
-                            <input type="radio" class="btn-check" name="sortSrc" id="sortName" checked onchange="app.setSort('name')">
-                            <label class="btn btn-outline-secondary" for="sortName">Имя</label>
-                            <input type="radio" class="btn-check" name="sortSrc" id="sortId" onchange="app.setSort('id')">
-                            <label class="btn btn-outline-secondary" for="sortId">ID</label>
+        <!-- Right Column: Source Channels -->
+        <div class="col-panel col-40">
+                <div class="panel-head">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h6 style="margin: 0; font-weight: 600;">Источник</h6>
+                        <div class="sort-toggle">
+                            <input type="radio" name="sortSrc" id="sortName" checked onchange="app.setSort('name')">
+                            <label for="sortName">Имя</label>
+                            <input type="radio" name="sortSrc" id="sortId" onchange="app.setSort('id')">
+                            <label for="sortId">ID</label>
                         </div>
                     </div>
                     
-                    <div class="d-flex gap-2 mb-2">
-                         <input type="text" id="channelSearch" class="form-control form-control-sm" placeholder="Поиск каналов...">
-                         <button class="btn btn-sm btn-success" onclick="app.openChannelModal()" title="Добавить в базу"><i class="bi bi-plus-lg"></i></button>
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                         <input type="text" id="channelSearch" class="input input--sm" placeholder="Поиск каналов...">
+                         <button class="btn btn--sm btn--success" onclick="app.openChannelModal()" title="Добавить в базу"><i class="bi bi-plus-lg"></i></button>
                     </div>
                     
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-primary flex-grow-1 text-truncate" id="btnAddSelected" disabled onclick="app.addSelectedToCurrent()">
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn--sm btn--primary" style="flex: 1;" id="btnAddSelected" disabled onclick="app.addSelectedToCurrent()">
                             <i class="bi bi-arrow-left"></i> <span id="btnAddText">Добавить</span> (<span id="selCount">0</span>)
                         </button>
-                        <button class="btn btn-sm btn-outline-dark flex-grow-1" id="btnCreateFromSelected" disabled onclick="app.createGroupFromSelectedLocal()">
+                        <button class="btn btn--sm" style="background: var(--surface-2); flex: 1;" id="btnCreateFromSelected" disabled onclick="app.createGroupFromSelectedLocal()">
                             <i class="bi bi-folder-plus"></i> Группа
                         </button>
                     </div>
                 </div>
-                <div id="allChannelsList" class="list-group list-group-flush flex-grow-1"></div>
-            </div>
-
+                <div id="allChannelsList" class="panel-body"></div>
         </div>
+
     </div>
 
 <div class="modal fade" id="channelModal" tabindex="-1">
@@ -787,7 +784,7 @@ setPlaylist: async function(id) {
                 if (!this.state.currentGroup && selCount === 0) {
                     title.textContent = "Выберите группу"; countInfo.textContent = "";
                     movePanel.classList.add('d-none');
-                    container.innerHTML = '<div class="text-center text-muted mt-5">Выберите группу слева</div>';
+                    container.innerHTML = '<div style="text-align: center; color: var(--text-faint); margin-top: 40px;">Выберите группу слева</div>';
                     return;
                 }
 
@@ -1052,7 +1049,7 @@ setPlaylist: async function(id) {
                         <input type="checkbox" class="form-check-input me-2" ${isSel ? 'checked' : ''}>
                         <div class="flex-grow-1 text-truncate">
                             <div class="fw-bold">${c.name}</div>
-                            <small class="text-muted">ID:${c.id} | ${c.rec}d | ${c.resolution}</small>
+                            <small style="color: var(--text-faint);">ID:${c.id} | ${c.rec}d | ${c.resolution}</small>
                         </div>
                         <div>
                             <button class="btn btn-sm text-primary p-0 me-2" onclick="app.openChannelModal(${c.id})"><i class="bi bi-pencil"></i></button>
