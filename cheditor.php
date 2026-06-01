@@ -427,6 +427,7 @@ setPlaylist: async function(id) {
                     
                     btn.addEventListener('dragstart', (e) => {
                         if (e.shiftKey || e.ctrlKey || e.metaKey) { e.preventDefault(); return; }
+                        // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Используем замыкание idx вместо dataset.idx
                         if (!this.state.selectedGroupIndices.has(idx)) this.handleGroupClick(g, idx, null);
                         btn.classList.add('dragging');
                     });
@@ -454,8 +455,11 @@ setPlaylist: async function(id) {
 
             applyGroupOrder: function(container) {
                 const newOrder = [];
-                container.querySelectorAll('.group-draggable').forEach(el => {
-                    newOrder.push(this.state.groups[parseInt(el.dataset.idx)]);
+                container.querySelectorAll('.group-draggable').forEach((el, newIndex) => {
+                    const oldIdx = parseInt(el.dataset.idx);
+                    newOrder.push(this.state.groups[oldIdx]);
+                    // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Обновляем dataset.idx после перетасовки
+                    el.dataset.idx = newIndex;
                 });
                 
                 let changed = false;
@@ -466,6 +470,7 @@ setPlaylist: async function(id) {
                 
                 if (changed) {
                     this.state.groups = newOrder;
+                    // Сбрасываем выделение, так как индексы изменились
                     this.state.selectedGroupIndices.clear();
                     this.state.currentGroup = null;
                     this.setDirty(true);
@@ -597,7 +602,7 @@ setPlaylist: async function(id) {
                     div.innerHTML = `
                         <div class="card-body p-2 d-flex justify-content-between align-items-center">
                             <div class="text-truncate" style="pointer-events:none;">${inner}</div>
-                            <button class="btn btn-sm text-danger p-0 border-0" onclick="app.removeChannelLocal(${idx})"><i class="bi bi-x-lg"></i></button>
+                            <button class="btn btn-sm text-danger p-0 border-0" onclick="event.stopPropagation(); app.removeChannelLocal(${idx})"><i class="bi bi-x-lg"></i></button>
                         </div>
                     `;
                     
@@ -670,9 +675,11 @@ setPlaylist: async function(id) {
             applyChannelOrder: function(container) {
                 const newIds = [];
                 const oldIds = this.state.currentGroup.channel_ids;
-                container.querySelectorAll('.draggable-item').forEach(el => {
+                container.querySelectorAll('.draggable-item').forEach((el, newIndex) => {
                     const idx = parseInt(el.dataset.idx);
                     newIds.push(oldIds[idx]);
+                    // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Обновляем dataset.idx после перетасовки
+                    el.dataset.idx = newIndex;
                 });
                 
                 if (JSON.stringify(newIds) !== JSON.stringify(oldIds)) {
